@@ -3,50 +3,99 @@
   import type { ActionHash, AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@material/mwc-circular-progress';
-
+  import { view, viewHash, navigate } from './store.js';
   import { clientContext } from './contexts';
+  import Header from './whosin/coordinator/Header.svelte';
+  import CreateCoordination from './whosin/coordinator/CreateCoordination.svelte';
+  import AllCoordinations from './whosin/coordinator/AllCoordinations.svelte';
+  import CoordinationDetail from './whosin/coordinator/CoordinationDetail.svelte';
+  import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
+  import MyCoordinations from './whosin/coordinator/MyCoordinations.svelte';
 
+  import {
+    ProfilesStore,
+    ProfilesClient,
+    CreateProfile,
+    ProfilePrompt,
+    profilesStoreContext,
+    MyProfile,
+    ProfilesContext
+  } from '@holochain-open-dev/profiles';
+  
   let client: AppAgentClient | undefined;
   let loading = true;
+  let store = undefined;
+  let currentView: String;
+  let currentHash: Uint8Array;
 
-  $: client, loading;
+  $: client, loading, store;
+
+  if (!customElements.get('profiles-context')){
+    customElements.define('profiles-context', ProfilesContext)
+  }
+
+  if (!customElements.get('my-profile')){
+    customElements.define('my-profile', MyProfile)
+  }
+
+  if (!customElements.get('profile-prompt')){
+    customElements.define('profile-prompt', ProfilePrompt)
+  }
+
+  
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     client = await AppAgentWebsocket.connect('', 'dcan');
+    const config = {
+      // avatarMode: "identicon",
+      // additionalFields: ["Location", "Bio"], // Custom app level profile fields
+    };
+    store = new ProfilesStore(new ProfilesClient(client, 'whosin'), config);
     loading = false;
   });
 
   setContext(clientContext, {
     getClient: () => client,
   });
+
+  view.subscribe(value => {
+    currentView = value;
+  });
+
+  viewHash.subscribe(value => {
+    currentHash = value;
+  });
 </script>
 
+{#if client}
 <main>
-  {#if loading}
-    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-      <mwc-circular-progress indeterminate />
-    </div>
-  {:else}
-    <div id="content" style="display: flex; flex-direction: column; flex: 1;">
-      <h2>EDIT ME! Add the components of your app here.</h2>
-
-      <span>Look in the <code>ui/src/DNA/ZOME</code> folders for UI elements that are generated with <code>hc scaffold entry-type</code>, <code>hc scaffold collection</code> and <code>hc scaffold link-type</code> and add them here as appropriate.</span>
-        
-      <span>For example, if you have scaffolded a "todos" dna, a "todos" zome, a "todo_item" entry type, and a collection called "all_todos", you might want to add an element here to create and list your todo items, with the generated <code>ui/src/todos/todos/AllTodos.svelte</code> and <code>ui/src/todos/todos/CreateTodo.svelte</code> elements.</span>
-          
-      <span>So, to use those elements here:</span>
-      <ol>
-        <li>Import the elements with:
-        <pre>
-import AllTodos from './todos/todos/AllTodos.svelte';
-import CreateTodo from './todos/todos/CreateTodo.svelte';
-        </pre>
-        </li>
-        <li>Replace this "EDIT ME!" section with <code>&lt;CreateTodo&gt;&lt;/CreateTodo&gt;&lt;AllTodos&gt;&lt;/AllTodos&gt;</code>.</li>
-        </ol>
-    </div>
-  {/if}
+  <Header client={client}></Header>
+  <profiles-context store={store}>
+    <profile-prompt>
+      <!-- <my-profile></my-profile> -->
+    <!-- <div style="margin: 20px;"></div> -->
+    {#if loading}
+      <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+        <mwc-circular-progress indeterminate />
+      </div>
+    {:else if currentView == "coordination"}
+      <div id="content"><CoordinationDetail coordinationHash={currentHash}></CoordinationDetail></div>
+    {:else if currentView == "create-coordination"}
+      <div id="content"><CreateCoordination></CreateCoordination></div>
+      <!-- HI -->
+    {:else if currentView == "notifications"}
+      <div id="content"><AllNotifications></AllNotifications></div>
+      {:else if currentView == "dashboard"}
+      <div id="content"><MyCoordinations></MyCoordinations></div>
+    {:else if currentView == "all-coordinations"}
+      <div id="content"><AllCoordinations></AllCoordinations></div>
+    {:else}
+      <!-- <CreateCoordination></CreateCoordination> -->
+      <AllCoordinations></AllCoordinations>
+    {/if}
+  </profile-prompt>
+  </profiles-context>
 </main>
 
 <style>
@@ -63,3 +112,4 @@ import CreateTodo from './todos/todos/CreateTodo.svelte';
     }
   }
 </style>
+{/if}

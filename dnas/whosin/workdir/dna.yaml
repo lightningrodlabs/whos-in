@@ -1,0 +1,28 @@
+---
+manifest_version: "1"
+name: whosin
+integrity:
+  network_seed: ~
+  properties: ~
+  origin_time: 1678833011691831
+  zomes:
+    - name: coordinator_integrity
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/coordinator_integrity.wasm"
+      dependencies: ~
+    - name: profiles_integrity
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/profiles_integrity.wasm"
+      dependencies: ~
+coordinator:
+  zomes:
+    - name: coordinator
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/coordinator.wasm"
+      dependencies:
+        - name: coordinator_integrity
+    - name: profiles
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/profiles.wasm"
+      dependencies:
+        - name: profiles_integrity

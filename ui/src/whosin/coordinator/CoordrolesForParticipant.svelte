@@ -1,0 +1,67 @@
+<script lang="ts">
+import { onMount, getContext } from 'svelte';
+import '@material/mwc-circular-progress';
+import type { Record, ActionHash, EntryHash, AgentPubKey, AppAgentClient, NewEntryAction } from '@holochain/client';
+import { clientContext } from '../../contexts';
+import CoordroleDetail from './CoordroleDetail.svelte';
+import type { CoordinatorSignal } from './types';
+
+export let participant: AgentPubKey;
+
+let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+
+let hashes: Array<ActionHash> | undefined;
+
+let loading = true;
+let error: any = undefined;
+
+$: hashes, loading, error;
+
+onMount(async () => {
+  if (participant === undefined) {
+    throw new Error(`The participant input is required for the CoordrolesForParticipant element`);
+  }
+
+  try {
+    const records = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'coordinator',
+      fn_name: 'get_coordroles_for_participant',
+      payload: participant,
+    });
+    hashes = records.map(r => r.signed_action.hashed.hash);
+  } catch (e) {
+    error = e;
+  }
+  loading = false;
+  
+  client.on('signal', signal => {
+    if (signal.zome_name !== 'coordinator') return;
+    const payload = signal.payload as CoordinatorSignal;
+    if (payload.type !== 'LinkCreated') return;
+    if (payload.link_type !== 'ParticipantToCoordroles') return;
+
+    hashes = [...hashes, payload.action.hashed.content.target_address];
+  });
+});
+
+</script>
+
+{#if loading }
+<div style="display: flex; flex: 1; align-items: center; justify-content: center">
+  <mwc-circular-progress indeterminate></mwc-circular-progress>
+</div>
+{:else if error}
+<span>Error fetching coordroles: {error.data.data}.</span>
+{:else if hashes.length === 0}
+<span>No coordroles found for this participant.</span>
+{:else}
+<div style="display: flex; flex-direction: column">
+  {#each hashes as hash}
+    <div style="margin-bottom: 8px;">
+      <CoordroleDetail coordroleHash={hash}></CoordroleDetail>
+    </div>
+  {/each}
+</div>
+{/if}
