@@ -122,7 +122,13 @@
         <br>
         <div>{role.description}</div>
         <br>
-        <button class="delete" on:click={remove_role(role)}>Remove</button>
+        <button class="delete" on:click={() => remove_role(role)}>Remove</button>
+        <!-- <button class="delete" on:click={async () => {
+          remove_role(role)
+          return undefined;
+        }}>Remove</button> -->
+        
+        <!-- <button class="delete" on:click={remove_role(role)}>Remove</button> -->
       </div>
       {/each}
       </div>

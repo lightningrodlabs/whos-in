@@ -24,10 +24,10 @@
       ProfileListItemSkeleton,
       AgentAvatar,
     } from '@holochain-open-dev/profiles';
-    // let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+    let client: AppAgentClient = (getContext(clientContext) as any).getClient();
     
-    let client: AppAgentClient;
-    let myAgentPubKey: AgentPubKey = (getContext(clientContext) as any).getClient();
+    // let client: AppAgentClient;
+    // let myAgentPubKey: AgentPubKey = (getContext(clientContext) as any).getClient();
     
     if (!customElements.get('my-profile')){
       customElements.define('my-profile', MyProfile)
@@ -118,7 +118,7 @@
             <agent-avatar>
           </profiles-context> -->
           <!-- <my-profile></my-profile> -->
-          <!-- <profile-detail></profile-detail> -->
+          <!-- <profile-detail agentPubKey={client.myPubKey}></profile-detail> -->
           <!-- <img class="nav-image" src="/assets/Line11-9bb361353b5c1a0dcd5b57d071c00a3edc6d82426e0c26bf0145a6dfd1e90081.svg" alt="Line11" border="0"> -->
     
           <!-- <li class="user-nav-link">

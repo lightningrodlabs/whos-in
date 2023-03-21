@@ -20,7 +20,7 @@
     let loading = true;
     let error: any = undefined;
     
-    let record: Record | undefined;
+    let record;//: Record | undefined;
     let coordination: Coordination | undefined;
     let coordRoles; //: Coordrole[] | undefined;
     let totalMin = 0;

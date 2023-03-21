@@ -50,7 +50,10 @@ async function fetchCoordinations() {
 {:else if error}
 <span>Error fetching the coordinations: {error.data.data}.</span>
 {:else if hashes.length === 0}
-<span>No coordinations found.</span>
+<div class="white-container" style="display: flex; flex-direction: column">
+  <h1>Actions Bulletin</h1>
+  <span>No actions yet.</span>
+</div>
 {:else}
 <div class="white-container" style="display: flex; flex-direction: column">
   <h1>Actions Bulletin</h1>

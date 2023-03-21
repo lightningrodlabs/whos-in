@@ -52,9 +52,9 @@
     <ul id="notifications">
     {#each local_notifications as n}
         {#if !n.seen}
-            <li on:click={goToCoordination(n.hash, n.seen)}><b>{n.description}</b></li>
+            <li on:click={() => goToCoordination(n.hash, n.seen)}><b>{n.description}</b></li>
         {:else}
-            <li on:click={goToCoordination(n.hash, n.seen)}>{n.description}</li>
+            <li on:click={() => goToCoordination(n.hash, n.seen)}>{n.description}</li>
         {/if}
     {/each}
     </ul>

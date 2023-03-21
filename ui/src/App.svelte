@@ -22,6 +22,7 @@
     ProfilesContext,
     AgentAvatar,
     ProfileDetail,
+    ListProfiles,
   } from '@holochain-open-dev/profiles';
   
   let client: AppAgentClient | undefined;
@@ -51,10 +52,13 @@
   if (!customElements.get('agent-avatar')){
     customElements.define('agent-avatar', AgentAvatar)
   }
-
   
   if (!customElements.get('profile-detail')){
     customElements.define('profile-detail', ProfileDetail)
+  }
+
+  if (!customElements.get('list-profiles')){
+    customElements.define('list-profiles', ListProfiles)
   }
 
   onMount(async () => {
@@ -82,10 +86,24 @@
 </script>
 
 {#if client}
+<!-- {client.myPubKey} -->
 <main>
   <!-- <profiles-context store={store}> -->
+    <!-- <agent-avatar /> -->
+
+    <!-- <profile-detail agentPubKey={client.myPubKey}> -->
+  <!-- </profile-detail> -->
+    <!-- </agent-avatar> -->
+  <!-- </profiles-context> -->
+  <!-- <profiles-context store={store}> -->
+    <!-- <agent-avatar></agent-avatar> -->
+
+    <!-- <profile-detail /> -->
+    <!-- <list-profiles /> -->
     <Header></Header>
     <!-- <profile-prompt> -->
+      <!-- <profile-detail /> -->
+
     <!-- <agent-avatar></agent-avatar> -->
     <!-- <profile-details></profile-details> -->
       <!-- <my-profile></my-profile> -->
@@ -107,7 +125,10 @@
       <div id="content"><AllCoordinations></AllCoordinations></div>
     {:else}
       <!-- <CreateCoordination></CreateCoordination> -->
+      <!-- <profile-detail /> -->
+
       <AllCoordinations></AllCoordinations>
+      
     {/if}
   <!-- </profile-prompt> -->
   <!-- </profiles-context> -->
