@@ -53,6 +53,7 @@ async function fetchCoordinations() {
 <span>No coordinations found.</span>
 {:else}
 <div class="white-container" style="display: flex; flex-direction: column">
+  <h1>Actions Bulletin</h1>
   {#each hashes as hash}
     <CoordinationListItem coordinationHash={hash}></CoordinationListItem>
   {/each}

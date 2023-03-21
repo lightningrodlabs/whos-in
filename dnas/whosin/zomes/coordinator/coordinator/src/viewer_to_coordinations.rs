@@ -1,14 +1,15 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AddCoordinationForViewerInput {
-    pub base_viewer: AgentPubKey,
-    pub target_coordination_hash: ActionHash,
-}
+// #[derive(Serialize, Deserialize, Debug)]
+// pub struct AddCoordinationForViewerInput {
+//     pub base_viewer: AgentPubKey,
+//     pub target_coordination_hash: ActionHash,
+// }
 #[hdk_extern]
-pub fn add_coordination_for_viewer(input: AddCoordinationForViewerInput) -> ExternResult<()> {
-    create_link(input.base_viewer.clone(), input.target_coordination_hash.clone(), LinkTypes::ViewerToCoordinations, ())?;
+pub fn add_coordination_for_viewer(target_coordination_hash: ActionHash) -> ExternResult<()> {
+    let my_agent_pub_key: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    create_link(my_agent_pub_key, target_coordination_hash.clone(), LinkTypes::ViewerToCoordinations, ())?;
     
 
     Ok(())    
@@ -32,6 +33,14 @@ pub fn get_coordinations_for_viewer(viewer: AgentPubKey) -> ExternResult<Vec<Rec
     Ok(records)
 }
 
+#[hdk_extern]
+pub fn find_coordination_links_for_viewer(coordination_hash: ActionHash) -> ExternResult<i32> {
+    let my_agent_pub_key: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let links = get_links(my_agent_pub_key, LinkTypes::ViewerToCoordinations, None)?;
+    let relevant_links = links.into_iter().filter(|link| ActionHash::from(link.target.clone()).eq(&coordination_hash));
+
+    Ok(relevant_links.count() as i32)
+}
         
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RemoveCoordinationForViewerInput {

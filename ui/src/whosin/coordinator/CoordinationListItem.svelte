@@ -25,6 +25,7 @@
     let coordRoles; //: Coordrole[] | undefined;
     let totalMin = 0;
     let totalUnderMin = 0;
+    let totalParticipants = 0;
     
     let errorSnackbar: Snackbar;
       
@@ -82,6 +83,7 @@
           record.forEach(r => {
             let min = decode(r.coordrole.entry.Present.entry)["minimum"];
             let underMin = Math.min(r.participants, min);
+            totalParticipants += r.participants;
             totalMin += min;
             totalUnderMin += underMin;
             totalMin = totalMin;
@@ -125,7 +127,7 @@
       <!-- </div> -->
 
       <div class="action-section">
-        <div class="role-item">{totalUnderMin} committed
+        <div class="role-item">{totalParticipants} committed
           {#if totalUnderMin < totalMin}
             and {totalMin - totalUnderMin} more needed
           {:else}

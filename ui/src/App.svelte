@@ -19,7 +19,9 @@
     ProfilePrompt,
     profilesStoreContext,
     MyProfile,
-    ProfilesContext
+    ProfilesContext,
+    AgentAvatar,
+    ProfileDetail,
   } from '@holochain-open-dev/profiles';
   
   let client: AppAgentClient | undefined;
@@ -42,7 +44,18 @@
     customElements.define('profile-prompt', ProfilePrompt)
   }
 
+  if (!customElements.get('agent-avatar')){
+    customElements.define('agent-avatar', AgentAvatar)
+  }
+
+  if (!customElements.get('agent-avatar')){
+    customElements.define('agent-avatar', AgentAvatar)
+  }
+
   
+  if (!customElements.get('profile-detail')){
+    customElements.define('profile-detail', ProfileDetail)
+  }
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
@@ -70,9 +83,11 @@
 
 {#if client}
 <main>
-  <Header client={client}></Header>
-  <profiles-context store={store}>
-    <profile-prompt>
+  <!-- <profiles-context store={store}> -->
+    <Header></Header>
+    <!-- <profile-prompt> -->
+    <!-- <agent-avatar></agent-avatar> -->
+    <!-- <profile-details></profile-details> -->
       <!-- <my-profile></my-profile> -->
     <!-- <div style="margin: 20px;"></div> -->
     {#if loading}
@@ -94,8 +109,8 @@
       <!-- <CreateCoordination></CreateCoordination> -->
       <AllCoordinations></AllCoordinations>
     {/if}
-  </profile-prompt>
-  </profiles-context>
+  <!-- </profile-prompt> -->
+  <!-- </profiles-context> -->
 </main>
 
 <style>

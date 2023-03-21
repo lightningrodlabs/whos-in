@@ -164,6 +164,10 @@ nav logo {
   height: 22px;
 }
 
+.middle-of-header-right {
+  margin: 0 12px;
+}
+
 .notifications, .dashboard, .bulletin {
   width: 24px;
   height: 26px;
@@ -171,6 +175,16 @@ nav logo {
   /* margin: 0 10px; */
   margin-right: 10px;
   cursor: pointer;
+}
+
+update-profile {
+  position: absolute;
+  left: 25vw;
+  top: 20vh;
+  background-color: rgb(223, 223, 223);
+  padding: 100px;
+  border-radius: 200px;
+  z-index: 1;
 }
 
 /* .dashboard, .bulletin {

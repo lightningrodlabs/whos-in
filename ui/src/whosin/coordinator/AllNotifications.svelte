@@ -2,7 +2,6 @@
     import { onMount, getContext } from 'svelte';
     import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
     import { clientContext } from '../../contexts';
-    // import type { SeenNotifications, Seen } from './types';
     import { decode } from '@msgpack/msgpack';
     import { notifications, notifications_update } from '../../store.js';
     import { navigate } from '../../store.js';
@@ -23,71 +22,27 @@
         local_notifications = value;
     });
 
+    async function goToCoordination(coordinationHash, seen) {
 
-    // async function markSeen(content: String) {
-    //     try {
-    //         const records = await client
-    //         .callZome({
-    //             cap_secret: null,
-    //             role_name: 'hcan',
-    //             zome_name: 'coordinator',
-    //             fn_name: 'register_seen',
-    //             payload: content,
-    //         });
-    //         records
-    //     } catch (e) {
-    //         error = e;
-    //     }
-    // }
-
-    // async function markSeen(coordinationHash: EntryHash, description: string) {  
-    //     const seenEntry: Seen = { 
-    //         coordination_hash: coordinationHash!,
-    //         description: description!,
-    //     };
-        
-    //     try {
-    //         const record: Record = await client.callZome({
-    //         cap_secret: null,
-    //         role_name: 'hcan',
-    //         zome_name: 'coordinator',
-    //         fn_name: 'create_seen',
-    //         payload: seenEntry,
-    //         });
-    //         // dispatch('seen-created', { seenHash: record.signed_action.hashed.hash });
-    //     } catch (e) {
-    //         alert(JSON.stringify(e))
-    //         // errorSnackbar.labelText = `Error creating the seen: ${e.data.data}`;
-    //         // errorSnackbar.show();
-    //     }
-    // }
-
-    // async function checkSeen(coordinationHash: ActionHash, description: string) {
-    //     const seenEntry: SeenNotifications = { 
-    //         coordination_hash: coordinationHash!,
-    //         description: description!,
-    //     };
-
-    //     try {
-    //         const records = await client
-    //         .callZome({
-    //             cap_secret: null,
-    //             role_name: 'hcan',
-    //             zome_name: 'coordinator',
-    //             fn_name: 'get_seen',
-    //             payload: seenEntry,
-    //         });
-    //         // alert(records)
-    //         records
-    //     } catch (e) {
-    //         error = e;
-    //     }
-    // }
-
-    async function goToCoordination(coordinationHash, description) {
-    //   markSeen(coordinationHash, description)
-      navigate("coordination", coordinationHash);
+    if (!seen) {
+        try {
+            const records = await client
+            .callZome({
+                cap_secret: null,
+                role_name: 'whosin',
+                zome_name: 'coordinator',
+                fn_name: 'add_coordination_for_viewer',
+                payload: coordinationHash,
+            });
+            navigate("coordination", coordinationHash);
+            records
+        } catch (e) {
+            error = e;
+        }
+    } else {
+        navigate("coordination", coordinationHash);
     }
+}
 
 </script>
 
@@ -96,11 +51,11 @@
     <h1>Notifications</h1>
     <ul id="notifications">
     {#each local_notifications as n}
-        <!-- {#if checkSeen(n.hash, n.description)}
-            {JSON.stringify(checkSeen(n.hash, n.description))}
-        {/if} -->
-        <!-- {JSON.stringify(n)} -->
-        <li on:click={goToCoordination(n.hash, n.description)}>{n.description}</li>
+        {#if !n.seen}
+            <li on:click={goToCoordination(n.hash, n.seen)}><b>{n.description}</b></li>
+        {:else}
+            <li on:click={goToCoordination(n.hash, n.seen)}>{n.description}</li>
+        {/if}
     {/each}
     </ul>
 </div>
