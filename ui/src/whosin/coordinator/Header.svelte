@@ -12,38 +12,38 @@
     import { onMount, setContext, getContext } from 'svelte';
     import { decode } from '@msgpack/msgpack';
     
-    import {
-      ProfilesStore,
-      ProfilesClient,
-      CreateProfile,
-      ProfilePrompt,
-      profilesStoreContext,
-      MyProfile,
-      ProfilesContext,
-      ProfileDetail,
-      ProfileListItemSkeleton,
-      AgentAvatar,
-    } from '@holochain-open-dev/profiles';
+    // import {
+    //   ProfilesStore,
+    //   ProfilesClient,
+    //   CreateProfile,
+    //   ProfilePrompt,
+    //   profilesStoreContext,
+    //   MyProfile,
+    //   ProfilesContext,
+    //   ProfileDetail,
+    //   ProfileListItemSkeleton,
+    //   AgentAvatar,
+    // } from '@holochain-open-dev/profiles';
     let client: AppAgentClient = (getContext(clientContext) as any).getClient();
     
     // let client: AppAgentClient;
     // let myAgentPubKey: AgentPubKey = (getContext(clientContext) as any).getClient();
     
-    if (!customElements.get('my-profile')){
-      customElements.define('my-profile', MyProfile)
-    }
+    // if (!customElements.get('my-profile')){
+    //   customElements.define('my-profile', MyProfile)
+    // }
 
-    if (!customElements.get('profile-detail')){
-      customElements.define('profile-detail', ProfileDetail)
-    }
+    // if (!customElements.get('profile-detail')){
+    //   customElements.define('profile-detail', ProfileDetail)
+    // }
 
-    if (!customElements.get('profile-list-item-skeleton')){
-      customElements.define('profile-list-item-skeleton', ProfileListItemSkeleton)
-    }
+    // if (!customElements.get('profile-list-item-skeleton')){
+    //   customElements.define('profile-list-item-skeleton', ProfileListItemSkeleton)
+    // }
 
-    if (!customElements.get('agent-avatar')){
-      customElements.define('agent-avatar', AgentAvatar)
-    }
+    // if (!customElements.get('agent-avatar')){
+    //   customElements.define('agent-avatar', AgentAvatar)
+    // }
 
     async function goToCreate() {
       navigate("create-coordination", {});

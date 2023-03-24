@@ -4,6 +4,7 @@ use hdi::prelude::*;
 pub struct Coordination {
     pub title: String,
     pub description: String,
+    // TODO: add a field for the date of the coordination that can be a date or empty
     pub coordroles: Vec<ActionHash>,
 }
 pub fn validate_create_coordination(

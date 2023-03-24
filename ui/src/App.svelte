@@ -12,18 +12,18 @@
   import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
   import MyCoordinations from './whosin/coordinator/MyCoordinations.svelte';
 
-  import {
-    ProfilesStore,
-    ProfilesClient,
-    CreateProfile,
-    ProfilePrompt,
-    profilesStoreContext,
-    MyProfile,
-    ProfilesContext,
-    AgentAvatar,
-    ProfileDetail,
-    ListProfiles,
-  } from '@holochain-open-dev/profiles';
+  // import {
+  //   ProfilesStore,
+  //   ProfilesClient,
+  //   CreateProfile,
+  //   ProfilePrompt,
+  //   profilesStoreContext,
+  //   MyProfile,
+  //   ProfilesContext,
+  //   AgentAvatar,
+  //   ProfileDetail,
+  //   ListProfiles,
+  // } from '@holochain-open-dev/profiles';
   
   let client: AppAgentClient | undefined;
   let loading = true;
@@ -33,33 +33,33 @@
 
   $: client, loading, store;
 
-  if (!customElements.get('profiles-context')){
-    customElements.define('profiles-context', ProfilesContext)
-  }
+  // if (!customElements.get('profiles-context')){
+  //   customElements.define('profiles-context', ProfilesContext)
+  // }
 
-  if (!customElements.get('my-profile')){
-    customElements.define('my-profile', MyProfile)
-  }
+  // if (!customElements.get('my-profile')){
+  //   customElements.define('my-profile', MyProfile)
+  // }
 
-  if (!customElements.get('profile-prompt')){
-    customElements.define('profile-prompt', ProfilePrompt)
-  }
+  // if (!customElements.get('profile-prompt')){
+  //   customElements.define('profile-prompt', ProfilePrompt)
+  // }
 
-  if (!customElements.get('agent-avatar')){
-    customElements.define('agent-avatar', AgentAvatar)
-  }
+  // if (!customElements.get('agent-avatar')){
+  //   customElements.define('agent-avatar', AgentAvatar)
+  // }
 
-  if (!customElements.get('agent-avatar')){
-    customElements.define('agent-avatar', AgentAvatar)
-  }
+  // if (!customElements.get('agent-avatar')){
+  //   customElements.define('agent-avatar', AgentAvatar)
+  // }
   
-  if (!customElements.get('profile-detail')){
-    customElements.define('profile-detail', ProfileDetail)
-  }
+  // if (!customElements.get('profile-detail')){
+  //   customElements.define('profile-detail', ProfileDetail)
+  // }
 
-  if (!customElements.get('list-profiles')){
-    customElements.define('list-profiles', ListProfiles)
-  }
+  // if (!customElements.get('list-profiles')){
+  //   customElements.define('list-profiles', ListProfiles)
+  // }
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
@@ -68,7 +68,7 @@
       // avatarMode: "identicon",
       // additionalFields: ["Location", "Bio"], // Custom app level profile fields
     };
-    store = new ProfilesStore(new ProfilesClient(client, 'whosin'), config);
+    // store = new ProfilesStore(new ProfilesClient(client, 'whosin'), config);
     loading = false;
   });
 
