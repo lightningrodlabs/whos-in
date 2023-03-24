@@ -26,13 +26,47 @@ pub struct AddParticipantForCoordroleInput {
 #[hdk_extern]
 pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
-    create_link(
+    // make sure the participant is not already committed to this coordrole
+    let links = get_links(
         coordrole_hash.clone(),
-        participant.clone(),
         LinkTypes::CoordroleToParticipants,
-        (),
+        None,
     )?;
-    create_link(participant, coordrole_hash, LinkTypes::ParticipantToCoordroles, ())?;
+    let links_length = links.len();
+    let mut already_committed = false;
+    for link in links {
+        if AgentPubKey::from(EntryHash::from(link.target.clone())).eq(&participant) {
+            already_committed = true;
+        }
+    }
+
+
+    let maybe_record = get(ActionHash::from(coordrole_hash.clone()), GetOptions::default())?;
+    let mut maximum = 0;
+
+    if let Some(record) = maybe_record {
+      let coordrole: Coordrole = record
+        .entry()
+        .to_app_option()
+        .map_err(|err| wasm_error!(err))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Could not retrieve coordrole".into(),
+        )))?;
+        
+        maximum = coordrole.maximum;
+    }
+
+    let max_reached = links_length >= maximum as usize;
+
+    if !already_committed && !max_reached{
+        create_link(
+            coordrole_hash.clone(),
+            participant.clone(),
+            LinkTypes::CoordroleToParticipants,
+            (),
+        )?;
+        create_link(participant, coordrole_hash, LinkTypes::ParticipantToCoordroles, ())?;
+    }
     Ok(())
 }
 #[hdk_extern]

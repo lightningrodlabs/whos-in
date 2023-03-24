@@ -202,7 +202,7 @@
         
         {#if role.committed}
           <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>
-        {:else}
+        {:else if role.participants < decode(role.coordrole.entry.Present.entry)["maximum"]}
           <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash)} >Add me</button>
         {/if}
         </div>
