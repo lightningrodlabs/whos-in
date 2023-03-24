@@ -46,11 +46,11 @@ export interface Coordination {
 
   description: string;
 
-  // happening_date: number;
+  happening_date: number | null;
 
-  // signup_deadline: number;
+  signup_deadline: number | null;
 
-  // reminder_date: number;
+  reminder_date: number | null;
 
   coordroles: Array<Coordrole>;
 }

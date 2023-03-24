@@ -9,6 +9,9 @@ pub struct CreateCoordroleInput {
 pub struct CreateCoordinationInput {
     title: String,
     description: String,
+    happening_date: Option<Timestamp>,
+    reminder_date: Option<Timestamp>,
+    signup_deadline: Option<Timestamp>,
     coordroles: Vec<Coordrole>,
 }
 #[hdk_extern]
@@ -19,9 +22,13 @@ pub fn create_coordination(input: CreateCoordinationInput) -> ExternResult<Recor
         let coordrole_hash = create_entry(&EntryTypes::Coordrole(role.clone()))?;
         coordrole_hashes.push(coordrole_hash);
     }
+
     let coordination: Coordination = Coordination {
         title: input.title,
         description: input.description,
+        happening_date: input.happening_date,
+        reminder_date: input.reminder_date,
+        signup_deadline: input.signup_deadline,
         coordroles: coordrole_hashes.clone(),
     };
     let coordination_hash = create_entry(

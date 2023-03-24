@@ -1,10 +1,13 @@
 use hdi::prelude::*;
+
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Coordination {
     pub title: String,
     pub description: String,
-    // TODO: add a field for the date of the coordination that can be a date or empty
+    pub happening_date: Option<Timestamp>,
+    pub signup_deadline: Option<Timestamp>,
+    pub reminder_date: Option<Timestamp>,
     pub coordroles: Vec<ActionHash>,
 }
 pub fn validate_create_coordination(
