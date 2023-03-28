@@ -28,7 +28,7 @@
         }
         else {
             // alert(client)
-            console.log(client)
+            // console.log(client)
         }
     
         await fetchNotifications();
@@ -42,8 +42,9 @@
         loading = true;
         error = undefined;
         let record = undefined;
-        let formatted_coordination = decode((coordination.entry as any).Present.entry) as Coordination;
+        let formatted_coordination = await decode((coordination.entry as any).Present.entry) as Coordination;
         let coordination_hash = coordination.signed_action.hashed.hash;
+        // console.log(formatted_coordination.title)
 
         try {
             record = await client
@@ -78,10 +79,9 @@
                         seenBool = true;
                     }
 
-                    // console.log(seenBool)
-
-                    coordination_details.push(
+                    coordination_details.push (
                         {
+                            "timestamp": record[0].coordrole.signed_action.hashed.content.timestamp,
                             "type": "coordination-activation",
                             "description": "The Action " + formatted_coordination.title + " has reached minimum participation",
                             "hash": coordination_hash,
@@ -111,7 +111,9 @@
                 payload: null,
             });
 
-            coordinations = records//.map(r => r.signed_action.hashed.hash);
+            // coordinations = records//.map(r => r.signed_action.hashed.hash);
+            coordinations = records.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
+
             coordination_details = [];
             next_unseen_notifications = 0;
             let items_processed = 0;
@@ -119,7 +121,6 @@
             coordinations.forEach(c => {
                 let seen = fetchCoordination(c);
                 seen.then(function(result) {
-                    // console.log(result)
                     if (result == false) {
                         next_unseen_notifications += 1;
                     }

@@ -1,3 +1,7 @@
+pub mod coordination_to_spam_reporters;
+pub use coordination_to_spam_reporters::*;
+pub mod coordination_to_sponsors;
+pub use coordination_to_sponsors::*;
 pub mod viewer_to_coordinations;
 pub use viewer_to_coordinations::*;
 pub mod coordrole_to_participants;
@@ -26,6 +30,10 @@ pub enum LinkTypes {
     ParticipantToCoordroles,
     AllCoordinations,
     ViewerToCoordinations,
+    CoordinationToSponsors,
+    SponsorToCoordinations,
+    CoordinationToSpamReporters,
+    SpamReporterToCoordinations,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -198,6 +206,38 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::CoordinationToSponsors => {
+                    validate_create_link_coordination_to_sponsors(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::SponsorToCoordinations => {
+                    validate_create_link_sponsor_to_coordinations(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::CoordinationToSpamReporters => {
+                    validate_create_link_coordination_to_spam_reporters(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::SpamReporterToCoordinations => {
+                    validate_create_link_spam_reporter_to_coordinations(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         OpType::RegisterDeleteLink {
@@ -256,6 +296,42 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::ViewerToCoordinations => {
                     validate_delete_link_viewer_to_coordinations(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::CoordinationToSponsors => {
+                    validate_delete_link_coordination_to_sponsors(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::SponsorToCoordinations => {
+                    validate_delete_link_sponsor_to_coordinations(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::CoordinationToSpamReporters => {
+                    validate_delete_link_coordination_to_spam_reporters(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::SpamReporterToCoordinations => {
+                    validate_delete_link_spam_reporter_to_coordinations(
                         action,
                         original_action,
                         base_address,
@@ -492,6 +568,38 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
+                        LinkTypes::CoordinationToSponsors => {
+                            validate_create_link_coordination_to_sponsors(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::SponsorToCoordinations => {
+                            validate_create_link_sponsor_to_coordinations(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::CoordinationToSpamReporters => {
+                            validate_create_link_coordination_to_spam_reporters(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::SpamReporterToCoordinations => {
+                            validate_create_link_spam_reporter_to_coordinations(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                     }
                 }
                 OpRecord::DeleteLink { original_action_hash, base_address, action } => {
@@ -564,6 +672,42 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::ViewerToCoordinations => {
                             validate_delete_link_viewer_to_coordinations(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::CoordinationToSponsors => {
+                            validate_delete_link_coordination_to_sponsors(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::SponsorToCoordinations => {
+                            validate_delete_link_sponsor_to_coordinations(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::CoordinationToSpamReporters => {
+                            validate_delete_link_coordination_to_spam_reporters(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::SpamReporterToCoordinations => {
+                            validate_delete_link_spam_reporter_to_coordinations(
                                 action,
                                 create_link.clone(),
                                 base_address,

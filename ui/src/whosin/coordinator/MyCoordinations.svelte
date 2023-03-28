@@ -3,7 +3,7 @@
   import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
   import { clientContext } from '../../contexts';
   import type { Coordination, CoordinatorSignal } from './types';
-  import { decode } from '@msgpack/msgpack';
+  import { decode, encode } from '@msgpack/msgpack';
   import CoordinationListItem from './CoordinationListItem.svelte';
   // import { notifications, notifications_update } from '../../store.js';
   
@@ -11,12 +11,14 @@
   
   let client: AppAgentClient = (getContext(clientContext) as any).getClient();
   
-  let coordinations: Array<ActionHash> | [];
+  // let coordinations: Array<ActionHash> | [];
+    let coordinations;
   // let coordination_details = [];
   let loading = true;
   let error: any = undefined;
+  let shown = [];
   
-  $: coordinations, loading, error;
+  $: coordinations, loading, error, shown;
   
   onMount(async () => {
       fetchCoordinations();
@@ -33,13 +35,8 @@
               payload: null,
           });
 
-          coordinations = records//.map(r => r.signed_action.hashed.hash);
-          // coordination_details = [];
+          coordinations = records.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
 
-          // coordinations.forEach(c => {
-          //     fetchCoordination(c)
-          // })
-          // coordination_details_show = coordination_details;
       } catch (e) {
           error = e;
       }
@@ -52,7 +49,7 @@
 <div class="white-container" style="display: flex; flex-direction: column">
   <h1>My Commitments</h1>
   {#if coordinations && coordinations.length}
-  {#each coordinations as hash}
+  {#each coordinations.reverse() as hash}
     <CoordinationListItem coordinationHash={hash}></CoordinationListItem>
   {/each}
   {:else}

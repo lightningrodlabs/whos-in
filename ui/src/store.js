@@ -10,5 +10,6 @@ export function navigate(location, hash) {
 }
 
 export function notifications_update(new_notifications) {
-    notifications.update(v => new_notifications)
+    let ordered = new_notifications.sort((a, b) => a.timestamp - b.timestamp);
+    notifications.update(v => ordered)
 }

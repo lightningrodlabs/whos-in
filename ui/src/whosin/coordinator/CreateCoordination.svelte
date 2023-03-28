@@ -31,16 +31,16 @@
   let errorSnackbar: Snackbar;
   
   $: title, description, happeningDate, signupDeadline, reminderDate, coordRoles, roleTitle, roleDescription, minimum, maximum;
-  $: isCoordinationValid = true && title !== undefined && description !== undefined && coordRoles.length > 0 //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
-  $: isCoordRoleValid = roleTitle != undefined && roleDescription != undefined && minimum != undefined && maximum != undefined && minimum <= maximum;
+  $: isCoordinationValid = true && title !== undefined && description !== undefined && coordRoles.length > 0; //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
+  $: isCoordRoleValid = roleTitle != undefined && roleDescription != undefined && minimum != undefined && maximum != undefined && minimum <= maximum && minimum > 0;
   
-  async function createCoordination() {  
-    const coordinationEntry: Coordination = { 
+  async function createCoordination() {
+    const coordinationEntry: Coordination = {
       title: title!,
       description: description!,
-      // happening_date: happeningDate!,
-      // signup_deadline: signupDeadline!,
-      // reminder_date: reminderDate!,
+      happening_date: happeningDate!,
+      signup_deadline: signupDeadline!,
+      reminder_date: reminderDate!,
       coordroles: coordRoles!,
     };
     
@@ -60,6 +60,7 @@
         coordinationHash: record.signed_action.hashed.hash 
       });
   
+      // notify("")
       navigate("coordination", record.signed_action.hashed.hash);
   
     } catch (e) {
@@ -118,7 +119,7 @@
       <div class="created-role">
         <strong>{role.title}</strong>
         <br>
-        <div>Min: {role.minimum} Max: {role.minimum}</div>
+        <div>Min: {role.minimum} Max: {role.maximum}</div>
         <br>
         <div>{role.description}</div>
         <br>

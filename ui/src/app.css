@@ -17,6 +17,11 @@ main {
   padding: 0 !important;
 }
 
+.invisible {
+  opacity: 0;
+  width: fit-content;
+}
+
 .role-outer {
   background-color: white;
   display: inline-block;

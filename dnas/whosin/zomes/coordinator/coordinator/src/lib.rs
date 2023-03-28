@@ -1,5 +1,7 @@
-pub mod viewer_to_coordinations;
+pub mod coordination_to_spam_reporters;
 
+pub mod coordination_to_sponsors;
+pub mod viewer_to_coordinations;
 pub mod all_coordinations;
 pub mod coordrole_to_participants;
 pub mod coordination_to_coordroles;

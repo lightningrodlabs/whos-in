@@ -1,32 +1,48 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddParticipantForCoordroleInput {
     coordrole_hash: ActionHash,
     participant: AgentPubKey,
 }
-// #[hdk_extern]
-// pub fn add_participant_for_coordrole(
-//     input: AddParticipantForCoordroleInput,
-// ) -> ExternResult<()> {
-//     create_link(
-//         input.coordrole_hash.clone(),
-//         input.participant.clone(),
-//         LinkTypes::CoordroleToParticipants,
-//         (),
-//     )?;
-//     create_link(
-//         input.participant,
-//         input.coordrole_hash,
-//         LinkTypes::ParticipantToCoordroles,
-//         (),
-//     )?;
-//     Ok(())
-// }
 #[hdk_extern]
 pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
-    // make sure the participant is not already committed to this coordrole
+    let coordination_hash = get_links(
+        coordrole_hash.clone(),
+        LinkTypes::CoordroleToCoordinations,
+        None,
+    )?;
+    let coordination_hash = coordination_hash[0].target.clone();
+
+    let sponsor_links = get_links(
+        coordrole_hash.clone(),
+        LinkTypes::CoordinationToSponsors,
+        None,
+    )?;
+    let mut already_sponsored = false;
+    for link in sponsor_links {
+        if AgentPubKey::from(EntryHash::from(link.target.clone())).eq(&participant) {
+            already_sponsored = true;
+        }
+    }
+
+    if !already_sponsored {
+        create_link(
+            coordination_hash.clone(),
+            participant.clone(),
+            LinkTypes::CoordinationToSponsors,
+            (),
+        )?;
+        create_link(
+            participant.clone(),
+            coordination_hash.clone(),
+            LinkTypes::SponsorToCoordinations,
+            (),
+        )?;
+    }
+
     let links = get_links(
         coordrole_hash.clone(),
         LinkTypes::CoordroleToParticipants,
@@ -39,33 +55,37 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             already_committed = true;
         }
     }
-
-
-    let maybe_record = get(ActionHash::from(coordrole_hash.clone()), GetOptions::default())?;
+    let maybe_record = get(
+        ActionHash::from(coordrole_hash.clone()),
+        GetOptions::default(),
+    )?;
     let mut maximum = 0;
-
     if let Some(record) = maybe_record {
-      let coordrole: Coordrole = record
-        .entry()
-        .to_app_option()
-        .map_err(|err| wasm_error!(err))?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(
-            "Could not retrieve coordrole".into(),
-        )))?;
-        
+        let coordrole: Coordrole = record
+            .entry()
+            .to_app_option()
+            .map_err(|err| wasm_error!(err))?
+            .ok_or(
+                wasm_error!(
+                    WasmErrorInner::Guest("Could not retrieve coordrole".into(),)
+                ),
+            )?;
         maximum = coordrole.maximum;
     }
-
     let max_reached = links_length >= maximum as usize;
-
-    if !already_committed && !max_reached{
+    if !already_committed && !max_reached {
         create_link(
             coordrole_hash.clone(),
             participant.clone(),
             LinkTypes::CoordroleToParticipants,
             (),
         )?;
-        create_link(participant, coordrole_hash, LinkTypes::ParticipantToCoordroles, ())?;
+        create_link(
+            participant,
+            coordrole_hash,
+            LinkTypes::ParticipantToCoordroles,
+            (),
+        )?;
     }
     Ok(())
 }
@@ -129,30 +149,3 @@ pub struct RemoveParticipantForCoordroleInput {
     coordrole_hash: ActionHash,
     participant: AgentPubKey,
 }
-// #[hdk_extern]
-// pub fn remove_participant_for_coordrole(
-//     input: RemoveParticipantForCoordroleInput,
-// ) -> ExternResult<()> {
-//     let links = get_links(
-//         input.coordrole_hash.clone(),
-//         LinkTypes::CoordroleToParticipants,
-//         None,
-//     )?;
-//     for link in links {
-//         if AgentPubKey::from(EntryHash::from(link.target.clone())).eq(&input.participant)
-//         {
-//             delete_link(link.create_link_hash)?;
-//         }
-//     }
-//     let links = get_links(
-//         input.participant.clone(),
-//         LinkTypes::ParticipantToCoordroles,
-//         None,
-//     )?;
-//     for link in links {
-//         if ActionHash::from(link.target.clone()).eq(&input.coordrole_hash) {
-//             delete_link(link.create_link_hash)?;
-//         }
-//     }
-//     Ok(())
-// }

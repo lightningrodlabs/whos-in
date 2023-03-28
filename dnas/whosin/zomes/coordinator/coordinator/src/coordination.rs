@@ -16,13 +16,13 @@ pub struct CreateCoordinationInput {
 }
 #[hdk_extern]
 pub fn create_coordination(input: CreateCoordinationInput) -> ExternResult<Record> {
+    let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
     let coordroles = input.coordroles;
     let mut coordrole_hashes = vec![];
     for role in coordroles.iter() {
         let coordrole_hash = create_entry(&EntryTypes::Coordrole(role.clone()))?;
         coordrole_hashes.push(coordrole_hash);
     }
-
     let coordination: Coordination = Coordination {
         title: input.title,
         description: input.description,
@@ -45,6 +45,18 @@ pub fn create_coordination(input: CreateCoordinationInput) -> ExternResult<Recor
         path.path_entry_hash()?,
         coordination_hash.clone(),
         LinkTypes::AllCoordinations,
+        (),
+    )?;
+    create_link(
+        coordination_hash.clone(),
+        participant.clone(),
+        LinkTypes::CoordinationToSponsors,
+        (),
+    )?;
+    create_link(
+        participant.clone(),
+        coordination_hash.clone(),
+        LinkTypes::SponsorToCoordinations,
         (),
     )?;
     for coordrole_hash in coordrole_hashes.iter() {

@@ -20,13 +20,14 @@
   let loading = true;
   let error: any = undefined;
   
-  let record: Record | undefined;
+  // let record: Record | undefined;
   let coordination: Coordination | undefined;
   let coordRoles; //: Coordrole[] | undefined;
+  let sponsors;
   
   let errorSnackbar: Snackbar;
     
-  $: error, loading, record, coordination;
+  $: error, loading, coordination, sponsors;
   
   // onMount(() => fetchCoordination());
   // onMount(() => fetchRoles());
@@ -36,12 +37,14 @@
     .then(() => {
       fetchRoles()
     })
+
+    getSponsors()
   });
   
   async function fetchCoordination() {
     loading = true;
     error = undefined;
-    record = undefined;
+    let record = undefined;
     coordination = undefined;
     
     try {
@@ -59,13 +62,12 @@
       error = e;
     }
   
-    // loading = false;
+    loading = false;
   }
   
   async function fetchRoles() {
-    loading = true;
     error = undefined;
-    record = undefined;
+    let record = undefined;
     coordRoles = undefined;
     
     try {
@@ -88,7 +90,90 @@
   
     loading = false;
   }
-  
+
+  async function sponsor() {
+    error = undefined;
+    let record = undefined;
+    coordination = undefined;
+    
+    try {
+      record = await client.callZome({
+        cap_secret: null,
+        role_name: 'whosin',
+        zome_name: 'coordinator',
+        fn_name: 'add_sponsor_for_coordination',
+        payload: coordinationHash,
+      });
+    } catch (e) {
+      error = e;
+    }
+  }
+
+  async function unsponsor() {
+    let confirmation = window.confirm("Hide this post?")
+    if (confirmation) {
+      error = undefined;
+      let record = undefined;
+      
+      try {
+        record = await client.callZome({
+          cap_secret: null,
+          role_name: 'whosin',
+          zome_name: 'coordinator',
+          fn_name: 'remove_sponsor_for_coordination',
+          payload: coordinationHash,
+        });
+        navigate("all-coordinations");
+      } catch (e) {
+        error = e;
+      }
+    }
+  }
+
+  async function getSponsors() {
+    error = undefined;
+    let record = undefined;
+    
+    try {
+      record = await client.callZome({
+        cap_secret: null,
+        role_name: 'whosin',
+        zome_name: 'coordinator',
+        fn_name: 'get_sponsors_for_coordination',
+        payload: coordinationHash,
+      });
+    } catch (e) {
+      error = e;
+    }
+    if (record) {
+      // sponsors = record;
+      sponsors = [];
+      record.forEach(element => {
+        sponsors.push(element.join())
+      });
+    }
+  }
+
+  async function markSpam() {
+    let confirmation = window.confirm("Report as spam?")
+    if (confirmation) {
+      error = undefined;
+      let record = undefined;
+      
+      try {
+        record = await client.callZome({
+          cap_secret: null,
+          role_name: 'whosin',
+          zome_name: 'coordinator',
+          fn_name: 'add_spam_reporter_for_coordination',
+          payload: coordinationHash,
+        });
+      } catch (e) {
+        error = e;
+      }
+    }
+  }
+
   async function fetchCoordrole(coordroleCoded) {
     return decode((coordroleCoded.entry).Present.entry)
   }
@@ -149,7 +234,7 @@
   {:else}
   
   <div class="white-container" style="display: flex; flex-direction: column">
-  
+
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <h1>{ coordination.title }</h1>
     </div>
@@ -220,8 +305,12 @@
     </div>
     {/each}
     {/if}
+
+    {#if sponsors && sponsors.length && sponsors.length == 1 && sponsors.includes(client.myPubKey.join())}
+      <p>Since no one else has signed up for a role, you can still hide this action. <button on:click={() => unsponsor()}>Hide</button></p>
+    {/if}
   
-  
+  <div class="invisible" on:click={() => markSpam()}>.</div>
   </div>
   {/if}
   
