@@ -19,7 +19,7 @@
     });
 
     notifications.subscribe(value => {
-        local_notifications = value.reverse();
+        local_notifications = value;
     });
 
     async function goToCoordination(coordinationHash, seen) {

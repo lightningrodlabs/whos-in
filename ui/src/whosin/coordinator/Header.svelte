@@ -5,7 +5,7 @@
     import FaBullhorn from 'svelte-icons/fa/FaBullhorn.svelte';
     import FaList from 'svelte-icons/fa/FaList.svelte';
     import FaHome from 'svelte-icons/fa/FaHome.svelte';
-    import { navigate } from '../../store.js';
+    import { navigate, view } from '../../store.js';
     import Notifications from './Notifications.svelte';
     import { clientContext } from '../../contexts';
     import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
@@ -24,8 +24,14 @@
     //   ProfileListItemSkeleton,
     //   AgentAvatar,
     // } from '@holochain-open-dev/profiles';
+
     let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+    let currentView;
     
+    view.subscribe(value => {
+      currentView = value;
+    });
+
     // let client: AppAgentClient;
     // let myAgentPubKey: AgentPubKey = (getContext(clientContext) as any).getClient();
     
@@ -62,13 +68,11 @@
     }
     </script>
     
-    <!-- <div>{JSON.stringify(myAgentPubKey["myPubKey"])}</div> -->
-
     <header>
         <nav class="navbar">
           <div class="container-fluid converge-header">
             <div>
-              <a id="logo" class="navbar-brand" href="/">
+              <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>
                 <img class="logo-image" src={Logo} alt="whos-in logo"/>
               </a>    
             </div>
@@ -77,26 +81,45 @@
           <ul class="nav navbar-nav float-right">
     
           <li class="bulletin" on:click={goToBulletin}>
+            {#if currentView == "all-coordinations"}
+            <div class="bulletin-icon" style="color:#1952bb">
+              <FaBullhorn />
+            </div>
+            {:else}
             <div class="bulletin-icon">
               <FaBullhorn />
             </div>
+            {/if}
           </li>
     
           <li class="dashboard" on:click={goToDashboard}>
+            {#if currentView == "dashboard"}
+            <div class="dashboard-icon" style="color:#1952bb">
+              <FaList />
+            </div>
+            {:else}
             <div class="dashboard-icon">
               <FaList />
             </div>
+            {/if}
           </li>
     
           <li class="notifications-li">
-            <div class="notifications" on:click={goToNotifications}>
-              <FaBell />
+            {#if currentView == "notifications"}
+            <div class="notifications" style="color:#1952bb" on:click={goToNotifications}>
+                <FaBell />
               <span class="notifications-count">
-                <!-- {#if client} -->
                 <Notifications client={client}></Notifications>
-                <!-- {/if} -->
               </span>
             </div>
+            {:else}
+            <div class="notifications" on:click={goToNotifications}>
+                <FaBell />
+              <span class="notifications-count">
+                <Notifications client={client}></Notifications>
+              </span>
+            </div>
+            {/if}
           </li>
         
           <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>

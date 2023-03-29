@@ -10,6 +10,7 @@
   import AllCoordinations from './whosin/coordinator/AllCoordinations.svelte';
   import CoordinationDetail from './whosin/coordinator/CoordinationDetail.svelte';
   import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
+  import Instructions from './whosin/coordinator/Instructions.svelte';
   import MyCoordinations from './whosin/coordinator/MyCoordinations.svelte';
 
   // import {
@@ -61,14 +62,46 @@
   //   customElements.define('list-profiles', ListProfiles)
   // }
 
+  async function checkIfNew() {
+      try {
+          const records = await client
+          .callZome({
+              cap_secret: null,
+              role_name: 'whosin',
+              zome_name: 'coordinator',
+              fn_name: 'get_my_coordination_hashes',
+              payload: null,
+          });
+
+          if (records.length > 0) {
+              navigate('dashboard');
+          } else {
+              navigate('');
+          }
+
+      } catch (e) {
+          console.log(e)
+      }
+      loading = false;
+  }
+
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     client = await AppAgentWebsocket.connect('', 'dcan');
-    const config = {
+
+    console.log(currentView)
+
+    if (currentView == "home") {
+      checkIfNew()
+    }
+
+    // const config = {
       // avatarMode: "identicon",
       // additionalFields: ["Location", "Bio"], // Custom app level profile fields
-    };
+    // };
     // store = new ProfilesStore(new ProfilesClient(client, 'whosin'), config);
+
+
     loading = false;
   });
 
@@ -113,22 +146,21 @@
         <mwc-circular-progress indeterminate />
       </div>
     {:else if currentView == "coordination"}
-      <div id="content"><CoordinationDetail coordinationHash={currentHash}></CoordinationDetail></div>
+      <CoordinationDetail coordinationHash={currentHash}></CoordinationDetail>
     {:else if currentView == "create-coordination"}
-      <div id="content"><CreateCoordination></CreateCoordination></div>
+      <CreateCoordination></CreateCoordination>
       <!-- HI -->
     {:else if currentView == "notifications"}
-      <div id="content"><AllNotifications></AllNotifications></div>
+      <AllNotifications></AllNotifications>
       {:else if currentView == "dashboard"}
-      <div id="content"><MyCoordinations></MyCoordinations></div>
+      <MyCoordinations></MyCoordinations>
     {:else if currentView == "all-coordinations"}
-      <div id="content"><AllCoordinations></AllCoordinations></div>
+      <AllCoordinations></AllCoordinations>
     {:else}
       <!-- <CreateCoordination></CreateCoordination> -->
       <!-- <profile-detail /> -->
 
-      <AllCoordinations></AllCoordinations>
-      
+      <Instructions></Instructions>
     {/if}
   <!-- </profile-prompt> -->
   <!-- </profiles-context> -->

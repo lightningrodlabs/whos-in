@@ -124,6 +124,8 @@ main {
   border: none;
   margin-bottom: 50px;
   box-shadow: 0px 3px 6px #0000001A;
+  position: relative;
+  z-index: 1;
 }
 
 nav logo {
@@ -356,4 +358,9 @@ vaadin-date-time-picker {
 
 .created-role > div {
   display: inline-block;
+}
+
+/* transition all elements*/
+* {
+  transition: all 0.2s ease-in-out;
 }

@@ -10,6 +10,6 @@ export function navigate(location, hash) {
 }
 
 export function notifications_update(new_notifications) {
-    let ordered = new_notifications.sort((a, b) => a.timestamp - b.timestamp);
+    let ordered = new_notifications.sort((a, b) => parseFloat(b.timestamp) - parseFloat(a.timestamp));
     notifications.update(v => ordered)
 }

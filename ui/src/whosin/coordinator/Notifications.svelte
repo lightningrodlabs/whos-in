@@ -112,7 +112,8 @@
             });
 
             // coordinations = records//.map(r => r.signed_action.hashed.hash);
-            coordinations = records.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
+            // coordinations = records.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
+            coordinations = records;
 
             coordination_details = [];
             next_unseen_notifications = 0;
