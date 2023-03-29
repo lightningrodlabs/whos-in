@@ -105,21 +105,16 @@
           </li>
     
           <li class="notifications-li">
-            {#if currentView == "notifications"}
-            <div class="notifications" style="color:#1952bb" on:click={goToNotifications}>
-                <FaBell />
-              <span class="notifications-count">
-                <Notifications client={client}></Notifications>
-              </span>
-            </div>
-            {:else}
             <div class="notifications" on:click={goToNotifications}>
-                <FaBell />
+              {#if currentView == "notifications"}
+                <span style="color:#1952bb"><FaBell /></span>
+              {:else}
+                <span><FaBell /></span>
+              {/if}
               <span class="notifications-count">
                 <Notifications client={client}></Notifications>
               </span>
             </div>
-            {/if}
           </li>
         
           <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>

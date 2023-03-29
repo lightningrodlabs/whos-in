@@ -2,8 +2,7 @@
     import { onMount, getContext } from 'svelte';
     import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
     import { clientContext } from '../../contexts';
-    import { decode } from '@msgpack/msgpack';
-    import { notifications, notifications_update } from '../../store.js';
+    import { notifications } from '../../store.js';
     import { navigate } from '../../store.js';
     
     let client: AppAgentClient = (getContext(clientContext) as any).getClient();
