@@ -97,6 +97,7 @@ async function fetchCoordinations() {
 
       }
     );
+    hashes = hashes.reverse();
   } catch (e) {
     error = e;
   }
@@ -121,7 +122,7 @@ async function fetchCoordinations() {
   <h1>Actions Bulletin</h1>
   {#if hashes.length > 0}
     
-  {#each hashes.reverse() as hash}
+  {#each hashes as hash}
   {#if allSponsors[hash] && allSponsors[hash].length && (!allSpamReporters[hash] || !allSpamReporters[hash].length)}
     <CoordinationListItem coordinationHash={hash}></CoordinationListItem>
   {:else}

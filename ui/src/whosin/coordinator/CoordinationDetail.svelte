@@ -307,7 +307,7 @@
     {/if}
 
     {#if sponsors && sponsors.length && sponsors.length == 1 && sponsors.includes(client.myPubKey.join())}
-      <p>Since no one else has signed up for a role, you can still hide this action. <button on:click={() => unsponsor()}>Hide</button></p>
+      <p>Since no one else has signed up for a role yet, you can still hide this action from the bulletin. <button on:click={() => unsponsor()}>Hide</button></p>
     {/if}
   
   <div class="invisible" on:click={() => markSpam()}>.</div>

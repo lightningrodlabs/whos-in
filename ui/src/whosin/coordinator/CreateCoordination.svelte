@@ -31,7 +31,7 @@
   let errorSnackbar: Snackbar;
   
   $: title, description, happeningDate, signupDeadline, reminderDate, coordRoles, roleTitle, roleDescription, minimum, maximum;
-  $: isCoordinationValid = true && title !== undefined && description !== undefined && coordRoles.length > 0; //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
+  $: isCoordinationValid = title !== undefined && description !== undefined && coordRoles.length > 0; //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
   $: isCoordRoleValid = roleTitle != undefined && roleDescription != undefined && minimum != undefined && maximum != undefined && minimum <= maximum && minimum > 0;
   
   async function createCoordination() {
@@ -50,17 +50,13 @@
         role_name: 'whosin',
         zome_name: 'coordinator',
         fn_name: 'create_coordination',
-        payload: coordinationEntry  //{
-          // coordination: coordinationEntry, 
-          // coordroles: coordRoles
-        // },
+        payload: coordinationEntry
       });
   
       dispatch('coordination-created', { 
         coordinationHash: record.signed_action.hashed.hash 
       });
   
-      // notify("")
       navigate("coordination", record.signed_action.hashed.hash);
   
     } catch (e) {
@@ -72,6 +68,19 @@
   async function addCoordrole(roleTitle, roleDescription, min, max) {
     coordRoles.push({title: roleTitle, description: roleDescription, minimum: min, maximum: max});
     
+    // clear the #minimum-field and #maximum-field values
+    // document.getElementById("minimum-field").shadowRoot.querySelector("input").value = "0";
+    // document.getElementById("maximum-field").shadowRoot.querySelector("input").value = "0";
+    // document.getElementById("role-title-field").shadowRoot.querySelector("input").value = "title";
+
+    // document.getElementById("role-description-field").shadowRoot.querySelector("input").value = "description";
+    
+    // clear the form values
+    // roleTitle = "title";
+    // roleDescription = "description";
+    // minimum = 0;
+    // maximum = 0;
+
     coordRoles = coordRoles;
   }
   
@@ -119,9 +128,9 @@
       <div class="created-role">
         <strong>{role.title}</strong>
         <br>
-        <div>Min: {role.minimum} Max: {role.maximum}</div>
-        <br>
         <div>{role.description}</div>
+        <br>
+        <div>Min: {role.minimum} Max: {role.maximum}</div>
         <br>
         <button class="delete" on:click={() => remove_role(role)}>Remove</button>
         <!-- <button class="delete" on:click={async () => {
@@ -135,10 +144,10 @@
       </div>
     
       <div class="role">
-        <mwc-textfield style="width: 20%" label="Title" on:input={e => { roleTitle = e.target.value; } } required></mwc-textfield>          
-        <mwc-textfield style="width: 40%" label="Description"  on:input={e => { roleDescription = e.target.value;} } required></mwc-textfield>          
-        <mwc-textfield style="width: 10%" type="number" label="Min"  on:input={e => { minimum = Number(e.target.value);} } required></mwc-textfield>          
-        <mwc-textfield style="width: 10%" type="number" label="Max"  on:input={e => { maximum = Number(e.target.value);} } required></mwc-textfield>          
+        <mwc-textfield style="width: 20%" label="Title" id="role-title-field" on:input={e => { roleTitle = e.target.value; } } required></mwc-textfield>          
+        <mwc-textfield style="width: 40%" label="Description" id="role-description-field"  on:input={e => { roleDescription = e.target.value;} } required></mwc-textfield>          
+        <mwc-textfield style="width: 10%" type="number" label="Min" id="minimum-field" on:input={e => { minimum = Number(e.target.value);} } required></mwc-textfield>
+        <mwc-textfield style="width: 10%" type="number" label="Max" id="maximum-field"  on:input={e => { maximum = Number(e.target.value);} } required></mwc-textfield>          
       </div>
   
     </div>
