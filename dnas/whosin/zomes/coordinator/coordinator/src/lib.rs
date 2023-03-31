@@ -1,5 +1,7 @@
-pub mod coordination_to_spam_reporters;
+pub mod notification_recipient_to_notifiers;
 
+pub mod contact;
+pub mod coordination_to_spam_reporters;
 pub mod coordination_to_sponsors;
 pub mod viewer_to_coordinations;
 pub mod all_coordinations;

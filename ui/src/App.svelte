@@ -12,6 +12,8 @@
   import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
   import Instructions from './whosin/coordinator/Instructions.svelte';
   import MyCoordinations from './whosin/coordinator/MyCoordinations.svelte';
+  import CreateContact from './whosin/coordinator/CreateContact.svelte';
+  import ContactDetail from './whosin/coordinator/ContactDetail.svelte';
 
   // import {
   //   ProfilesStore,
@@ -141,6 +143,10 @@
     <!-- <profile-details></profile-details> -->
       <!-- <my-profile></my-profile> -->
     <!-- <div style="margin: 20px;"></div> -->
+
+    <CreateContact></CreateContact>
+    <!-- <ContactDetail></ContactDetail> -->
+
     {#if loading}
       <div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate />

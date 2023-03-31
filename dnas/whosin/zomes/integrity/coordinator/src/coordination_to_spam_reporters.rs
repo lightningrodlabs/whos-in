@@ -17,11 +17,7 @@ pub fn validate_create_link_coordination_to_spam_reporters(
             ),
         )?;
     if target_address != action.author.clone().into() {
-        return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do this".into(),
-            ),
-        );
+        return Ok(ValidateCallbackResult::Invalid("Only the agent can do this".into()));
     }
     Ok(ValidateCallbackResult::Valid)
 }
@@ -44,11 +40,7 @@ pub fn validate_delete_link_coordination_to_spam_reporters(
             ),
         )?;
     if target_address != action.author.clone().into() {
-        return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do this".into(),
-            ),
-        );
+        return Ok(ValidateCallbackResult::Invalid("Only the agent can do this".into()));
     }
     Ok(ValidateCallbackResult::Valid)
 }
@@ -58,7 +50,6 @@ pub fn validate_create_link_spam_reporter_to_coordinations(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    // Check the entry type for the given action hash
     let action_hash = ActionHash::from(target_address);
     let record = must_get_valid_record(action_hash)?;
     let _coordination: crate::Coordination = record
@@ -70,12 +61,9 @@ pub fn validate_create_link_spam_reporter_to_coordinations(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
-    // TODO: add the appropriate validation rules
     if base_address != action.author.clone().into() {
         return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do report spam".into(),
-            ),
+            ValidateCallbackResult::Invalid("Only the agent can do report spam".into()),
         );
     }
     Ok(ValidateCallbackResult::Valid)
@@ -87,7 +75,6 @@ pub fn validate_delete_link_spam_reporter_to_coordinations(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    // TODO: add the appropriate validation rules
     let action_hash = ActionHash::from(target_address);
     let record = must_get_valid_record(action_hash)?;
     let _coordination: crate::Coordination = record
@@ -99,7 +86,6 @@ pub fn validate_delete_link_spam_reporter_to_coordinations(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
-    // TODO: add the appropriate validation rules
     if base_address != action.author.clone().into() {
         return Ok(
             ValidateCallbackResult::Invalid(

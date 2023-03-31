@@ -36,6 +36,7 @@ export type CoordinatorSignal = {
 };
 
 export type EntryTypes =
+ | ({ type: 'Contact'; } & Contact)
  | ({ type: 'Coordrole'; } & Coordrole)
  | ({  type: 'Coordination'; } & Coordination);
 
@@ -65,5 +66,18 @@ export interface Coordrole {
   minimum: number;
 
   maximum: number;
+}
+
+
+
+
+export interface Contact { 
+  agent_pub_key: AgentPubKey;
+
+  text_number: string | null;
+
+  whatsapp_number: string | null;
+
+  email: string | null;
 }
 

@@ -1,6 +1,5 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddParticipantForCoordroleInput {
     coordrole_hash: ActionHash,
@@ -15,7 +14,6 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         None,
     )?;
     let coordination_hash = coordination_hash[0].target.clone();
-
     let sponsor_links = get_links(
         coordrole_hash.clone(),
         LinkTypes::CoordinationToSponsors,
@@ -27,7 +25,6 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             already_sponsored = true;
         }
     }
-
     if !already_sponsored {
         create_link(
             coordination_hash.clone(),
@@ -42,7 +39,6 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             (),
         )?;
     }
-
     let links = get_links(
         coordrole_hash.clone(),
         LinkTypes::CoordroleToParticipants,

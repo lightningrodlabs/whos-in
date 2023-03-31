@@ -47,3 +47,25 @@ export async function createCoordrole(cell: CallableCell, coordrole = undefined)
     });
 }
 
+
+
+export async function sampleContact(cell: CallableCell, partialContact = {}) {
+    return {
+        ...{
+	  agent_pub_key: (await fakeAgentPubKey()),
+	  text_number: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	  whatsapp_number: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	  email: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        },
+        ...partialContact
+    };
+}
+
+export async function createContact(cell: CallableCell, contact = undefined): Promise<Record> {
+    return cell.callZome({
+      zome_name: "coordinator",
+      fn_name: "create_contact",
+      payload: contact || await sampleContact(cell),
+    });
+}
+
