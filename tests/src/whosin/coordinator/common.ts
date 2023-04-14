@@ -69,3 +69,23 @@ export async function createContact(cell: CallableCell, contact = undefined): Pr
     });
 }
 
+
+
+export async function sampleTwilioCredentials(cell: CallableCell, partialTwilioCredentials = {}) {
+    return {
+        ...{
+	  account_sid: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	  auth_token: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        },
+        ...partialTwilioCredentials
+    };
+}
+
+export async function createTwilioCredentials(cell: CallableCell, twilioCredentials = undefined): Promise<Record> {
+    return cell.callZome({
+      zome_name: "coordinator",
+      fn_name: "create_twilio_credentials",
+      payload: twilioCredentials || await sampleTwilioCredentials(cell),
+    });
+}
+

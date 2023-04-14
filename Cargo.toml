@@ -18,6 +18,12 @@ path = "dnas/whosin/zomes/coordinator/coordinator"
 [workspace.dependencies.coordinator_integrity]
 path = "dnas/whosin/zomes/integrity/coordinator"
 
+[workspace.dependencies.notifications]
+path = "dnas/whosin/zomes/coordinator/notifications"
+
+[workspace.dependencies.notifications_integrity]
+path = "dnas/whosin/zomes/integrity/notifications"
+
 [workspace.dependencies.profiles]
 path = "dnas/whosin/zomes/coordinator/profiles"
 

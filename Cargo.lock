@@ -1144,6 +1144,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7843ec2de400bcbc6a6328c958dc38e5359da6e93e72e37bc5246bf1ae776389"
 
 [[package]]
+name = "notifications"
+version = "0.0.1"
+dependencies = [
+ "hdk",
+ "notifications_integrity",
+ "serde",
+]
+
+[[package]]
+name = "notifications_integrity"
+version = "0.0.1"
+dependencies = [
+ "hdi",
+ "serde",
+]
+
+[[package]]
 name = "num-integer"
 version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,13 +1,9 @@
-pub mod coordination_to_spam_reporters;
-pub mod coordination_to_sponsors;
-pub mod viewer_to_coordinations;
-pub mod all_coordinations;
-pub mod coordrole_to_participants;
-pub mod coordination_to_coordroles;
-pub mod coordrole;
-pub mod coordination;
+pub mod notificant_to_notifiers;
+
+pub mod twilio_credentials;
+pub mod contacts;
 use hdk::prelude::*;
-use coordinator_integrity::*;
+use notifications_integrity::*;
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
     Ok(InitCallbackResult::Pass)
@@ -15,6 +11,8 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum Signal {
+    LinkCreated { action: SignedActionHashed, link_type: LinkTypes },
+    LinkDeleted { action: SignedActionHashed, link_type: LinkTypes },
     EntryCreated { action: SignedActionHashed, app_entry: EntryTypes },
     EntryUpdated {
         action: SignedActionHashed,
@@ -22,8 +20,6 @@ pub enum Signal {
         original_app_entry: EntryTypes,
     },
     EntryDeleted { action: SignedActionHashed, original_app_entry: EntryTypes },
-    LinkCreated { action: SignedActionHashed, link_type: LinkTypes },
-    LinkDeleted { action: SignedActionHashed, link_type: LinkTypes },
 }
 #[hdk_extern(infallible)]
 pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
@@ -35,38 +31,6 @@ pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
 }
 fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
     match action.hashed.content.clone() {
-        Action::Create(_create) => {
-            if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
-                emit_signal(Signal::EntryCreated {
-                    action,
-                    app_entry,
-                })?;
-            }
-            Ok(())
-        }
-        Action::Update(update) => {
-            if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
-                if let Ok(Some(original_app_entry))
-                    = get_entry_for_action(&update.original_action_address) {
-                    emit_signal(Signal::EntryUpdated {
-                        action,
-                        app_entry,
-                        original_app_entry,
-                    })?;
-                }
-            }
-            Ok(())
-        }
-        Action::Delete(delete) => {
-            if let Ok(Some(original_app_entry))
-                = get_entry_for_action(&delete.deletes_address) {
-                emit_signal(Signal::EntryDeleted {
-                    action,
-                    original_app_entry,
-                })?;
-            }
-            Ok(())
-        }
         Action::CreateLink(create_link) => {
             if let Ok(Some(link_type))
                 = LinkTypes::from_type(create_link.zome_index, create_link.link_type) {
@@ -110,6 +74,38 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
                     );
                 }
             }
+        }
+        Action::Create(_create) => {
+            if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
+                emit_signal(Signal::EntryCreated {
+                    action,
+                    app_entry,
+                })?;
+            }
+            Ok(())
+        }
+        Action::Update(update) => {
+            if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
+                if let Ok(Some(original_app_entry))
+                    = get_entry_for_action(&update.original_action_address) {
+                    emit_signal(Signal::EntryUpdated {
+                        action,
+                        app_entry,
+                        original_app_entry,
+                    })?;
+                }
+            }
+            Ok(())
+        }
+        Action::Delete(delete) => {
+            if let Ok(Some(original_app_entry))
+                = get_entry_for_action(&delete.deletes_address) {
+                emit_signal(Signal::EntryDeleted {
+                    action,
+                    original_app_entry,
+                })?;
+            }
+            Ok(())
         }
         _ => Ok(()),
     }

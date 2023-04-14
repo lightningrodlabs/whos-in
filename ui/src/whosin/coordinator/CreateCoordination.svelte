@@ -11,7 +11,6 @@
   import { view, viewHash, navigate } from '../../store.js';
   
   import '@vaadin/date-time-picker/theme/material/vaadin-date-time-picker.js';
-      import CreateCoordrole from './CreateCoordrole.svelte';
   let client: AppAgentClient = (getContext(clientContext) as any).getClient();
   
   const dispatch = createEventDispatcher();
@@ -27,6 +26,7 @@
   let roleDescription: string | undefined;
   let minimum: number | undefined;
   let maximum: number | undefined;
+  let notifierVisibility = false;
   
   let errorSnackbar: Snackbar;
   
@@ -63,6 +63,26 @@
       errorSnackbar.labelText = `Error creating the coordination: ${e.data.data}`;
       errorSnackbar.show();
     }
+  }
+
+  async function claimNotifier() {
+    try {
+      const record: Record = await client.callZome({
+        cap_secret: null,
+        role_name: 'whosin',
+        zome_name: 'coordinator',
+        fn_name: 'claim_notifier',
+        payload: null,
+      });
+
+    } catch (e) {
+      errorSnackbar.labelText = `Error creating the coordination: ${e.data.data}`;
+      errorSnackbar.show();
+    }
+  }
+
+  async function notifierPopup() {
+    notifierVisibility = true;
   }
   
   async function addCoordrole(roleTitle, roleDescription, min, max) {
@@ -169,3 +189,4 @@
     ></mwc-button>
   </div>
   
+  <!-- <button on:click={() => {addToNotifiers()}}>.</button> -->

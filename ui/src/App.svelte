@@ -12,8 +12,10 @@
   import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
   import Instructions from './whosin/coordinator/Instructions.svelte';
   import MyCoordinations from './whosin/coordinator/MyCoordinations.svelte';
-  import CreateContact from './whosin/coordinator/CreateContact.svelte';
-  import ContactDetail from './whosin/coordinator/ContactDetail.svelte';
+  import CreateContacts from './whosin/notifications/CreateContacts.svelte';
+  import ContactsDetail from './whosin/notifications/ContactsDetail.svelte';
+  import TwilioCredentialsDetail from './whosin/notifications/TwilioCredentialsDetail.svelte';
+  import CreateTwilioCredentials from './whosin/notifications/CreateTwilioCredentials.svelte';
 
   // import {
   //   ProfilesStore,
@@ -144,7 +146,7 @@
       <!-- <my-profile></my-profile> -->
     <!-- <div style="margin: 20px;"></div> -->
 
-    <CreateContact></CreateContact>
+    <!-- <CreateContact></CreateContact> -->
     <!-- <ContactDetail></ContactDetail> -->
 
     {#if loading}
@@ -162,6 +164,8 @@
       <MyCoordinations></MyCoordinations>
     {:else if currentView == "all-coordinations"}
       <AllCoordinations></AllCoordinations>
+    {:else if currentView == "notifier"}
+      <CreateTwilioCredentials></CreateTwilioCredentials>
     {:else}
       <!-- <CreateCoordination></CreateCoordination> -->
       <!-- <profile-detail /> -->

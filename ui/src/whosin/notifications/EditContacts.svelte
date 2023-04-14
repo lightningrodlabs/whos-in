@@ -1,0 +1,102 @@
+<script lang="ts">
+import { createEventDispatcher, getContext, onMount } from 'svelte';
+import type { AppAgentClient, Record, EntryHash, AgentPubKey, DnaHash, ActionHash } from '@holochain/client';
+import { decode } from '@msgpack/msgpack';
+import { clientContext } from '../../contexts';
+import type { Contacts } from './types';
+import '@material/mwc-button';
+import '@material/mwc-snackbar';
+import type { Snackbar } from '@material/mwc-snackbar';
+import '@material/mwc-textarea';
+
+let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+
+const dispatch = createEventDispatcher();
+
+export let originalContactsHash!: ActionHash;
+
+export let currentRecord!: Record;
+let currentContacts: Contacts = decode((currentRecord.entry as any).Present.entry) as Contacts;
+
+let textNumber: string | undefined = currentContacts.text_number;
+let whatsappNumber: string | undefined = currentContacts.whatsapp_number;
+let emailAddress: string | undefined = currentContacts.email_address;
+
+let errorSnackbar: Snackbar;
+
+$: textNumber, whatsappNumber, emailAddress;
+$: isContactsValid = true;
+
+onMount(() => {
+  if (currentRecord === undefined) {
+    throw new Error(`The currentRecord input is required for the EditContacts element`);
+  }
+  if (originalContactsHash === undefined) {
+    throw new Error(`The originalContactsHash input is required for the EditContacts element`);
+  }
+});
+
+async function updateContacts() {
+
+  const contacts: Contacts = { 
+    text_number: textNumber,
+    whatsapp_number: whatsappNumber,
+    email_address: emailAddress,
+    agent_pub_key: currentContacts.agent_pub_key,
+  };
+
+  try {
+    const updateRecord: Record = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'notifications',
+      fn_name: 'update_contacts',
+      payload: {
+        original_contacts_hash: originalContactsHash,
+        previous_contacts_hash: currentRecord.signed_action.hashed.hash,
+        updated_contacts: contacts
+      }
+    });
+  
+    dispatch('contacts-updated', { actionHash: updateRecord.signed_action.hashed.hash });
+  } catch (e) {
+    errorSnackbar.labelText = `Error updating the contacts: ${e.data.data}`;
+    errorSnackbar.show();
+  }
+}
+
+</script>
+<mwc-snackbar bind:this={errorSnackbar} leading>
+</mwc-snackbar>
+<div style="display: flex; flex-direction: column">
+  <span style="font-size: 18px">Edit Contacts</span>
+  
+  <div style="margin-bottom: 16px">
+    <mwc-textarea outlined label="Text Number" value={ textNumber } on:input={e => { textNumber = e.target.value;} } ></mwc-textarea>    
+  </div>
+
+  <div style="margin-bottom: 16px">
+    <mwc-textarea outlined label="Whatsapp Number" value={ whatsappNumber } on:input={e => { whatsappNumber = e.target.value;} } ></mwc-textarea>    
+  </div>
+
+  <div style="margin-bottom: 16px">
+    <mwc-textarea outlined label="Email Address" value={ emailAddress } on:input={e => { emailAddress = e.target.value;} } ></mwc-textarea>    
+  </div>
+
+
+  <div style="display: flex; flex-direction: row">
+    <mwc-button
+      outlined
+      label="Cancel"
+      on:click={() => dispatch('edit-canceled')}
+      style="flex: 1; margin-right: 16px"
+    ></mwc-button>
+    <mwc-button 
+      raised
+      label="Save"
+      disabled={!isContactsValid}
+      on:click={() => updateContacts()}
+      style="flex: 1;"
+    ></mwc-button>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+[package]
+name = "notifications"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "notifications"
+
+[dependencies]
+hdk = { workspace = true }
+
+serde = { workspace = true }
+
+notifications_integrity = { workspace = true } 

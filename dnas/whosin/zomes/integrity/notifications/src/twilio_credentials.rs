@@ -1,34 +1,33 @@
 use hdi::prelude::*;
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
-pub struct Contact {
-    pub agent_pub_key: AgentPubKey,
-    pub text_number: Option<String>,
-    pub whatsapp_number: Option<String>,
-    pub email: Option<String>,
+pub struct TwilioCredentials {
+    pub account_sid: String,
+    pub auth_token: String,
+    pub from_number: String,
 }
-pub fn validate_create_contact(
+pub fn validate_create_twilio_credentials(
     _action: EntryCreationAction,
-    _contact: Contact,
+    _twilio_credentials: TwilioCredentials,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
-pub fn validate_update_contact(
+pub fn validate_update_twilio_credentials(
     _action: Update,
-    _contact: Contact,
+    _twilio_credentials: TwilioCredentials,
     _original_action: EntryCreationAction,
-    _original_contact: Contact,
+    _original_twilio_credentials: TwilioCredentials,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
-pub fn validate_delete_contact(
+pub fn validate_delete_twilio_credentials(
     _action: Delete,
     _original_action: EntryCreationAction,
-    _original_contact: Contact,
+    _original_twilio_credentials: TwilioCredentials,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
-pub fn validate_create_link_contact_updates(
+pub fn validate_create_link_twilio_credentials_updates(
     _action: CreateLink,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
@@ -36,7 +35,7 @@ pub fn validate_create_link_contact_updates(
 ) -> ExternResult<ValidateCallbackResult> {
     let action_hash = ActionHash::from(base_address);
     let record = must_get_valid_record(action_hash)?;
-    let _contact: crate::Contact = record
+    let _twilio_credentials: crate::TwilioCredentials = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
@@ -47,7 +46,7 @@ pub fn validate_create_link_contact_updates(
         )?;
     let action_hash = ActionHash::from(target_address);
     let record = must_get_valid_record(action_hash)?;
-    let _contact: crate::Contact = record
+    let _twilio_credentials: crate::TwilioCredentials = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
@@ -58,7 +57,7 @@ pub fn validate_create_link_contact_updates(
         )?;
     Ok(ValidateCallbackResult::Valid)
 }
-pub fn validate_delete_link_contact_updates(
+pub fn validate_delete_link_twilio_credentials_updates(
     _action: DeleteLink,
     _original_action: CreateLink,
     _base: AnyLinkableHash,
@@ -67,7 +66,7 @@ pub fn validate_delete_link_contact_updates(
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(
         ValidateCallbackResult::Invalid(
-            String::from("ContactUpdates links cannot be deleted"),
+            String::from("TwilioCredentialsUpdates links cannot be deleted"),
         ),
     )
 }

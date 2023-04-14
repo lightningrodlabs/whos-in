@@ -1,7 +1,3 @@
-pub mod notification_recipient_to_notifiers;
-pub use notification_recipient_to_notifiers::*;
-pub mod contact;
-pub use contact::*;
 pub mod coordination_to_spam_reporters;
 pub use coordination_to_spam_reporters::*;
 pub mod coordination_to_sponsors;
@@ -24,8 +20,6 @@ use hdi::prelude::*;
 pub enum EntryTypes {
     Coordination(Coordination),
     Coordrole(Coordrole),
-    // #[entry_def(name = "contact", visibility = "private")]
-    Contact(Contact),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
@@ -40,9 +34,7 @@ pub enum LinkTypes {
     SponsorToCoordinations,
     CoordinationToSpamReporters,
     SpamReporterToCoordinations,
-    ContactUpdates,
-    NotificationRecipientToNotifiers,
-    NotifierToNotificationRecipients,
+    // AnchorToNotifiers,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -75,12 +67,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 coordrole,
                             )
                         }
-                        EntryTypes::Contact(contact) => {
-                            validate_create_contact(
-                                EntryCreationAction::Create(action),
-                                contact,
-                            )
-                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -97,12 +83,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 coordrole,
                             )
                         }
-                        EntryTypes::Contact(contact) => {
-                            validate_create_contact(
-                                EntryCreationAction::Update(action),
-                                contact,
-                            )
-                        }
                     }
                 }
                 _ => Ok(ValidateCallbackResult::Valid),
@@ -117,17 +97,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     action,
                 } => {
                     match (app_entry, original_app_entry) {
-                        (
-                            EntryTypes::Contact(contact),
-                            EntryTypes::Contact(original_contact),
-                        ) => {
-                            validate_update_contact(
-                                action,
-                                contact,
-                                original_action,
-                                original_contact,
-                            )
-                        }
                         (
                             EntryTypes::Coordrole(coordrole),
                             EntryTypes::Coordrole(original_coordrole),
@@ -176,9 +145,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         EntryTypes::Coordrole(coordrole) => {
                             validate_delete_coordrole(action, original_action, coordrole)
-                        }
-                        EntryTypes::Contact(contact) => {
-                            validate_delete_contact(action, original_action, contact)
                         }
                     }
                 }
@@ -267,30 +233,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::SpamReporterToCoordinations => {
                     validate_create_link_spam_reporter_to_coordinations(
-                        action,
-                        base_address,
-                        target_address,
-                        tag,
-                    )
-                }
-                LinkTypes::ContactUpdates => {
-                    validate_create_link_contact_updates(
-                        action,
-                        base_address,
-                        target_address,
-                        tag,
-                    )
-                }
-                LinkTypes::NotificationRecipientToNotifiers => {
-                    validate_create_link_notification_recipient_to_notifiers(
-                        action,
-                        base_address,
-                        target_address,
-                        tag,
-                    )
-                }
-                LinkTypes::NotifierToNotificationRecipients => {
-                    validate_create_link_notifier_to_notification_recipients(
                         action,
                         base_address,
                         target_address,
@@ -398,33 +340,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
-                LinkTypes::ContactUpdates => {
-                    validate_delete_link_contact_updates(
-                        action,
-                        original_action,
-                        base_address,
-                        target_address,
-                        tag,
-                    )
-                }
-                LinkTypes::NotificationRecipientToNotifiers => {
-                    validate_delete_link_notification_recipient_to_notifiers(
-                        action,
-                        original_action,
-                        base_address,
-                        target_address,
-                        tag,
-                    )
-                }
-                LinkTypes::NotifierToNotificationRecipients => {
-                    validate_delete_link_notifier_to_notification_recipients(
-                        action,
-                        original_action,
-                        base_address,
-                        target_address,
-                        tag,
-                    )
-                }
             }
         }
         OpType::StoreRecord(store_record) => {
@@ -441,12 +356,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_coordrole(
                                 EntryCreationAction::Create(action),
                                 coordrole,
-                            )
-                        }
-                        EntryTypes::Contact(contact) => {
-                            validate_create_contact(
-                                EntryCreationAction::Create(action),
-                                contact,
                             )
                         }
                     }
@@ -534,37 +443,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
-                        EntryTypes::Contact(contact) => {
-                            let result = validate_create_contact(
-                                EntryCreationAction::Update(action.clone()),
-                                contact.clone(),
-                            )?;
-                            if let ValidateCallbackResult::Valid = result {
-                                let original_contact: Option<Contact> = original_record
-                                    .entry()
-                                    .to_app_option()
-                                    .map_err(|e| wasm_error!(e))?;
-                                let original_contact = match original_contact {
-                                    Some(contact) => contact,
-                                    None => {
-                                        return Ok(
-                                            ValidateCallbackResult::Invalid(
-                                                "The updated entry type must be the same as the original entry type"
-                                                    .to_string(),
-                                            ),
-                                        );
-                                    }
-                                };
-                                validate_update_contact(
-                                    action,
-                                    contact,
-                                    original_action,
-                                    original_contact,
-                                )
-                            } else {
-                                Ok(result)
-                            }
-                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -631,13 +509,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 original_action,
                                 original_coordrole,
-                            )
-                        }
-                        EntryTypes::Contact(original_contact) => {
-                            validate_delete_contact(
-                                action,
-                                original_action,
-                                original_contact,
                             )
                         }
                     }
@@ -724,30 +595,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::SpamReporterToCoordinations => {
                             validate_create_link_spam_reporter_to_coordinations(
-                                action,
-                                base_address,
-                                target_address,
-                                tag,
-                            )
-                        }
-                        LinkTypes::ContactUpdates => {
-                            validate_create_link_contact_updates(
-                                action,
-                                base_address,
-                                target_address,
-                                tag,
-                            )
-                        }
-                        LinkTypes::NotificationRecipientToNotifiers => {
-                            validate_create_link_notification_recipient_to_notifiers(
-                                action,
-                                base_address,
-                                target_address,
-                                tag,
-                            )
-                        }
-                        LinkTypes::NotifierToNotificationRecipients => {
-                            validate_create_link_notifier_to_notification_recipients(
                                 action,
                                 base_address,
                                 target_address,
@@ -862,33 +709,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::SpamReporterToCoordinations => {
                             validate_delete_link_spam_reporter_to_coordinations(
-                                action,
-                                create_link.clone(),
-                                base_address,
-                                create_link.target_address,
-                                create_link.tag,
-                            )
-                        }
-                        LinkTypes::ContactUpdates => {
-                            validate_delete_link_contact_updates(
-                                action,
-                                create_link.clone(),
-                                base_address,
-                                create_link.target_address,
-                                create_link.tag,
-                            )
-                        }
-                        LinkTypes::NotificationRecipientToNotifiers => {
-                            validate_delete_link_notification_recipient_to_notifiers(
-                                action,
-                                create_link.clone(),
-                                base_address,
-                                create_link.target_address,
-                                create_link.tag,
-                            )
-                        }
-                        LinkTypes::NotifierToNotificationRecipients => {
-                            validate_delete_link_notifier_to_notification_recipients(
                                 action,
                                 create_link.clone(),
                                 base_address,

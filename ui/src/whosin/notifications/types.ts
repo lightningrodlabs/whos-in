@@ -12,7 +12,7 @@ import type {
   DeleteLink
 } from '@holochain/client';
 
-export type CoordinatorSignal = {
+export type NotificationsSignal = {
   type: 'EntryCreated';
   action: SignedActionHashed<Create>;
   app_entry: EntryTypes;
@@ -37,49 +37,18 @@ export type CoordinatorSignal = {
 
 export type EntryTypes =
  | ({ type: 'TwilioCredentials'; } & TwilioCredentials)
- | ({ type: 'Contact'; } & Contact)
- | ({ type: 'Coordrole'; } & Coordrole)
- | ({  type: 'Coordination'; } & Coordination);
+ | ({  type: 'Contacts'; } & Contacts);
 
 
 
-export interface Coordination { 
-  title: string;
-
-  description: string;
-
-  happening_date: number | null;
-
-  signup_deadline: number | null;
-
-  reminder_date: number | null;
-
-  coordroles: Array<Coordrole>;
-}
-
-
-
-export interface Coordrole { 
-  title: string;
-
-  description: string;
-
-  minimum: number;
-
-  maximum: number;
-}
-
-
-
-
-export interface Contact { 
+export interface Contacts { 
   agent_pub_key: AgentPubKey;
 
-  text_number: string | null;
+  text_number: string | undefined;
 
-  whatsapp_number: string | null;
+  whatsapp_number: string | undefined;
 
-  email: string | null;
+  email_address: string | undefined;
 }
 
 
@@ -89,5 +58,7 @@ export interface TwilioCredentials {
   account_sid: string;
 
   auth_token: string;
+
+  from_number: string;
 }
 
