@@ -21,20 +21,6 @@
         local_notifications = value;
     });
 
-    async function sendText() {
-        fetch('https://api.twilio.com/2010-04-01/Accounts/AC1f78e545a68bbf0795eede3e01cc2c71/Messages.json', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Basic ' + btoa('AC1f78e545a68bbf0795eede3e01cc2c71:000ab3f1243f5cbcbe4b024b86d128f4')
-            },
-            body: new URLSearchParams({
-                'To': '+15186101450',
-                'MessagingServiceSid': 'MG7e68be408e69c85ccc5cc7d36f39a99a',
-                'Body': 'test hi 3'
-            })
-        });
-    }
-
     async function goToCoordination(coordinationHash, seen) {
         if (!seen) {
             try {

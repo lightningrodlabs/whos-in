@@ -4,16 +4,16 @@ import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
 import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
-import type { Contact } from './types';
+import type { SentNotification } from './types';
 import '@material/mwc-circular-progress';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import '@material/mwc-icon-button';
-import EditContact from './EditContact.svelte'; 
+import EditSentNotification from './EditSentNotification.svelte'; 
 
 const dispatch = createEventDispatcher();
 
-export let contactHash: ActionHash;
+export let sentNotificationHash: ActionHash;
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
@@ -21,37 +21,37 @@ let loading = true;
 let error: any = undefined;
 
 let record: Record | undefined;
-let contact: Contact | undefined;
+let sentNotification: SentNotification | undefined;
 
 let editing = false;
 
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, record, contact;
+$: editing,  error, loading, record, sentNotification;
 
 onMount(async () => {
-  if (contactHash === undefined) {
-    throw new Error(`The contactHash input is required for the ContactDetail element`);
+  if (sentNotificationHash === undefined) {
+    throw new Error(`The sentNotificationHash input is required for the SentNotificationDetail element`);
   }
-  await fetchContact();
+  await fetchSentNotification();
 });
 
-async function fetchContact() {
+async function fetchSentNotification() {
   loading = true;
   error = undefined;
   record = undefined;
-  contact = undefined;
+  sentNotification = undefined;
   
   try {
     record = await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
-      zome_name: 'coordinator',
-      fn_name: 'get_contact',
-      payload: contactHash,
+      zome_name: 'notifications',
+      fn_name: 'get_sent_notification',
+      payload: sentNotificationHash,
     });
     if (record) {
-      contact = decode((record.entry as any).Present.entry) as Contact;
+      sentNotification = decode((record.entry as any).Present.entry) as SentNotification;
     }
   } catch (e) {
     error = e;
@@ -60,18 +60,18 @@ async function fetchContact() {
   loading = false;
 }
 
-async function deleteContact() {
+async function deleteSentNotification() {
   try {
     await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
-      zome_name: 'coordinator',
-      fn_name: 'delete_contact',
-      payload: contactHash,
+      zome_name: 'notifications',
+      fn_name: 'delete_sent_notification',
+      payload: sentNotificationHash,
     });
-    dispatch('contact-deleted', { contactHash: contactHash });
+    dispatch('sent-notification-deleted', { sentNotificationHash: sentNotificationHash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the contact: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the sent notification: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
@@ -85,24 +85,24 @@ async function deleteContact() {
   <mwc-circular-progress indeterminate></mwc-circular-progress>
 </div>
 {:else if error}
-<span>Error fetching the contact: {error.data.data}</span>
+<span>Error fetching the sent notification: {error.data.data}</span>
 {:else if editing}
-<EditContact
-  originalContactHash={ contactHash}
+<EditSentNotification
+  originalSentNotificationHash={ sentNotificationHash}
   currentRecord={record}
-  on:contact-updated={async () => {
+  on:sent-notification-updated={async () => {
     editing = false;
-    await fetchContact()
+    await fetchSentNotification()
   } }
   on:edit-canceled={() => { editing = false; } }
-></EditContact>
+></EditSentNotification>
 {:else}
 
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
     <mwc-icon-button style="margin-left: 8px" icon="edit" on:click={() => { editing = true; } }></mwc-icon-button>
-    <mwc-icon-button style="margin-left: 8px" icon="delete" on:click={() => deleteContact()}></mwc-icon-button>
+    <mwc-icon-button style="margin-left: 8px" icon="delete" on:click={() => deleteSentNotification()}></mwc-icon-button>
   </div>
 
 </div>

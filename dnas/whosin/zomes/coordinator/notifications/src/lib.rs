@@ -1,7 +1,7 @@
+pub mod sent_notification;
+pub mod contact;
 pub mod notificant_to_notifiers;
-
 pub mod twilio_credentials;
-pub mod contacts;
 use hdk::prelude::*;
 use notifications_integrity::*;
 #[hdk_extern]
@@ -20,6 +20,84 @@ pub enum Signal {
         original_app_entry: EntryTypes,
     },
     EntryDeleted { action: SignedActionHashed, original_app_entry: EntryTypes },
+}
+#[hdk_extern]
+pub fn handle_notification_tip(data: AnyLinkableHash) -> ExternResult<()> {
+    emit_signal(data)?;
+    Ok(())
+}
+#[hdk_extern]
+pub fn send_notification_tip(data: AnyLinkableHash) -> ExternResult<()> {
+    let path = Path::from(format!("all_notifiers"));
+    let typed_path = path.typed(LinkTypes::AnchorToNotifiers)?;
+    typed_path.ensure()?;
+    let links = get_links(
+        typed_path.path_entry_hash()?,
+        LinkTypes::AnchorToNotifiers,
+        None,
+    )?;
+    let agents: Vec<AgentPubKey> = links
+        .into_iter()
+        .map(|link| AgentPubKey::from(EntryHash::from(link.target)))
+        .collect();
+    let notifier = agents[0].clone();
+    let zome_call_response = call_remote(
+        notifier.clone(),
+        "notifications",
+        FunctionName(String::from("handle_notification_tip")),
+        None,
+        data,
+    )?;
+    match zome_call_response {
+        ZomeCallResponse::Ok(result) => {
+            let me: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+            create_link(me, notifier, LinkTypes::NotificantToNotifiers, ())?;
+            Ok(())
+        }
+        ZomeCallResponse::NetworkError(err) => {
+            Err(
+                wasm_error!(
+                    WasmErrorInner::Guest(format!("There was a network error: {:?}",
+                    err))
+                ),
+            )
+        }
+        _ => {
+            Err(
+                wasm_error!(WasmErrorInner::Guest("Failed to handle remote call".into())),
+            )
+        }
+    }
+}
+#[hdk_extern]
+pub fn claim_notifier(_: ()) -> ExternResult<()> {
+    let path = Path::from(format!("all_notifiers"));
+    let typed_path = path.typed(LinkTypes::AnchorToNotifiers)?;
+    typed_path.ensure()?;
+    let my_agent_pub_key: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    create_link(
+        typed_path.path_entry_hash()?,
+        my_agent_pub_key,
+        LinkTypes::AnchorToNotifiers,
+        (),
+    )?;
+    Ok(())
+}
+#[hdk_extern]
+pub fn find_a_notifier(_: ()) -> ExternResult<AgentPubKey> {
+    let path = Path::from(format!("all_notifiers"));
+    let typed_path = path.typed(LinkTypes::AnchorToNotifiers)?;
+    typed_path.ensure()?;
+    let links = get_links(
+        typed_path.path_entry_hash()?,
+        LinkTypes::AnchorToNotifiers,
+        None,
+    )?;
+    let agents: Vec<AgentPubKey> = links
+        .into_iter()
+        .map(|link| AgentPubKey::from(EntryHash::from(link.target)))
+        .collect();
+    Ok(agents[0].clone())
 }
 #[hdk_extern(infallible)]
 pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {

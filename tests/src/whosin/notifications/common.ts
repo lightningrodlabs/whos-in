@@ -44,3 +44,44 @@ export async function createTwilioCredentials(cell: CallableCell, twilioCredenti
     });
 }
 
+
+
+export async function sampleContact(cell: CallableCell, partialContact = {}) {
+    return {
+        ...{
+	  agent_pub_key: (await fakeAgentPubKey()),
+	  text_number: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	  whatsapp_number: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	  email_address: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        },
+        ...partialContact
+    };
+}
+
+export async function createContact(cell: CallableCell, contact = undefined): Promise<Record> {
+    return cell.callZome({
+      zome_name: "notifications",
+      fn_name: "create_contact",
+      payload: contact || await sampleContact(cell),
+    });
+}
+
+
+
+export async function sampleSentNotification(cell: CallableCell, partialSentNotification = {}) {
+    return {
+        ...{
+	  unique_data: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        },
+        ...partialSentNotification
+    };
+}
+
+export async function createSentNotification(cell: CallableCell, sentNotification = undefined): Promise<Record> {
+    return cell.callZome({
+      zome_name: "notifications",
+      fn_name: "create_sent_notification",
+      payload: sentNotification || await sampleSentNotification(cell),
+    });
+}
+

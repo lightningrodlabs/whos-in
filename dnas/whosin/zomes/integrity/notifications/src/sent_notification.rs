@@ -1,42 +1,40 @@
 use hdi::prelude::*;
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
-pub struct Contacts {
-    pub agent_pub_key: AgentPubKey,
-    pub text_number: Option<String>,
-    pub whatsapp_number: Option<String>,
-    pub email_address: Option<String>,
+pub struct SentNotification {
+    pub unique_data: String,
 }
-pub fn validate_create_contacts(
+pub fn validate_create_sent_notification(
     _action: EntryCreationAction,
-    _contacts: Contacts,
+    _sent_notification: SentNotification,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
-pub fn validate_update_contacts(
+pub fn validate_update_sent_notification(
     _action: Update,
-    _contacts: Contacts,
+    _sent_notification: SentNotification,
     _original_action: EntryCreationAction,
-    _original_contacts: Contacts,
+    _original_sent_notification: SentNotification,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
-pub fn validate_delete_contacts(
+pub fn validate_delete_sent_notification(
     _action: Delete,
     _original_action: EntryCreationAction,
-    _original_contacts: Contacts,
+    _original_sent_notification: SentNotification,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
-pub fn validate_create_link_contacts_updates(
+pub fn validate_create_link_sent_notification_updates(
     _action: CreateLink,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
+    // Check the entry type for the given action hash
     let action_hash = ActionHash::from(base_address);
     let record = must_get_valid_record(action_hash)?;
-    let _contacts: crate::Contacts = record
+    let _sent_notification: crate::SentNotification = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
@@ -45,9 +43,10 @@ pub fn validate_create_link_contacts_updates(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
+    // Check the entry type for the given action hash
     let action_hash = ActionHash::from(target_address);
     let record = must_get_valid_record(action_hash)?;
-    let _contacts: crate::Contacts = record
+    let _sent_notification: crate::SentNotification = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
@@ -56,9 +55,10 @@ pub fn validate_create_link_contacts_updates(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
+    // TODO: add the appropriate validation rules
     Ok(ValidateCallbackResult::Valid)
 }
-pub fn validate_delete_link_contacts_updates(
+pub fn validate_delete_link_sent_notification_updates(
     _action: DeleteLink,
     _original_action: CreateLink,
     _base: AnyLinkableHash,
@@ -67,7 +67,7 @@ pub fn validate_delete_link_contacts_updates(
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(
         ValidateCallbackResult::Invalid(
-            String::from("ContactsUpdates links cannot be deleted"),
+            String::from("SentNotificationUpdates links cannot be deleted"),
         ),
     )
 }

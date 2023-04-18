@@ -36,6 +36,8 @@ export type NotificationsSignal = {
 };
 
 export type EntryTypes =
+ | ({ type: 'SentNotification'; } & SentNotification)
+ | ({ type: 'Contact'; } & Contact)
  | ({ type: 'TwilioCredentials'; } & TwilioCredentials)
  | ({  type: 'Contacts'; } & Contacts);
 
@@ -60,5 +62,25 @@ export interface TwilioCredentials {
   auth_token: string;
 
   from_number: string;
+}
+
+
+
+
+export interface Contact { 
+  agent_pub_key: AgentPubKey;
+
+  text_number: string | undefined;
+
+  whatsapp_number: string | undefined;
+
+  email_address: string | undefined;
+}
+
+
+
+
+export interface SentNotification { 
+  unique_data: string;
 }
 

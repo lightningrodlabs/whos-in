@@ -4,16 +4,16 @@ import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
 import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
-import type { Contacts } from './types';
+import type { Contact } from './types';
 import '@material/mwc-circular-progress';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import '@material/mwc-icon-button';
-import EditContacts from './EditContacts.svelte'; 
+import EditContact from './EditContact.svelte'; 
 
 const dispatch = createEventDispatcher();
 
-export let contactsHash: ActionHash;
+export let contactHash: ActionHash;
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
@@ -21,37 +21,37 @@ let loading = true;
 let error: any = undefined;
 
 let record: Record | undefined;
-let contacts: Contacts | undefined;
+let contact: Contact | undefined;
 
 let editing = false;
 
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, record, contacts;
+$: editing,  error, loading, record, contact;
 
 onMount(async () => {
-  if (contactsHash === undefined) {
-    throw new Error(`The contactsHash input is required for the ContactsDetail element`);
+  if (contactHash === undefined) {
+    throw new Error(`The contactHash input is required for the ContactDetail element`);
   }
-  await fetchContacts();
+  await fetchContact();
 });
 
-async function fetchContacts() {
+async function fetchContact() {
   loading = true;
   error = undefined;
   record = undefined;
-  contacts = undefined;
+  contact = undefined;
   
   try {
     record = await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
       zome_name: 'notifications',
-      fn_name: 'get_contacts',
-      payload: contactsHash,
+      fn_name: 'get_contact',
+      payload: contactHash,
     });
     if (record) {
-      contacts = decode((record.entry as any).Present.entry) as Contacts;
+      contact = decode((record.entry as any).Present.entry) as Contact;
     }
   } catch (e) {
     error = e;
@@ -60,18 +60,18 @@ async function fetchContacts() {
   loading = false;
 }
 
-async function deleteContacts() {
+async function deleteContact() {
   try {
     await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
       zome_name: 'notifications',
-      fn_name: 'delete_contacts',
-      payload: contactsHash,
+      fn_name: 'delete_contact',
+      payload: contactHash,
     });
-    dispatch('contacts-deleted', { contactsHash: contactsHash });
+    dispatch('contact-deleted', { contactHash: contactHash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the contacts: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the contact: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
@@ -85,39 +85,39 @@ async function deleteContacts() {
   <mwc-circular-progress indeterminate></mwc-circular-progress>
 </div>
 {:else if error}
-<span>Error fetching the contacts: {error.data.data}</span>
+<span>Error fetching the contact: {error.data.data}</span>
 {:else if editing}
-<EditContacts
-  originalContactsHash={ contactsHash}
+<EditContact
+  originalContactHash={ contactHash}
   currentRecord={record}
-  on:contacts-updated={async () => {
+  on:contact-updated={async () => {
     editing = false;
-    await fetchContacts()
+    await fetchContact()
   } }
   on:edit-canceled={() => { editing = false; } }
-></EditContacts>
+></EditContact>
 {:else}
 
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
     <mwc-icon-button style="margin-left: 8px" icon="edit" on:click={() => { editing = true; } }></mwc-icon-button>
-    <mwc-icon-button style="margin-left: 8px" icon="delete" on:click={() => deleteContacts()}></mwc-icon-button>
+    <mwc-icon-button style="margin-left: 8px" icon="delete" on:click={() => deleteContact()}></mwc-icon-button>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Text Number:</strong></span>
-    <span style="white-space: pre-line">{ contacts.text_number }</span>
+    <span style="white-space: pre-line">{ contact.text_number }</span>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Whatsapp Number:</strong></span>
-    <span style="white-space: pre-line">{ contacts.whatsapp_number }</span>
+    <span style="white-space: pre-line">{ contact.whatsapp_number }</span>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Email Address:</strong></span>
-    <span style="white-space: pre-line">{ contacts.email_address }</span>
+    <span style="white-space: pre-line">{ contact.email_address }</span>
   </div>
 
 </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount, setContext } from 'svelte';
-  import type { ActionHash, AppAgentClient } from '@holochain/client';
+  import { createEventDispatcher, onMount, setContext } from 'svelte';
+  import type { ActionHash, AgentPubKey, AppAgentClient, AppSignalCb } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@material/mwc-circular-progress';
   import { view, viewHash, navigate } from './store.js';
@@ -12,10 +12,9 @@
   import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
   import Instructions from './whosin/coordinator/Instructions.svelte';
   import MyCoordinations from './whosin/coordinator/MyCoordinations.svelte';
-  import CreateContacts from './whosin/notifications/CreateContacts.svelte';
-  import ContactsDetail from './whosin/notifications/ContactsDetail.svelte';
-  import TwilioCredentialsDetail from './whosin/notifications/TwilioCredentialsDetail.svelte';
   import CreateTwilioCredentials from './whosin/notifications/CreateTwilioCredentials.svelte';
+  import CreateContact from './whosin/notifications/CreateContact.svelte';
+  import NotificationsHandler from './whosin/notifications/NotificationsHandler.svelte';
 
   // import {
   //   ProfilesStore,
@@ -30,13 +29,16 @@
   //   ListProfiles,
   // } from '@holochain-open-dev/profiles';
   
+  const dispatch = createEventDispatcher();
+
   let client: AppAgentClient | undefined;
   let loading = true;
   let store = undefined;
   let currentView: String;
   let currentHash: Uint8Array;
+  let notifier: AgentPubKey | undefined;
 
-  $: client, loading, store;
+  $: client, loading, store, notifier;
 
   // if (!customElements.get('profiles-context')){
   //   customElements.define('profiles-context', ProfilesContext)
@@ -89,10 +91,26 @@
       loading = false;
   }
 
+  async function checkForNotifier() {
+    try {
+        const record = await client
+        .callZome({
+            cap_secret: null,
+            role_name: 'whosin',
+            zome_name: 'notifications',
+            fn_name: 'get_my_notifier',
+            payload: null,
+        });
+        notifier = record;
+    } catch (e) {
+        console.log(e)
+    }
+  }
+
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     client = await AppAgentWebsocket.connect('', 'dcan');
-
+    await checkForNotifier();
     console.log(currentView)
 
     if (currentView == "home") {
@@ -120,11 +138,30 @@
   viewHash.subscribe(value => {
     currentHash = value;
   });
+
+  async function alert_ui() {
+    try {
+        const record = await client
+        .callZome({
+            cap_secret: null,
+            role_name: 'whosin',
+            zome_name: 'notifications',
+            fn_name: 'notification_tip',
+            payload: "client.myPubKey",
+        });
+        notifier = record;
+    } catch (e) {
+        console.log(e.data.data)
+    }
+	}
+
 </script>
 
 {#if client}
-<!-- {client.myPubKey} -->
+<NotificationsHandler></NotificationsHandler>
 <main>
+  <!-- <button on:click={() => alert_ui()}>alert ui</button> -->
+  <!-- <TwilioCredentialsDetail></TwilioCredentialsDetail> -->
   <!-- <profiles-context store={store}> -->
     <!-- <agent-avatar /> -->
 
@@ -149,6 +186,10 @@
     <!-- <CreateContact></CreateContact> -->
     <!-- <ContactDetail></ContactDetail> -->
 
+    {#if !loading && !notifier && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
+      <button on:click={() => navigate('notificant')}>Add your contact information</button>
+    {/if}
+
     {#if loading}
       <div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate />
@@ -166,6 +207,8 @@
       <AllCoordinations></AllCoordinations>
     {:else if currentView == "notifier"}
       <CreateTwilioCredentials></CreateTwilioCredentials>
+    {:else if currentView == "notificant"}
+      <CreateContact></CreateContact>
     {:else}
       <!-- <CreateCoordination></CreateCoordination> -->
       <!-- <profile-detail /> -->

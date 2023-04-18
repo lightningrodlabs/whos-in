@@ -13,7 +13,7 @@ import EditTwilioCredentials from './EditTwilioCredentials.svelte';
 
 const dispatch = createEventDispatcher();
 
-export let twilioCredentialsHash: ActionHash;
+// export let twilioCredentialsHash: ActionHash;
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
@@ -30,54 +30,54 @@ let errorSnackbar: Snackbar;
 $: editing,  error, loading, record, twilioCredentials;
 
 onMount(async () => {
-  if (twilioCredentialsHash === undefined) {
-    throw new Error(`The twilioCredentialsHash input is required for the TwilioCredentialsDetail element`);
-  }
-  await fetchTwilioCredentials();
+  // if (twilioCredentialsHash === undefined) {
+  //   throw new Error(`The twilioCredentialsHash input is required for the TwilioCredentialsDetail element`);
+  // }
+  // await fetchTwilioCredentials();
 });
 
-async function fetchTwilioCredentials() {
-  loading = true;
-  error = undefined;
-  record = undefined;
-  twilioCredentials = undefined;
+// async function fetchTwilioCredentials() {
+//   loading = true;
+//   error = undefined;
+//   record = undefined;
+//   twilioCredentials = undefined;
   
-  try {
-    record = await client.callZome({
-      cap_secret: null,
-      role_name: 'whosin',
-      zome_name: 'notifications',
-      fn_name: 'get_twilio_credentials',
-      payload: twilioCredentialsHash,
-    });
-    if (record) {
-      twilioCredentials = decode((record.entry as any).Present.entry) as TwilioCredentials;
-    }
-  } catch (e) {
-    error = e;
-  }
+//   try {
+//     record = await client.callZome({
+//       cap_secret: null,
+//       role_name: 'whosin',
+//       zome_name: 'notifications',
+//       fn_name: 'get_twilio_credentials',
+//       payload: twilioCredentialsHash,
+//     });
+//     if (record) {
+//       twilioCredentials = decode((record.entry as any).Present.entry) as TwilioCredentials;
+//     }
+//   } catch (e) {
+//     error = e;
+//   }
 
-  loading = false;
-}
+//   loading = false;
+// }
 
-async function deleteTwilioCredentials() {
-  try {
-    await client.callZome({
-      cap_secret: null,
-      role_name: 'whosin',
-      zome_name: 'notifications',
-      fn_name: 'delete_twilio_credentials',
-      payload: twilioCredentialsHash,
-    });
-    dispatch('twilio-credentials-deleted', { twilioCredentialsHash: twilioCredentialsHash });
-  } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the twilio credentials: ${e.data.data}`;
-    errorSnackbar.show();
-  }
-}
+// async function deleteTwilioCredentials() {
+//   try {
+//     await client.callZome({
+//       cap_secret: null,
+//       role_name: 'whosin',
+//       zome_name: 'notifications',
+//       fn_name: 'delete_twilio_credentials',
+//       payload: twilioCredentialsHash,
+//     });
+//     dispatch('twilio-credentials-deleted', { twilioCredentialsHash: twilioCredentialsHash });
+//   } catch (e: any) {
+//     errorSnackbar.labelText = `Error deleting the twilio credentials: ${e.data.data}`;
+//     errorSnackbar.show();
+//   }
+// }
 </script>
 
-<mwc-snackbar bind:this={errorSnackbar} leading>
+<!-- <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 
 {#if loading}
@@ -122,4 +122,4 @@ async function deleteTwilioCredentials() {
 
 </div>
 {/if}
-
+ -->

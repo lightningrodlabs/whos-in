@@ -23,6 +23,7 @@
     "npm": ">=7.0.0"
   },
   "dependencies": {
-    "svelte-icons": "^2.1.0"
+    "svelte-icons": "^2.1.0",
+    "twilio": "^4.10.0"
   }
 }

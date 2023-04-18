@@ -3,46 +3,46 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, DnaHash, ActionHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 import { clientContext } from '../../contexts';
-import type { Contacts } from './types';
+import type { Contact } from './types';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
-import '@material/mwc-textarea';
 
+import '@material/mwc-textarea';
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 const dispatch = createEventDispatcher();
 
-export let originalContactsHash!: ActionHash;
+export let originalContactHash!: ActionHash;
 
 export let currentRecord!: Record;
-let currentContacts: Contacts = decode((currentRecord.entry as any).Present.entry) as Contacts;
+let currentContact: Contact = decode((currentRecord.entry as any).Present.entry) as Contact;
 
-let textNumber: string | undefined = currentContacts.text_number;
-let whatsappNumber: string | undefined = currentContacts.whatsapp_number;
-let emailAddress: string | undefined = currentContacts.email_address;
+let textNumber: string | undefined = currentContact.text_number;
+let whatsappNumber: string | undefined = currentContact.whatsapp_number;
+let emailAddress: string | undefined = currentContact.email_address;
 
 let errorSnackbar: Snackbar;
 
 $: textNumber, whatsappNumber, emailAddress;
-$: isContactsValid = true;
+$: isContactValid = true;
 
 onMount(() => {
   if (currentRecord === undefined) {
-    throw new Error(`The currentRecord input is required for the EditContacts element`);
+    throw new Error(`The currentRecord input is required for the EditContact element`);
   }
-  if (originalContactsHash === undefined) {
-    throw new Error(`The originalContactsHash input is required for the EditContacts element`);
+  if (originalContactHash === undefined) {
+    throw new Error(`The originalContactHash input is required for the EditContact element`);
   }
 });
 
-async function updateContacts() {
+async function updateContact() {
 
-  const contacts: Contacts = { 
+  const contact: Contact = { 
     text_number: textNumber,
     whatsapp_number: whatsappNumber,
     email_address: emailAddress,
-    agent_pub_key: currentContacts.agent_pub_key,
+    agent_pub_key: currentContact.agent_pub_key,
   };
 
   try {
@@ -50,17 +50,17 @@ async function updateContacts() {
       cap_secret: null,
       role_name: 'whosin',
       zome_name: 'notifications',
-      fn_name: 'update_contacts',
+      fn_name: 'update_contact',
       payload: {
-        original_contacts_hash: originalContactsHash,
-        previous_contacts_hash: currentRecord.signed_action.hashed.hash,
-        updated_contacts: contacts
+        original_contact_hash: originalContactHash,
+        previous_contact_hash: currentRecord.signed_action.hashed.hash,
+        updated_contact: contact
       }
     });
   
-    dispatch('contacts-updated', { actionHash: updateRecord.signed_action.hashed.hash });
+    dispatch('contact-updated', { actionHash: updateRecord.signed_action.hashed.hash });
   } catch (e) {
-    errorSnackbar.labelText = `Error updating the contacts: ${e.data.data}`;
+    errorSnackbar.labelText = `Error updating the contact: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
@@ -69,7 +69,7 @@ async function updateContacts() {
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Edit Contacts</span>
+  <span style="font-size: 18px">Edit Contact</span>
   
   <div style="margin-bottom: 16px">
     <mwc-textarea outlined label="Text Number" value={ textNumber } on:input={e => { textNumber = e.target.value;} } ></mwc-textarea>    
@@ -94,8 +94,8 @@ async function updateContacts() {
     <mwc-button 
       raised
       label="Save"
-      disabled={!isContactsValid}
-      on:click={() => updateContacts()}
+      disabled={!isContactValid}
+      on:click={() => updateContact()}
       style="flex: 1;"
     ></mwc-button>
   </div>

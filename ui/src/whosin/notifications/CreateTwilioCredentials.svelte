@@ -42,28 +42,39 @@ async function createTwilioCredentials() {
     });
     dispatch('twilio-credentials-created', { twilioCredentialsHash: record.signed_action.hashed.hash });
   } catch (e) {
-    errorSnackbar.labelText = `Error creating the twilio credentials: ${e.data.data}`;
-    errorSnackbar.show();
+    console.log(e.data.data)
   }
+
+  try {
+    const record: Record = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'notifications',
+      fn_name: 'claim_notifier',
+      payload: null,
+    });
+  } catch (e) {
+    console.log(e.data.data)
+  } 
 }
 
 </script>
+<div class="white-container" style="display: flex; flex-direction: column">
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Create TwilioCredentials</span>
+  <h1 style="font-size: 24px; font-weight: 400; text-align: left;">Add your Twilio credentials</h1>
   
-
   <div style="margin-bottom: 16px">
-    <mwc-textarea outlined label="Account Sid" value={ accountSid } on:input={e => { accountSid = e.target.value;} } required></mwc-textarea>          
+    <mwc-textarea label="Account Sid" value={ accountSid } on:input={e => { accountSid = e.target.value;} } required></mwc-textarea>          
   </div>
             
   <div style="margin-bottom: 16px">
-    <mwc-textarea outlined label="Auth Token" value={ authToken } on:input={e => { authToken = e.target.value;} } required></mwc-textarea>          
+    <mwc-textarea label="Auth Token" value={ authToken } on:input={e => { authToken = e.target.value;} } required></mwc-textarea>          
   </div>
             
   <div style="margin-bottom: 16px">
-    <mwc-textarea outlined label="From Number" value={ fromNumber } on:input={e => { fromNumber = e.target.value;} } required></mwc-textarea>          
+    <mwc-textarea label="From Number" value={ fromNumber } on:input={e => { fromNumber = e.target.value;} } required></mwc-textarea>          
   </div>
             
 
@@ -73,4 +84,5 @@ async function createTwilioCredentials() {
     disabled={!isTwilioCredentialsValid}
     on:click={() => createTwilioCredentials()}
   ></mwc-button>
+</div>
 </div>
