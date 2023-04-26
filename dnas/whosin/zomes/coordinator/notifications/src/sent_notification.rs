@@ -2,7 +2,7 @@ use hdk::prelude::*;
 use notifications_integrity::*;
 
 #[hdk_extern]
-pub fn check_sent_notification(_:()) -> ExternResult<Vec<Record>> {
+pub fn retrieve_sent_notifications(_:()) -> ExternResult<Vec<Record>> {
   let sent_notifications_entry_type: EntryType = UnitEntryTypes::SentNotification.try_into()?;
   let filter = ChainQueryFilter::new()
       .entry_type(sent_notifications_entry_type)
@@ -12,21 +12,21 @@ pub fn check_sent_notification(_:()) -> ExternResult<Vec<Record>> {
   Ok(all_sent_notifications)
 }
 
-// #[hdk_extern]
-// pub fn create_sent_notification(
-//     sent_notification: SentNotification,
-// ) -> ExternResult<Record> {
-//     let sent_notification_hash = create_entry(
-//         &EntryTypes::SentNotification(sent_notification.clone()),
-//     )?;
-//     let record = get(sent_notification_hash.clone(), GetOptions::default())?
-//         .ok_or(
-//             wasm_error!(
-//                 WasmErrorInner::Guest(String::from("Could not find the newly created SentNotification"))
-//             ),
-//         )?;
-//     Ok(record)
-// }
+#[hdk_extern]
+pub fn create_sent_notification(
+    sent_notification: SentNotification,
+) -> ExternResult<Record> {
+    let sent_notification_hash = create_entry(
+        &EntryTypes::SentNotification(sent_notification.clone()),
+    )?;
+    let record = get(sent_notification_hash.clone(), GetOptions::default())?
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest(String::from("Could not find the newly created SentNotification"))
+            ),
+        )?;
+    Ok(record)
+}
 // #[hdk_extern]
 // pub fn get_sent_notification(
 //     original_sent_notification_hash: ActionHash,

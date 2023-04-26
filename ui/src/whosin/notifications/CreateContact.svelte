@@ -23,7 +23,7 @@ let notifier = undefined; //: AgentPubKey | undefined;
 let errorSnackbar: Snackbar;
 
 $: agentPubKey, textNumber, whatsappNumber, emailAddress, notifier;
-$: isContactValid = true;
+$: isContactValid = textNumber !== '' || whatsappNumber !== '' || emailAddress !== '';
 
 onMount(() => {
   if (agentPubKey === undefined) {
@@ -95,7 +95,7 @@ async function findANotifier() {
 
   <mwc-button 
     raised
-    label="Create Contact"
+    label="Save Contact Information"
     disabled={!isContactValid}
     on:click={() => createContact()}
   ></mwc-button>

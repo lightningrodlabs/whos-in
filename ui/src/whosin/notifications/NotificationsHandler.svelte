@@ -39,18 +39,23 @@
               fetchCoordroles(signal.payload).then(activated => {
                 if (activated) {
                   fetchCoordination(signal.payload).then(coordination => {
-                    fetchTwilioCredentials().then(() => {
-                      all_participants.forEach(participant => {
-                        fetchContact(participant).then(contacts => {
-                          var contact = contacts.filter(c => {
-                            return JSON.stringify(c.agent_pub_key) == JSON.stringify(participant)
+                    was_it_sent(signal.payload + " activated").then(sent => {
+                      console.log(sent)
+                      if (!sent) {
+                        fetchTwilioCredentials().then(() => {
+                          all_participants.forEach(participant => {
+                            fetchContact(participant).then(contacts => {
+                              var contact = contacts.filter(c => {
+                                return JSON.stringify(c.agent_pub_key) == JSON.stringify(participant)
+                              })
+                              if (contact) {
+                                sendText(contact[contact.length-1]["text_number"], coordination["title"] + " is activated!", twilioCredentials["account_sid"], twilioCredentials["auth_token"], twilioCredentials["from_number"]);
+                                createSentNotification(signal.payload + " activated")
+                              }
+                            })
                           })
-                          if (contact) {
-                            // console.log(contact[0])
-                            sendText(contact[contact.length-1]["text_number"], coordination["title"] + " is activated!", twilioCredentials["account_sid"], twilioCredentials["auth_token"], twilioCredentials["from_number"]);
-                          }
                         })
-                      })
+                      }
                     })
                   })
                 }
@@ -80,42 +85,47 @@
     }
   }
 
-  // async function createSentNotification(uniqueData) {  
-  //   const sentNotificationEntry: SentNotification = { 
-  //     unique_data: uniqueData!,
-  //   };
-  //   try {
-  //     const record: Record = await client.callZome({
-  //       cap_secret: null,
-  //       role_name: 'whosin',
-  //       zome_name: 'notifications',
-  //       fn_name: 'create_sent_notification',
-  //       payload: sentNotificationEntry,
-  //     });
-  //   } catch (e) {
-  //     console.log(e.data.data)
-  //   }
-  // }
+  async function createSentNotification(uniqueData) {  
+    const sentNotificationEntry: SentNotification = { 
+      unique_data: uniqueData!,
+    };
+    try {
+      const record: Record = await client.callZome({
+        cap_secret: null,
+        role_name: 'whosin',
+        zome_name: 'notifications',
+        fn_name: 'create_sent_notification',
+        payload: sentNotificationEntry,
+      });
+    } catch (e) {
+      console.log(e.data.data)
+    }
+  }
 
-  // async function was_it_sent(unique_data: String) {    
-  //   try {
-  //     record = await client.callZome({
-  //       cap_secret: null,
-  //       role_name: 'whosin',
-  //       zome_name: 'notifications',
-  //       fn_name: 'check_sent_notification',
-  //       payload: null,
-  //     });
-  //     if (record) {
-  //       let sentNotification = decode((record.entry as any).Present.entry) as SentNotification;
-  //       return record
-  //     }
-  //   } catch (e) {
-  //     error = e;
-  //   }
-
-  //   loading = false;
-  // }
+  async function was_it_sent(unique_data: String) {    
+    try {
+      record = await client.callZome({
+        cap_secret: null,
+        role_name: 'whosin',
+        zome_name: 'notifications',
+        fn_name: 'retrieve_sent_notifications',
+        payload: null,
+      });
+      if (record) {
+        // console.log(record)
+        let output = false
+        for (var i = 0; i < record.length; i++) {
+          let sentNotification = decode((record[i].entry as any).Present.entry) as SentNotification;
+          if (sentNotification["unique_data"] == unique_data) {
+            output = true
+          }
+        }
+        return output
+      }
+    } catch (e) {
+      error = e;
+    }
+  }
 
   async function fetchCoordroles(actionHash) {
     let record;
@@ -144,7 +154,7 @@
       }
     }
     catch (e) {
-      console.log(e.data.data)
+      error = e;
     }
   };
 

@@ -80,7 +80,7 @@ async function createTwilioCredentials() {
 
   <mwc-button 
     raised
-    label="Create TwilioCredentials"
+    label="Save TwilioCredentials"
     disabled={!isTwilioCredentialsValid}
     on:click={() => createTwilioCredentials()}
   ></mwc-button>

@@ -103,7 +103,8 @@
         });
         notifier = record;
     } catch (e) {
-        console.log(e)
+        // console.log(e)
+        let error = e;
     }
   }
 
@@ -111,7 +112,6 @@
     // We pass '' as url because it will dynamically be replaced in launcher environments
     client = await AppAgentWebsocket.connect('', 'dcan');
     await checkForNotifier();
-    console.log(currentView)
 
     if (currentView == "home") {
       checkIfNew()
