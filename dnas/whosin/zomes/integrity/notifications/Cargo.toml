@@ -11,3 +11,5 @@ name = "notifications_integrity"
 hdi = { workspace = true }
 
 serde = { workspace = true }
+
+hc_zome_notifications_integrity = { git = "https://github.com/LeosPrograms/holochain-notifications", branch = "main" }
