@@ -33,6 +33,8 @@ pub struct CoordrolesOutput {
 #[hdk_extern]
 pub fn get_coordroles_for_coordination(
     coordination_hash: ActionHash,
+    // _:(),
+// ) -> ExternResult<()> {
 ) -> ExternResult<Vec<CoordrolesOutput>> {
     let links = get_links(coordination_hash, LinkTypes::CoordinationToCoordroles, None)?;
     let get_input: Vec<GetInput> = links
@@ -74,6 +76,7 @@ pub fn get_coordroles_for_coordination(
         records_with_users.push(r_with_users);
     }
     Ok(records_with_users)
+//   Ok(())
 }
 #[hdk_extern]
 pub fn get_coordinations_for_coordrole(

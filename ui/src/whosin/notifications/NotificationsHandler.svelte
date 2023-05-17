@@ -32,39 +32,40 @@
     client.on(
       'signal', 
       (signal) => {
+        console.log(signal)
         // wait a few seconds before executing
-        setTimeout(() => {
-          try {
-            if (signal.zome_name === 'notifications') {
-              fetchCoordroles(signal.payload).then(activated => {
-                if (activated) {
-                  fetchCoordination(signal.payload).then(coordination => {
-                    was_it_sent(signal.payload + " activated").then(sent => {
-                      console.log(sent)
-                      if (!sent) {
-                        fetchTwilioCredentials().then(() => {
-                          all_participants.forEach(participant => {
-                            fetchContact(participant).then(contacts => {
-                              var contact = contacts.filter(c => {
-                                return JSON.stringify(c.agent_pub_key) == JSON.stringify(participant)
-                              })
-                              if (contact) {
-                                sendText(contact[contact.length-1]["text_number"], coordination["title"] + " is activated!", twilioCredentials["account_sid"], twilioCredentials["auth_token"], twilioCredentials["from_number"]);
-                                createSentNotification(signal.payload + " activated")
-                              }
-                            })
-                          })
-                        })
-                      }
-                    })
-                  })
-                }
-              })
-            }
-          } catch (e) {
-            console.log(e.data.data)
-          }
-        }, 1000);
+        // setTimeout(() => {
+        //   try {
+        //     if (signal.zome_name === 'notifications') {
+        //       fetchCoordroles(signal.payload).then(activated => {
+        //         if (activated) {
+        //           fetchCoordination(signal.payload).then(coordination => {
+        //             was_it_sent(signal.payload + " activated").then(sent => {
+        //               console.log(sent)
+        //               if (!sent) {
+        //                 fetchTwilioCredentials().then(() => {
+        //                   all_participants.forEach(participant => {
+        //                     fetchContact(participant).then(contacts => {
+        //                       var contact = contacts.filter(c => {
+        //                         return JSON.stringify(c.agent_pub_key) == JSON.stringify(participant)
+        //                       })
+        //                       if (contact) {
+        //                         sendText(contact[contact.length-1]["text_number"], coordination["title"] + " is activated!", twilioCredentials["account_sid"], twilioCredentials["auth_token"], twilioCredentials["from_number"]);
+        //                         createSentNotification(signal.payload + " activated")
+        //                       }
+        //                     })
+        //                   })
+        //                 })
+        //               }
+        //             })
+        //           })
+        //         }
+        //       })
+        //     }
+        //   } catch (e) {
+        //     console.log(e.data.data)
+        //   }
+        // }, 1000);
       });
     });
 
@@ -102,61 +103,61 @@
     }
   }
 
-  async function was_it_sent(unique_data: String) {    
-    try {
-      record = await client.callZome({
-        cap_secret: null,
-        role_name: 'whosin',
-        zome_name: 'notifications',
-        fn_name: 'retrieve_sent_notifications',
-        payload: null,
-      });
-      if (record) {
-        // console.log(record)
-        let output = false
-        for (var i = 0; i < record.length; i++) {
-          let sentNotification = decode((record[i].entry as any).Present.entry) as SentNotification;
-          if (sentNotification["unique_data"] == unique_data) {
-            output = true
-          }
-        }
-        return output
-      }
-    } catch (e) {
-      error = e;
-    }
-  }
+  // async function was_it_sent(unique_data: String) {    
+  //   try {
+  //     record = await client.callZome({
+  //       cap_secret: null,
+  //       role_name: 'whosin',
+  //       zome_name: 'notifications',
+  //       fn_name: 'retrieve_sent_notifications',
+  //       payload: null,
+  //     });
+  //     if (record) {
+  //       // console.log(record)
+  //       let output = false
+  //       for (var i = 0; i < record.length; i++) {
+  //         let sentNotification = decode((record[i].entry as any).Present.entry) as SentNotification;
+  //         if (sentNotification["unique_data"] == unique_data) {
+  //           output = true
+  //         }
+  //       }
+  //       return output
+  //     }
+  //   } catch (e) {
+  //     error = e;
+  //   }
+  // }
 
-  async function fetchCoordroles(actionHash) {
-    let record;
-    let activated;
-    try {
-      record = await client
-      .callZome({
-          cap_secret: null,
-          role_name: 'whosin',
-          zome_name: 'coordinator',
-          fn_name: 'get_coordroles_for_coordination',
-          payload: actionHash,
-      });
-      if (record) {
-        activated = true;
-        record.forEach(role => {
-          if (role.participants < decode(role.coordrole.entry.Present.entry)["minimum"]) {
-            activated = false;
-          }
+  // async function fetchCoordroles(actionHash) {
+  //   let record;
+  //   let activated;
+  //   try {
+  //     record = await client
+  //     .callZome({
+  //         cap_secret: null,
+  //         role_name: 'whosin',
+  //         zome_name: 'coordinator',
+  //         fn_name: 'get_coordroles_for_coordination',
+  //         payload: actionHash,
+  //     });
+  //     if (record) {
+  //       activated = true;
+  //       record.forEach(role => {
+  //         if (role.participants < decode(role.coordrole.entry.Present.entry)["minimum"]) {
+  //           activated = false;
+  //         }
 
-          role.participants_details.forEach(participant => {
-            all_participants.push(participant);
-          })
-        })
-        return activated;
-      }
-    }
-    catch (e) {
-      error = e;
-    }
-  };
+  //         role.participants_details.forEach(participant => {
+  //           all_participants.push(participant);
+  //         })
+  //       })
+  //       return activated;
+  //     }
+  //   }
+  //   catch (e) {
+  //     error = e;
+  //   }
+  // };
 
   async function fetchCoordination(coordinationHash) {
     record = undefined;      
@@ -176,28 +177,28 @@
     }
   }
 
-  async function fetchContact(agent_pub_key) { 
-    try {
-      record = await client.callZome({
-        cap_secret: null,
-        role_name: 'whosin',
-        zome_name: 'notifications',
-        fn_name: 'get_contacts',
-        payload: agent_pub_key,
-      });
-      console.log(record)
-      if (record) {
-        // return record
-        let all_contacts = [];
-        record.forEach(element => {
-          all_contacts.push(decode((element.entry as any).Present.entry));          
-        });
-        return all_contacts
-      }
-    } catch (e) {
-      error = e.data.data;
-    }
-  }
+  // async function fetchContact(agent_pub_key) { 
+  //   try {
+  //     record = await client.callZome({
+  //       cap_secret: null,
+  //       role_name: 'whosin',
+  //       zome_name: 'notifications',
+  //       fn_name: 'get_contacts',
+  //       payload: agent_pub_key,
+  //     });
+  //     console.log(record)
+  //     if (record) {
+  //       // return record
+  //       let all_contacts = [];
+  //       record.forEach(element => {
+  //         all_contacts.push(decode((element.entry as any).Present.entry));          
+  //       });
+  //       return all_contacts
+  //     }
+  //   } catch (e) {
+  //     error = e.data.data;
+  //   }
+  // }
 
   async function sendText(to, message, account_sid, auth_token, from) {
     fetch('https://api.twilio.com/2010-04-01/Accounts/' + account_sid + '/Messages.json', {
