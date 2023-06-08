@@ -5,6 +5,19 @@ pub struct AddParticipantForCoordroleInput {
     coordrole_hash: ActionHash,
     participant: AgentPubKey,
 }
+
+// #[derive(Serialize, Deserialize, Debug)]
+// pub struct NotificationTipInput {
+//     pub relevant_hash: Option<AnyLinkableHash>,
+//     pub message: Option<String>,
+//     pub notifyees: Vec<AgentPubKey>,
+// }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Tip {
+    tip: String,
+}
+
 #[hdk_extern]
 pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
@@ -77,12 +90,23 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             (),
         )?;
         create_link(
-            participant,
+            participant.clone(),
             coordrole_hash,
             LinkTypes::ParticipantToCoordroles,
             (),
         )?;
     }
+
+    // let tip_input = NotificationTipInput {
+    //     relevant_hash: Some(AnyLinkableHash::from(coordination_hash.clone())),
+    //     message: Some(String::from("You have committed to a role!")),
+    //     notifyees: vec![participant.clone()],
+    // };
+
+    let relevant_hash = Some(AnyLinkableHash::from(coordination_hash.clone()));
+    let message = Some(String::from(relevant_hash.clone().unwrap().to_string()));
+
+    emit_signal(message.clone());
 
     // if links_length > maximum as usize - 2 {
         call(
@@ -90,7 +114,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             ZomeName::from(String::from("notifications")), // Name of the zome to call
             FunctionName(String::from("send_notification_tip")), // Name of the zome function to call
             None, // Capability secret, if necessary
-            coordination_hash, // Input for the zome function
+            message, // Input for the zome function
         )?;
     // }
     Ok(())
