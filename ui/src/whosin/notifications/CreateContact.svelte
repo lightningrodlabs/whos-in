@@ -38,7 +38,21 @@ async function createContact() {
     whatsapp_number: whatsappNumber,
     email_address: emailAddress,
   };
-  
+
+  try {
+    const record: Record = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'notifications',
+      fn_name: 'select_first_notifier',
+      payload: null,
+    });
+  } catch (e) {
+    console.log(e)
+    errorSnackbar.labelText = `Error creating the contact: ${e.data.data}`;
+    errorSnackbar.show();
+  }
+
   try {
     const record: Record = await client.callZome({
       cap_secret: null,
@@ -49,6 +63,7 @@ async function createContact() {
     });
     dispatch('contact-created', { contactHash: record.signed_action.hashed.hash });
   } catch (e) {
+    console.log(e)
     errorSnackbar.labelText = `Error creating the contact: ${e.data.data}`;
     errorSnackbar.show();
   }

@@ -1,5 +1,11 @@
 // use hdk::prelude::*;
 // use coordinator_integrity::*;
+
+// #[hdk_extern]
+// pub fn get_dna_hash(_:()) -> ExternResult<AnyLinkableHash> {
+//     Ok(AnyLinkableHash::from(agent_info()?.dna_hash))
+// }
+
 // #[hdk_extern]
 // pub fn claim_notifier(_: ()) -> ExternResult<()> {
 //     let path = Path::from(format!("all_notifiers"));

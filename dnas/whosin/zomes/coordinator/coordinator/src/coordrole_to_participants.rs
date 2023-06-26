@@ -13,9 +13,30 @@ pub struct AddParticipantForCoordroleInput {
 //     pub notifyees: Vec<AgentPubKey>,
 // }
 
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// pub struct Tip {
+//     tip: String,
+// }
+
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
+pub struct Contact {
+    pub agent_pub_key: AgentPubKey,
+    pub text_number: Option<String>,
+    pub whatsapp_number: Option<String>,
+    pub email_address: Option<String>,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Tip {
-    tip: String,
+pub struct NotificationTip {
+  pub retry_count: i32,
+  pub status: String,
+  pub message: String,
+  pub notificants: Vec<AgentPubKey>,
+  pub contacts: Vec<Contact>,
+  pub extra_context: String,
+  pub message_id: String,
+  pub destination: String,
 }
 
 #[hdk_extern]
@@ -103,10 +124,21 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     //     notifyees: vec![participant.clone()],
     // };
 
-    let relevant_hash = Some(AnyLinkableHash::from(coordination_hash.clone()));
-    let message = Some(String::from(relevant_hash.clone().unwrap().to_string()));
+    let relevant_hash = Some(ActionHash::from(coordination_hash.clone()));
+    // let extra_context = Some(String::from(relevant_hash.clone().unwrap().to_string()));
 
-    emit_signal(message.clone());
+    let tip: NotificationTip = NotificationTip {
+        retry_count: 0,
+        status: String::from(""),
+        message: String::from(""),
+        notificants: vec![],
+        contacts: vec![],
+        extra_context: String::from(relevant_hash.clone().unwrap().to_string()),
+        message_id: String::from(""),
+        destination: String::from("send_notification_tip"),
+    };
+
+    emit_signal(tip.clone())?;
 
     // if links_length > maximum as usize - 2 {
         call(
@@ -114,7 +146,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             ZomeName::from(String::from("notifications")), // Name of the zome to call
             FunctionName(String::from("send_notification_tip")), // Name of the zome function to call
             None, // Capability secret, if necessary
-            message, // Input for the zome function
+            tip, // Input for the zome function
         )?;
     // }
     Ok(())

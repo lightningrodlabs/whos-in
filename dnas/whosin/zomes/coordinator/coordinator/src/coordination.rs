@@ -15,6 +15,12 @@ pub struct CreateCoordinationInput {
     coordroles: Vec<Coordrole>,
 }
 #[hdk_extern]
+pub fn get_dna_hash(_:()) -> ExternResult<String> {
+    let x = hdk::info::dna_info()?;
+    Ok(x.hash.to_string())
+}
+
+#[hdk_extern]
 pub fn create_coordination(input: CreateCoordinationInput) -> ExternResult<Record> {
     let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
     let coordroles = input.coordroles;

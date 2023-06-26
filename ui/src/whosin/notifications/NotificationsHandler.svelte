@@ -184,14 +184,14 @@
   //       role_name: 'whosin',
   //       zome_name: 'notifications',
   //       fn_name: 'get_contacts',
-  //       payload: agent_pub_key,
+  //       payload: agent_pub_key,`
   //     });
   //     console.log(record)
   //     if (record) {
   //       // return record
   //       let all_contacts = [];
   //       record.forEach(element => {
-  //         all_contacts.push(decode((element.entry as any).Present.entry));          
+  //         all_contacts.push(decode((element.entry as any).Present.entry));
   //       });
   //       return all_contacts
   //     }

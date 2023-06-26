@@ -116,6 +116,19 @@
     if (currentView == "home") {
       checkIfNew()
     }
+    try {
+      const dna = await client
+        .callZome({
+            cap_secret: null,
+            role_name: 'whosin',
+            zome_name: 'coordinator',
+            fn_name: 'get_dna_hash',
+            payload: null,
+        });
+      console.log(dna)
+    } catch (e) {
+      console.log(e)
+    }
 
     // const config = {
       // avatarMode: "identicon",
