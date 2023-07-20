@@ -92,6 +92,45 @@ async function findANotifier() {
   }
 }
 
+let regionCode = "";
+let phoneNumber = "";
+let whatsappRegionCode = "";
+let whatsappPhoneNumber = "";
+
+const handleRegionInput = (event) => {
+  let input = event.target.value.replace(/[^+\d]/g, '');
+  if (!input.startsWith('+')) input = '+' + input;
+  regionCode = input;
+  textNumber = regionCode + phoneNumber;
+};
+
+const handlePhoneInput = (event) => {
+  let input = event.target.value.replace(/\D/g, '');
+  if (input.length > 3 && input.length <= 6)
+      input = `(${input.slice(0, 3)}) ${input.slice(3)}`;
+  else if (input.length > 6)
+      input = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
+  phoneNumber = input;
+  textNumber = regionCode + phoneNumber;
+};
+
+const handleWhatsappRegionInput = (event) => {
+  let input = event.target.value.replace(/[^+\d]/g, '');
+  if (!input.startsWith('+')) input = '+' + input;
+  whatsappRegionCode = input;
+  whatsappNumber = whatsappRegionCode + whatsappPhoneNumber;
+};
+
+const handleWhatsappPhoneInput = (event) => {
+  let input = event.target.value.replace(/\D/g, '');
+  if (input.length > 3 && input.length <= 6)
+      input = `(${input.slice(0, 3)}) ${input.slice(3)}`;
+  else if (input.length > 6)
+      input = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
+  whatsappPhoneNumber = input;
+  whatsappNumber = whatsappRegionCode + whatsappPhoneNumber;
+};
+
 </script>
 
 <div class="white-container" style="display: flex; flex-direction: column">
@@ -101,16 +140,33 @@ async function findANotifier() {
   <h1 style="font-size: 24px; font-weight: 400; text-align: left;">Add your contact information</h1>
 
   
+  <!-- <div style="margin-bottom: 16px">
+    <mwc-textarea label="Text Number" value={ textNumber } on:input={e => { textNumber = e.target.value;} } ></mwc-textarea>     
+  </div> -->
+  
+  <!-- <div class="form-container">
+    <mwc-textfield label="Phone number" type="tel" inputmode="numeric" value={ textNumber }  on:input={handleInput}></mwc-textfield>
+  </div> -->
+  
   <div style="margin-bottom: 16px">
-    <mwc-textarea label="Text Number" value={ textNumber } on:input={e => { textNumber = e.target.value;} } ></mwc-textarea>          
+    <div style="margin-bottom: 16px; display: block"><label>Text Number</label></div>
+    <mwc-textfield style="width:80px; display:inline-block" label="region" type="tel" inputmode="numeric" value={regionCode} on:input={handleRegionInput}></mwc-textfield>
+    <mwc-textfield style="width:240px; display:inline-block" label="number" type="tel" inputmode="numeric" value={phoneNumber} on:input={handlePhoneInput}></mwc-textfield>
   </div>
-            
+
   <div style="margin-bottom: 16px">
+    <div style="margin-bottom: 16px; display: block"><label>Whatsapp Number</label></div>
+    <mwc-textfield style="width:80px; display:inline-block" label="region" type="tel" inputmode="numeric" value={whatsappRegionCode} on:input={handleWhatsappRegionInput}></mwc-textfield>
+    <mwc-textfield style="width:240px; display:inline-block" label="number" type="tel" inputmode="numeric" value={whatsappPhoneNumber} on:input={handleWhatsappPhoneInput}></mwc-textfield>
+  </div>
+
+  <!-- <div style="margin-bottom: 16px">
     <mwc-textarea label="Whatsapp Number" value={ whatsappNumber } on:input={e => { whatsappNumber = e.target.value;} } ></mwc-textarea>          
-  </div>
+  </div> -->
             
+  <div style="margin-bottom: 16px; display: block"><label>Email Address</label></div>
   <div style="margin-bottom: 16px">
-    <mwc-textarea label="Email Address" value={ emailAddress } on:input={e => { emailAddress = e.target.value;} } ></mwc-textarea>          
+    <mwc-textarea label="*******@****.***" value={ emailAddress } on:input={e => { emailAddress = e.target.value;} } ></mwc-textarea>          
   </div>
             
 

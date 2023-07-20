@@ -657,7 +657,7 @@ dependencies = [
 [[package]]
 name = "hc_zome_notifications"
 version = "0.0.1"
-source = "git+https://github.com/LeosPrograms/holochain-notifications?branch=develop#f265debb2b12349349d3c2bc5d589c80f4093158"
+source = "git+https://github.com/LeosPrograms/holochain-notifications?branch=develop#14223efaf0db36f26f8cd89140f19c320e28e483"
 dependencies = [
  "hc_zome_notifications_integrity",
  "hdk",
@@ -667,7 +667,7 @@ dependencies = [
 [[package]]
 name = "hc_zome_notifications_integrity"
 version = "0.0.1"
-source = "git+https://github.com/LeosPrograms/holochain-notifications?branch=develop#f265debb2b12349349d3c2bc5d589c80f4093158"
+source = "git+https://github.com/LeosPrograms/holochain-notifications?branch=develop#14223efaf0db36f26f8cd89140f19c320e28e483"
 dependencies = [
  "hdi",
  "serde",
