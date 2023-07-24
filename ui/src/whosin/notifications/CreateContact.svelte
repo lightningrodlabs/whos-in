@@ -19,14 +19,35 @@ let textNumber: string | undefined = '';
 let whatsappNumber: string | undefined = '';
 let emailAddress: string | undefined = '';
 
-let notifier = undefined; //: AgentPubKey | undefined;
+let notifier: AgentPubKey | undefined;
 let errorSnackbar: Snackbar;
+let allNotifiers: AgentPubKey[] | undefined = undefined;
 
-$: agentPubKey, textNumber, whatsappNumber, emailAddress, notifier;
+$: agentPubKey, textNumber, whatsappNumber, emailAddress, notifier, allNotifiers;
 $: isContactValid = textNumber !== '' || whatsappNumber !== '' || emailAddress !== '';
 
-onMount(() => {
-  console.log('' + agentPubKey + '')
+async function getNotifiers() {
+  try {
+    const record: AgentPubKey[] = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'notifications',
+      fn_name: 'list_notifiers',
+      payload: null,
+    });
+    console.log(record)
+    allNotifiers = record;
+  } catch (e) {
+    console.log(e)
+    errorSnackbar.labelText = `Error creating the contact: ${e.data.data}`;
+    errorSnackbar.show();
+  }
+}
+
+onMount(async () => {
+  await getNotifiers();
+
+  // console.log('' + agentPubKey + '')
 
   if (agentPubKey === undefined) {
     throw new Error(`The agentPubKey input is required for the CreateContact element`);
@@ -35,7 +56,7 @@ onMount(() => {
 
 async function createContact() {  
   console.log(agentPubKey)
-  let fakePubKey = new Uint8Array([132,32,36,103,50,63,238,220,212,245,234,17,72,63,223,125,210,149,78,140,62,68,71,132,168,197,88,98,96,105,222,102,49,182,16,86,126,96,12])
+  // let fakePubKey = new Uint8Array([132,32,36,103,50,63,238,220,212,245,234,17,72,63,223,125,210,149,78,140,62,68,71,132,168,197,88,98,96,105,222,102,49,182,16,86,126,96,12])
   const contactEntry: Contact = {
     agent_pub_key: agentPubKey!,
     // agent_pub_key: fakePubKey!,
@@ -49,8 +70,8 @@ async function createContact() {
       cap_secret: null,
       role_name: 'whosin',
       zome_name: 'notifications',
-      fn_name: 'select_first_notifier',
-      payload: null,
+      fn_name: 'select_a_notifier',
+      payload: notifier,
     });
   } catch (e) {
     console.log(e)
@@ -75,22 +96,22 @@ async function createContact() {
   }
 }
 
-async function findANotifier() {
-  try {
-    const record: Record = await client.callZome({
-      cap_secret: null,
-      role_name: 'whosin',
-      zome_name: 'notifications',
-      fn_name: 'find_a_notifier',
-      payload: null,
-    });
-    notifier = record;
-    dispatch('contact-created', { contactHash: record.signed_action.hashed.hash });
-  } catch (e) {
-    errorSnackbar.labelText = `Error creating the contact: ${e.data.data}`;
-    errorSnackbar.show();
-  }
-}
+// async function findANotifier() {
+//   try {
+//     const record: Record = await client.callZome({
+//       cap_secret: null,
+//       role_name: 'whosin',
+//       zome_name: 'notifications',
+//       fn_name: 'find_a_notifier',
+//       payload: null,
+//     });
+//     notifier = record;
+//     dispatch('contact-created', { contactHash: record.signed_action.hashed.hash });
+//   } catch (e) {
+//     errorSnackbar.labelText = `Error creating the contact: ${e.data.data}`;
+//     errorSnackbar.show();
+//   }
+// }
 
 let regionCode = "";
 let phoneNumber = "";
@@ -147,6 +168,14 @@ const handleWhatsappPhoneInput = (event) => {
   <!-- <div class="form-container">
     <mwc-textfield label="Phone number" type="tel" inputmode="numeric" value={ textNumber }  on:input={handleInput}></mwc-textfield>
   </div> -->
+  {#if allNotifiers}
+  <div>
+    <select bind:value={notifier}>
+      {#each allNotifiers as notifier}
+        <option value={notifier}>{notifier}</option>
+      {/each}
+  </div>
+  {/if}
   
   <div style="margin-bottom: 16px">
     <div style="margin-bottom: 16px; display: block"><label>Text Number</label></div>
