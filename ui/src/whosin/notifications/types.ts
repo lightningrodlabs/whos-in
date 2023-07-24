@@ -61,7 +61,9 @@ export interface TwilioCredentials {
 
   auth_token: string;
 
-  from_number: string;
+  from_number_text: string;
+
+  from_number_whatsapp: string;
 }
 
 

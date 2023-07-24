@@ -15,12 +15,13 @@ const dispatch = createEventDispatcher();
 
 let accountSid: string = '';
 let authToken: string = '';
-let fromNumber: string = '';
+let fromNumberText: string = '';
+let fromNumberWhatsapp: string = '';
 
 let errorSnackbar: Snackbar;
 
-$: accountSid, authToken, fromNumber;
-$: isTwilioCredentialsValid = true && accountSid !== '' && authToken !== '' && fromNumber !== '';
+$: accountSid, authToken, fromNumberText, fromNumberWhatsapp;
+$: isTwilioCredentialsValid = true && accountSid !== '' && authToken !== '' && fromNumberText !== '' && fromNumberWhatsapp !== '';
 
 onMount(() => {
 });
@@ -29,7 +30,8 @@ async function createTwilioCredentials() {
   const twilioCredentialsEntry: TwilioCredentials = { 
     account_sid: accountSid!,
     auth_token: authToken!,
-    from_number: fromNumber!,
+    from_number_text: fromNumberText!,
+    from_number_whatsapp: fromNumberWhatsapp!,
   };
   
   try {
@@ -74,9 +76,12 @@ async function createTwilioCredentials() {
   </div>
             
   <div style="margin-bottom: 16px">
-    <mwc-textarea label="From Number" value={ fromNumber } on:input={e => { fromNumber = e.target.value;} } required></mwc-textarea>          
+    <mwc-textarea label="From Number" value={ fromNumberText } on:input={e => { fromNumberText = e.target.value;} } required></mwc-textarea>          
   </div>
-            
+
+  <div style="margin-bottom: 16px">
+    <mwc-textarea label="From Number" value={ fromNumberWhatsapp } on:input={e => { fromNumberWhatsapp = e.target.value;} } required></mwc-textarea>          
+  </div>
 
   <mwc-button 
     raised

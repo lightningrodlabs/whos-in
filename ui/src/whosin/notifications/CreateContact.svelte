@@ -21,7 +21,7 @@ let emailAddress: string | undefined = '';
 
 let notifier: AgentPubKey | undefined;
 let errorSnackbar: Snackbar;
-let allNotifiers: AgentPubKey[] | undefined = undefined;
+let allNotifiers: AgentPubKey[] | undefined;
 
 $: agentPubKey, textNumber, whatsappNumber, emailAddress, notifier, allNotifiers;
 $: isContactValid = textNumber !== '' || whatsappNumber !== '' || emailAddress !== '';
@@ -55,7 +55,8 @@ onMount(async () => {
 });
 
 async function createContact() {  
-  console.log(agentPubKey)
+  console.log(notifier)
+  // console.log(agentPubKey)
   // let fakePubKey = new Uint8Array([132,32,36,103,50,63,238,220,212,245,234,17,72,63,223,125,210,149,78,140,62,68,71,132,168,197,88,98,96,105,222,102,49,182,16,86,126,96,12])
   const contactEntry: Contact = {
     agent_pub_key: agentPubKey!,
@@ -70,7 +71,7 @@ async function createContact() {
       cap_secret: null,
       role_name: 'whosin',
       zome_name: 'notifications',
-      fn_name: 'select_a_notifier',
+      fn_name: 'select_notifier',
       payload: notifier,
     });
   } catch (e) {
@@ -168,14 +169,14 @@ const handleWhatsappPhoneInput = (event) => {
   <!-- <div class="form-container">
     <mwc-textfield label="Phone number" type="tel" inputmode="numeric" value={ textNumber }  on:input={handleInput}></mwc-textfield>
   </div> -->
-  {#if allNotifiers}
+{#if allNotifiers && allNotifiers.length}
   <div>
     <select bind:value={notifier}>
-      {#each allNotifiers as notifier}
-        <option value={notifier}>{notifier}</option>
+      {#each allNotifiers as n}
+        <option value={n}>{n}</option>
       {/each}
   </div>
-  {/if}
+  <br>
   
   <div style="margin-bottom: 16px">
     <div style="margin-bottom: 16px; display: block"><label>Text Number</label></div>
@@ -205,5 +206,9 @@ const handleWhatsappPhoneInput = (event) => {
     disabled={!isContactValid}
     on:click={() => createContact()}
   ></mwc-button>
+
+{:else}
+  <div>Loading notifiers...</div>
+{/if}
 </div>
 </div>
