@@ -1,4 +1,4 @@
-use hdk::prelude::*;
+use hdk::prelude::{*, tracing::field::debug};
 use coordinator_integrity::*;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddParticipantForCoordroleInput {
@@ -141,13 +141,18 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     emit_signal(tip.clone())?;
 
     // if links_length > maximum as usize - 2 {
-        call(
+        if let Err(e) = call(
             CallTargetCell::Local, // Must be one of the roles specified in the happ manifest
             ZomeName::from(String::from("notifications")), // Name of the zome to call
             FunctionName(String::from("send_notification_tip")), // Name of the zome function to call
             None, // Capability secret, if necessary
             tip, // Input for the zome function
-        )?;
+        ) {
+            // Handle the error here
+            debug!("Error calling the notification function: {:?}", e);
+        } else {
+            debug!("Successfully called the zome function")
+        }
     // }
     Ok(())
 }

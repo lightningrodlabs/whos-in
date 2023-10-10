@@ -14,6 +14,8 @@ const dispatch = createEventDispatcher();
 
 // export let notifier!: AgentPubKey;
 
+let loadingNotifiers = true;
+
 let agentPubKey: AgentPubKey = client.myPubKey;
 let textNumber: string | undefined = '';
 let whatsappNumber: string | undefined = '';
@@ -23,10 +25,11 @@ let notifier: AgentPubKey | undefined;
 let errorSnackbar: Snackbar;
 let allNotifiers: AgentPubKey[] | undefined;
 
-$: agentPubKey, textNumber, whatsappNumber, emailAddress, notifier, allNotifiers;
+$: agentPubKey, textNumber, whatsappNumber, emailAddress, notifier, allNotifiers, loadingNotifiers;
 $: isContactValid = textNumber !== '' || whatsappNumber !== '' || emailAddress !== '';
 
 async function getNotifiers() {
+  loadingNotifiers = true;
   try {
     const record: AgentPubKey[] = await client.callZome({
       cap_secret: null,
@@ -37,6 +40,9 @@ async function getNotifiers() {
     });
     console.log(record)
     allNotifiers = record;
+    setInterval(() => {
+      loadingNotifiers = false;
+    }, 2000);
   } catch (e) {
     console.log(e)
     errorSnackbar.labelText = `Error creating the contact: ${e.data.data}`;
@@ -169,7 +175,9 @@ const handleWhatsappPhoneInput = (event) => {
   <!-- <div class="form-container">
     <mwc-textfield label="Phone number" type="tel" inputmode="numeric" value={ textNumber }  on:input={handleInput}></mwc-textfield>
   </div> -->
-{#if allNotifiers && allNotifiers.length}
+{#if loadingNotifiers}
+  <div>Loading notifiers...</div>
+{:else if allNotifiers && allNotifiers.length}
   <div>
     <select bind:value={notifier}>
       {#each allNotifiers as n}
@@ -208,7 +216,8 @@ const handleWhatsappPhoneInput = (event) => {
   ></mwc-button>
 
 {:else}
-  <div>Loading notifiers...</div>
+  <div>Couldn't find any notifiers.
+  <button on:click={() => getNotifiers()}>Try again</button></div>
 {/if}
 </div>
 </div>

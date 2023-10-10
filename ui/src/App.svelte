@@ -199,20 +199,20 @@
     <!-- <CreateContact></CreateContact> -->
     <!-- <ContactDetail></ContactDetail> -->
 
-    {#if !loading && !notifier && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
-      <button on:click={() => navigate('notificant')}>Add your contact information</button>
-    {/if}
-
+    
     {#if loading}
-      <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-        <mwc-circular-progress indeterminate />
-      </div>
+    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+      <mwc-circular-progress indeterminate />
+    </div>
     {:else if currentView == "coordination"}
-      <CoordinationDetail coordinationHash={currentHash}></CoordinationDetail>
+    <CoordinationDetail coordinationHash={currentHash}></CoordinationDetail>
     {:else if currentView == "create-coordination"}
-      <CreateCoordination></CreateCoordination>
-      <!-- HI -->
+    <CreateCoordination></CreateCoordination>
+    <!-- HI -->
     {:else if currentView == "notifications"}
+      {#if !loading && !notifier && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
+        <button on:click={() => navigate('notificant')}>Sign up for text nofifications</button>
+      {/if}
       <AllNotifications></AllNotifications>
       {:else if currentView == "dashboard"}
       <MyCoordinations></MyCoordinations>
