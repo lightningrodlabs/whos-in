@@ -1,4 +1,4 @@
-# Dcan
+# Whos in?
 
 ## Environment Setup
 
