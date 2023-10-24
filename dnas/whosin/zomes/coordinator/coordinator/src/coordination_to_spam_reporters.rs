@@ -21,7 +21,7 @@ pub fn get_spam_reporters_for_coordination(coordination_hash: ActionHash) -> Ext
     
     let agents: Vec<AgentPubKey> = links
         .into_iter()
-        .map(|link| AgentPubKey::from(EntryHash::from(link.target)))
+        .map(|link| AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()))
         .collect();
     let mut unduped_agents = vec![];
     for agent in agents {
@@ -39,7 +39,10 @@ pub fn get_coordinations_for_spam_reporter(spam_reporter: AgentPubKey) -> Extern
     
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new(ActionHash::from(link.target).into(), GetOptions::default()))
+        .map(|link| GetInput::new(
+            // ActionHash::from(link.target).into(),
+            ActionHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().into(),
+        GetOptions::default()))
         .collect();
 
     // Get the records to filter out the deleted ones
@@ -63,7 +66,7 @@ pub fn remove_spam_reporter_for_coordination(coordination_hash: ActionHash ) -> 
     let links = get_links(coordination_hash.clone(), LinkTypes::CoordinationToSpamReporters, None)?;
     
     for link in links {
-        if AgentPubKey::from(EntryHash::from(link.target.clone())).eq(&spam_reporter) {
+        if AgentPubKey::from(EntryHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()).eq(&spam_reporter) {
             delete_link(link.create_link_hash)?;
         }
     }
@@ -71,7 +74,7 @@ pub fn remove_spam_reporter_for_coordination(coordination_hash: ActionHash ) -> 
     let links = get_links(spam_reporter.clone(), LinkTypes::SpamReporterToCoordinations, None)?;
 
     for link in links {
-        if ActionHash::from(link.target.clone()).eq(&coordination_hash) {
+        if             ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().eq(&coordination_hash) {
             delete_link(link.create_link_hash)?;
         }
     }

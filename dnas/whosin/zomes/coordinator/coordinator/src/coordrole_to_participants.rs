@@ -23,7 +23,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     )?;
     let mut already_sponsored = false;
     for link in sponsor_links {
-        if AgentPubKey::from(EntryHash::from(link.target.clone())).eq(&participant) {
+        if AgentPubKey::from(EntryHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()).eq(&participant) {
             already_sponsored = true;
         }
     }
@@ -51,12 +51,13 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     let links_length = links.len();
     let mut already_committed = false;
     for link in links {
-        if AgentPubKey::from(EntryHash::from(link.target.clone())).eq(&participant) {
+        if AgentPubKey::from(EntryHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()).eq(&participant) {
             already_committed = true;
         }
     }
     let maybe_record = get(
-        ActionHash::from(coordrole_hash.clone()),
+        // ActionHash::from(coordrole_hash.clone()),
+        ActionHash::try_from(coordrole_hash.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap(),
         GetOptions::default(),
     )?;
     let mut maximum = 0;
@@ -98,7 +99,7 @@ pub fn uncommit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         None,
     )?;
     for link in links {
-        if AgentPubKey::from(EntryHash::from(link.target.clone())).eq(&participant) {
+        if AgentPubKey::from(EntryHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()).eq(&participant) {
             delete_link(link.create_link_hash)?;
         }
     }
@@ -108,7 +109,8 @@ pub fn uncommit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         None,
     )?;
     for link in links {
-        if ActionHash::from(link.target.clone()).eq(&coordrole_hash) {
+        if ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap()
+        .eq(&coordrole_hash) {
             delete_link(link.create_link_hash)?;
         }
     }
@@ -121,7 +123,7 @@ pub fn get_participants_for_coordrole(
     let links = get_links(coordrole_hash, LinkTypes::CoordroleToParticipants, None)?;
     let agents: Vec<AgentPubKey> = links
         .into_iter()
-        .map(|link| AgentPubKey::from(EntryHash::from(link.target)))
+        .map(|link| AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()))
         .collect();
     Ok(agents)
 }
@@ -133,7 +135,8 @@ pub fn get_coordroles_for_participant(
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| GetInput::new(
-            ActionHash::from(link.target).into(),
+            // ActionHash::from(link.target).into(),
+            ActionHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().into(),
             GetOptions::default(),
         ))
         .collect();

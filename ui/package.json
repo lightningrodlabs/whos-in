@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "scripts": {
     "start": "vite --clearScreen false --port $UI_PORT",
-    "build": "npm run check && vite build",
+    "build": "npm run check; vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain-open-dev/profiles": "^0.12.1",
     "@holochain/client": "^0.12.2",
+    "@lightningrodlabs/we-applet": "0.9.0",
     "@material/mwc-button": "^0.27.0",
     "@material/mwc-checkbox": "^0.27.0",
     "@material/mwc-circular-progress": "^0.27.0",

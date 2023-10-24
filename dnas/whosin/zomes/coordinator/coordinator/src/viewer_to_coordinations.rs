@@ -19,7 +19,8 @@ pub fn get_coordinations_for_viewer(viewer: AgentPubKey) -> ExternResult<Vec<Rec
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| GetInput::new(
-            ActionHash::from(link.target).into(),
+            // ActionHash::from(link.target).into(),
+            ActionHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().into(),
             GetOptions::default(),
         ))
         .collect();
@@ -38,7 +39,7 @@ pub fn find_coordination_links_for_viewer(
     let links = get_links(my_agent_pub_key, LinkTypes::ViewerToCoordinations, None)?;
     let relevant_links = links
         .into_iter()
-        .filter(|link| ActionHash::from(link.target.clone()).eq(&coordination_hash));
+        .filter(|link| ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().eq(&coordination_hash));
     Ok(relevant_links.count() as i32)
 }
 #[derive(Serialize, Deserialize, Debug)]
@@ -56,7 +57,7 @@ pub fn remove_coordination_for_viewer(
         None,
     )?;
     for link in links {
-        if ActionHash::from(link.target.clone()).eq(&input.target_coordination_hash) {
+        if ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().eq(&input.target_coordination_hash) {
             delete_link(link.create_link_hash)?;
         }
     }

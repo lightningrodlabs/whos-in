@@ -31,7 +31,7 @@ pub fn get_sponsors_for_coordination(
     let links = get_links(coordination_hash, LinkTypes::CoordinationToSponsors, None)?;
     let agents: Vec<AgentPubKey> = links
         .into_iter()
-        .map(|link| AgentPubKey::from(EntryHash::from(link.target)))
+        .map(|link| AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()))
         .collect();
     let mut unduped_agents = vec![];
     for agent in agents {
@@ -47,7 +47,8 @@ pub fn get_coordinations_for_sponsor(sponsor: AgentPubKey) -> ExternResult<Vec<R
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| GetInput::new(
-            ActionHash::from(link.target).into(),
+            // ActionHash::from(link.target).into(),
+            ActionHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().into(),
             GetOptions::default(),
         ))
         .collect();
@@ -75,7 +76,7 @@ pub fn remove_sponsor_for_coordination(
         None,
     )?;
     for link in links {
-        if AgentPubKey::from(EntryHash::from(link.target.clone()))
+        if AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap())
             .eq(&sponsor)
         {
             delete_link(link.create_link_hash)?;
@@ -87,7 +88,7 @@ pub fn remove_sponsor_for_coordination(
         None,
     )?;
     for link in links {
-        if ActionHash::from(link.target.clone()).eq(&coordination_hash) {
+        if             ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().eq(&coordination_hash) {
             delete_link(link.create_link_hash)?;
         }
     }

@@ -12,6 +12,7 @@
   import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
   import Instructions from './whosin/coordinator/Instructions.svelte';
   import MyCoordinations from './whosin/coordinator/MyCoordinations.svelte';
+  import { WeClient, isWeContext } from '@lightningrodlabs/we-applet';
 
   // import {
   //   ProfilesStore,
@@ -86,8 +87,22 @@
   }
 
   onMount(async () => {
-    // We pass '' as url because it will dynamically be replaced in launcher environments
-    client = await AppAgentWebsocket.connect('', 'dcan');
+    if (isWeContext()) {
+      const weClient = await WeClient.connect();
+      console.log(weClient.renderInfo)
+
+      if (
+        !(weClient.renderInfo.type === "applet-view")
+        && !(weClient.renderInfo.view.type === "main")
+      ) throw new Error("This Applet only implements the applet main view.");
+
+      client = weClient.renderInfo.appletClient;
+      console.log("client... ", client)
+      // const profilesClient = weClient.renderInfo.profilesClient;
+    } else {
+      // We pass '' as url because it will dynamically be replaced in launcher environments
+      client = await AppAgentWebsocket.connect('', 'dcan');
+    }
 
     console.log(currentView)
 

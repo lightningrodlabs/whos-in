@@ -5,7 +5,7 @@ pub fn validate_create_link_coordrole_to_participants(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    let action_hash = ActionHash::from(base_address);
+    let action_hash = ActionHash::try_from(base_address).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();
     let record = must_get_valid_record(action_hash)?;
     let _coordrole: crate::Coordrole = record
         .entry()
@@ -32,7 +32,7 @@ pub fn validate_delete_link_coordrole_to_participants(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    let action_hash = ActionHash::from(base_address);
+    let action_hash = ActionHash::try_from(base_address).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();
     let record = must_get_valid_record(action_hash)?;
     let _coordrole: crate::Coordrole = record
         .entry()
@@ -58,7 +58,7 @@ pub fn validate_create_link_participant_to_coordroles(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    let action_hash = ActionHash::from(target_address);
+    let action_hash = ActionHash::try_from(target_address).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();
     let record = must_get_valid_record(action_hash)?;
     let _coordrole: crate::Coordrole = record
         .entry()
@@ -85,7 +85,7 @@ pub fn validate_delete_link_participant_to_coordroles(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    let action_hash = ActionHash::from(target_address);
+    let action_hash = ActionHash::try_from(target_address).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();
     let record = must_get_valid_record(action_hash)?;
     let _coordrole: crate::Coordrole = record
         .entry()
