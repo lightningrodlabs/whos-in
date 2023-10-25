@@ -1,5 +1,4 @@
 pub mod coordination_to_spam_reporters;
-
 pub mod coordination_to_sponsors;
 pub mod viewer_to_coordinations;
 pub mod all_coordinations;
@@ -11,6 +10,14 @@ use hdk::prelude::*;
 use coordinator_integrity::*;
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
+    #[cfg(any(
+        target_os = "linux",
+        target_os = "freebsd",
+        target_os = "dragonfly",
+        target_os = "openbsd",
+        target_os = "netbsd"
+    ))]
+    std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
     Ok(InitCallbackResult::Pass)
 }
 #[derive(Serialize, Deserialize, Debug)]

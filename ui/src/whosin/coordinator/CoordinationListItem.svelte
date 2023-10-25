@@ -111,7 +111,7 @@
     <span>Error fetching the coordination: {error.data.data}</span>
     {:else}
     
-    <div on:click={goToFullview} class="dashboard-item" style="margin-bottom: 8px;">
+    <div on:mousedown={goToFullview} class="dashboard-item" style="margin-bottom: 8px;">
       <div style="display: flex; flex-direction: row; margin-bottom: 2px">
         <div class="action-title"> { coordination.title }</div>
       </div>
