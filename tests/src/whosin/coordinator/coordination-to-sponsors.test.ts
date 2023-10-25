@@ -10,7 +10,7 @@ test('link a Coordination to a Sponsor', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
-    const testAppPath = process.cwd() + '/../workdir/dcan.happ';
+    const testAppPath = process.cwd() + '/../workdir/whosin.happ';
 
     // Set up the app to be installed 
     const appSource = { appBundleSource: { path: testAppPath } };

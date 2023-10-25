@@ -1,7 +1,7 @@
 ---
 manifest_version: "1"
-name: dcan
+name: whosin
 ui:
   bundled: "../ui/dist.zip"
 happ_manifest:
-  bundled: "./dcan.happ"
+  bundled: "./whosin.happ"

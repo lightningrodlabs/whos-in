@@ -101,7 +101,7 @@
       // const profilesClient = weClient.renderInfo.profilesClient;
     } else {
       // We pass '' as url because it will dynamically be replaced in launcher environments
-      client = await AppAgentWebsocket.connect('', 'dcan');
+      client = await AppAgentWebsocket.connect('', 'whosin');
     }
 
     console.log(currentView)
