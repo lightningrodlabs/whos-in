@@ -24,10 +24,11 @@
   let coordination: Coordination | undefined;
   let coordRoles; //: Coordrole[] | undefined;
   let sponsors;
+  let commitingInProcess = false;
   
   let errorSnackbar: Snackbar;
     
-  $: error, loading, coordination, sponsors;
+  $: error, loading, coordination, sponsors, commitingInProcess;
   
   // onMount(() => fetchCoordination());
   // onMount(() => fetchRoles());
@@ -179,6 +180,7 @@
   }
   
   async function commitMe(coordRole) {
+    commitingInProcess = true;
     let coordRoleHash = coordRole;
     
     try {
@@ -195,6 +197,9 @@
       // navigate("all-coordinations", {})
       coordRole.committed = true;
     } catch (e: any) {
+      fetchRoles();
+      coordRole.committed = true;
+      commitingInProcess = false;
       console.log(e)
       errorSnackbar.labelText = `Error commiting to the coordination: ${e.data.data}`;
       errorSnackbar.show();
@@ -286,10 +291,16 @@
         <!-- {JSON.stringify(role.committed)} -->
         <!-- {JSON.stringify(role.participants.includes(client.myPubKey))} -->
         
+        {#if commitingInProcess}
+        <div class="commit" style="padding: 0; height: fit-content">
+          <mwc-circular-progress indeterminate></mwc-circular-progress>
+        </div>
+        {:else}
         {#if role.committed}
           <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>
         {:else if role.participants < decode(role.coordrole.entry.Present.entry)["maximum"]}
           <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash)} >Add me</button>
+        {/if}
         {/if}
         </div>
   

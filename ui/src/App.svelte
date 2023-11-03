@@ -236,7 +236,7 @@
         <button on:click={() => navigate('notificant')}>Sign up for text notifications</button>
       {/if}
       <AllNotifications></AllNotifications>
-      {:else if currentView == "dashboard"}
+    {:else if currentView == "dashboard"}
       <MyCoordinations></MyCoordinations>
     {:else if currentView == "all-coordinations"}
       <AllCoordinations></AllCoordinations>
@@ -252,10 +252,14 @@
     {/if}
   <!-- </profile-prompt> -->
   <!-- </profiles-context> -->
-  <br>
+  {#if dna && !loading && currentView != "instructions" && currentView != ""}
+  <footer style="margin: 10px;">
   <small>
     <img class="holochain-logo" src={Holochain} alt="holochain logo"/>
-    Private Holochain network: {dna}</small>
+    Private Holochain network: {dna}
+  </small>
+  </footer>
+  {/if}
 </main>
 
 <style>
@@ -273,8 +277,8 @@
   }
 
   .holochain-logo {
-    height: 1em;
-    top: 0.1em;
+    height: 1.2em;
+    top: 0.3em;
     position: relative;
   }
 </style>

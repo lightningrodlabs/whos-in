@@ -23,7 +23,7 @@ let emailAddress: string | undefined = '';
 
 let notifier: AgentPubKey | undefined;
 let errorSnackbar: Snackbar;
-let allNotifiers: AgentPubKey[] | undefined;
+let allNotifiers: AgentPubKey[] = [];
 
 $: agentPubKey, textNumber, whatsappNumber, emailAddress, notifier, allNotifiers, loadingNotifiers;
 $: isContactValid = textNumber !== '' || whatsappNumber !== '' || emailAddress !== '';
@@ -31,15 +31,21 @@ $: isContactValid = textNumber !== '' || whatsappNumber !== '' || emailAddress !
 async function getNotifiers() {
   loadingNotifiers = true;
   try {
-    const record: AgentPubKey[] = await client.callZome({
+    const records: AgentPubKey[] = await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
       zome_name: 'notifications',
       fn_name: 'list_notifiers',
       payload: null,
     });
-    console.log(record)
-    allNotifiers = record;
+    console.log(records)
+    // only one of each record.join(",")
+    // allNotifiers = records.filter((item, index) => records[index].join("") === item.join(""));
+    records.forEach((item, index) => {
+      if (!allNotifiers?.includes(item.agent.join(","))) {
+        allNotifiers?.push(item);
+      }
+    });
     setInterval(() => {
       loadingNotifiers = false;
     }, 2000);
@@ -82,7 +88,8 @@ async function createContact() {
     });
   } catch (e) {
     console.log(e)
-    errorSnackbar.labelText = `Error creating the contact: ${e.data.data}`;
+    console.log(e.data.data)
+    errorSnackbar.labelText = `Error selecting notifier: ${e.data.data}`;
     errorSnackbar.show();
   }
 
@@ -181,7 +188,7 @@ const handleWhatsappPhoneInput = (event) => {
   <div>
     <select bind:value={notifier}>
       {#each allNotifiers as n}
-        <option value={n}>{n}</option>
+        <option value={n.agent}>{n.tag}</option>
       {/each}
   </div>
   <br>
