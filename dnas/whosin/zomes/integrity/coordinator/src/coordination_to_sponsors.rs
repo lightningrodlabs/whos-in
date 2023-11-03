@@ -17,11 +17,7 @@ pub fn validate_create_link_coordination_to_sponsors(
             ),
         )?;
     if target_address != action.author.clone().into() {
-        return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can sponsor".into(),
-            ),
-        );
+        return Ok(ValidateCallbackResult::Invalid("Only the agent can sponsor".into()));
     }
     Ok(ValidateCallbackResult::Valid)
 }
@@ -45,9 +41,7 @@ pub fn validate_delete_link_coordination_to_sponsors(
         )?;
     if target_address != action.author.clone().into() {
         return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do unsponsor".into(),
-            ),
+            ValidateCallbackResult::Invalid("Only the agent can do unsponsor".into()),
         );
     }
     Ok(ValidateCallbackResult::Valid)
@@ -70,11 +64,7 @@ pub fn validate_create_link_sponsor_to_coordinations(
             ),
         )?;
     if base_address != action.author.clone().into() {
-        return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do this".into(),
-            ),
-        );
+        return Ok(ValidateCallbackResult::Invalid("Only the agent can do this".into()));
     }
     Ok(ValidateCallbackResult::Valid)
 }
@@ -97,11 +87,7 @@ pub fn validate_delete_link_sponsor_to_coordinations(
             ),
         )?;
     if base_address != action.author.clone().into() {
-        return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do this".into(),
-            ),
-        );
+        return Ok(ValidateCallbackResult::Invalid("Only the agent can do this".into()));
     }
     Ok(ValidateCallbackResult::Valid)
 }

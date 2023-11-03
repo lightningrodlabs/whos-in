@@ -1,11 +1,44 @@
-use hdk::prelude::*;
+use hdk::prelude::{*, tracing::field::debug};
 use coordinator_integrity::*;
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddParticipantForCoordroleInput {
     coordrole_hash: ActionHash,
     participant: AgentPubKey,
 }
+
+// #[derive(Serialize, Deserialize, Debug)]
+// pub struct NotificationTipInput {
+//     pub relevant_hash: Option<AnyLinkableHash>,
+//     pub message: Option<String>,
+//     pub notifyees: Vec<AgentPubKey>,
+// }
+
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// pub struct Tip {
+//     tip: String,
+// }
+
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
+pub struct Contact {
+    pub agent_pub_key: AgentPubKey,
+    pub text_number: Option<String>,
+    pub whatsapp_number: Option<String>,
+    pub email_address: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct NotificationTip {
+  pub retry_count: i32,
+  pub status: String,
+  pub message: String,
+  pub notificants: Vec<AgentPubKey>,
+  pub contacts: Vec<Contact>,
+  pub extra_context: String,
+  pub message_id: String,
+  pub destination: String,
+}
+
 #[hdk_extern]
 pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
@@ -15,7 +48,6 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         None,
     )?;
     let coordination_hash = coordination_hash[0].target.clone();
-
     let sponsor_links = get_links(
         coordrole_hash.clone(),
         LinkTypes::CoordinationToSponsors,
@@ -27,7 +59,6 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             already_sponsored = true;
         }
     }
-
     if !already_sponsored {
         create_link(
             coordination_hash.clone(),
@@ -42,7 +73,6 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             (),
         )?;
     }
-
     let links = get_links(
         coordrole_hash.clone(),
         LinkTypes::CoordroleToParticipants,
@@ -82,12 +112,49 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             (),
         )?;
         create_link(
-            participant,
+            participant.clone(),
             coordrole_hash,
             LinkTypes::ParticipantToCoordroles,
             (),
         )?;
     }
+
+    // let tip_input = NotificationTipInput {
+    //     relevant_hash: Some(AnyLinkableHash::from(coordination_hash.clone())),
+    //     message: Some(String::from("You have committed to a role!")),
+    //     notifyees: vec![participant.clone()],
+    // };
+
+    let relevant_hash = Some(ActionHash::try_from(coordination_hash.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap());
+    // let extra_context = Some(String::from(relevant_hash.clone().unwrap().to_string()));
+
+    let tip: NotificationTip = NotificationTip {
+        retry_count: 0,
+        status: String::from(""),
+        message: String::from(""),
+        notificants: vec![],
+        contacts: vec![],
+        extra_context: String::from(relevant_hash.clone().unwrap().to_string()),
+        message_id: String::from(""),
+        destination: String::from("send_notification_tip"),
+    };
+
+    emit_signal(tip.clone())?;
+
+    // if links_length > maximum as usize - 2 {
+        if let Err(e) = call(
+            CallTargetCell::Local, // Must be one of the roles specified in the happ manifest
+            ZomeName::from(String::from("notifications")), // Name of the zome to call
+            FunctionName(String::from("send_notification_tip")), // Name of the zome function to call
+            None, // Capability secret, if necessary
+            tip, // Input for the zome function
+        ) {
+            // Handle the error here
+            debug!("Error calling the notification function: {:?}", e);
+        } else {
+            debug!("Successfully called the zome function")
+        }
+    // }
     Ok(())
 }
 #[hdk_extern]

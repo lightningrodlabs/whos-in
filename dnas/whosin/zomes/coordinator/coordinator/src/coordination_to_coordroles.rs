@@ -27,11 +27,14 @@ pub fn add_coordrole_for_coordination(
 pub struct CoordrolesOutput {
     coordrole: Record,
     participants: usize,
+    participants_details: Vec<AgentPubKey>,
     committed: bool,
 }
 #[hdk_extern]
 pub fn get_coordroles_for_coordination(
     coordination_hash: ActionHash,
+    // _:(),
+// ) -> ExternResult<()> {
 ) -> ExternResult<Vec<CoordrolesOutput>> {
     let links = get_links(coordination_hash, LinkTypes::CoordinationToCoordroles, None)?;
     let get_input: Vec<GetInput> = links
@@ -62,16 +65,19 @@ pub fn get_coordroles_for_coordination(
             .into_iter()
             .map(|link| AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()))
             .collect();
+        // let participants_details = vec![];
         let my_agent_pub_key = agent_info()?.agent_latest_pubkey;
         let committed: bool = agents.contains(&my_agent_pub_key);
         let r_with_users = CoordrolesOutput {
             coordrole: r,
-            participants: agents.len(),
+            participants: agents.clone().len(),
+            participants_details: agents,
             committed: committed,
         };
         records_with_users.push(r_with_users);
     }
     Ok(records_with_users)
+//   Ok(())
 }
 #[hdk_extern]
 pub fn get_coordinations_for_coordrole(

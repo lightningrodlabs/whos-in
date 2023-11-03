@@ -34,6 +34,7 @@ pub enum LinkTypes {
     SponsorToCoordinations,
     CoordinationToSpamReporters,
     SpamReporterToCoordinations,
+    // AnchorToNotifiers,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -49,6 +50,8 @@ pub fn validate_agent_joining(
 }
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
+    // Ok(ValidateCallbackResult::Valid)
+
     match op.to_type::<EntryTypes, LinkTypes>()? {
         OpType::StoreEntry(store_entry) => {
             match store_entry {

@@ -129,7 +129,13 @@
               <span id="new-action">New action</span>
             </div>
           </li>
-    
+
+          <!-- if no agent linked to my agent as notifier -->
+          <!-- {#if !notifier}
+            <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
+            <button class="btn btn-primary" on:click={() => navigate("create-profile")}>Create Profile</button>
+          {/if} -->
+         
           <!-- <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg> -->
 
           <!-- <profiles-context>

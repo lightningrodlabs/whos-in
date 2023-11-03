@@ -195,6 +195,7 @@
       // navigate("all-coordinations", {})
       coordRole.committed = true;
     } catch (e: any) {
+      console.log(e)
       errorSnackbar.labelText = `Error commiting to the coordination: ${e.data.data}`;
       errorSnackbar.show();
     }

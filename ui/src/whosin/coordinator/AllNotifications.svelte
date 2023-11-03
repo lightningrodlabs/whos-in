@@ -22,28 +22,48 @@
     });
 
     async function goToCoordination(coordinationHash, seen) {
-
-    if (!seen) {
-        try {
-            const records = await client
-            .callZome({
-                cap_secret: null,
-                role_name: 'whosin',
-                zome_name: 'coordinator',
-                fn_name: 'add_coordination_for_viewer',
-                payload: coordinationHash,
-            });
+        if (!seen) {
+            try {
+                const records = await client
+                .callZome({
+                    cap_secret: null,
+                    role_name: 'whosin',
+                    zome_name: 'coordinator',
+                    fn_name: 'add_coordination_for_viewer',
+                    payload: coordinationHash,
+                });
+                navigate("coordination", coordinationHash);
+                records
+            } catch (e) {
+                error = e;
+            }
+        } else {
             navigate("coordination", coordinationHash);
-            records
-        } catch (e) {
-            error = e;
         }
-    } else {
-        navigate("coordination", coordinationHash);
     }
-}
 
+    async function claimNotifier() {
+        try {
+        const record: Record = await client.callZome({
+            cap_secret: null,
+            role_name: 'whosin',
+            zome_name: 'coordinator',
+            fn_name: 'claim_notifier',
+            payload: null,
+        });
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    async function notifierPopup() {
+        navigate("notifier");
+    }
 </script>
+
+<!-- <button on:click={() => {notifierPopup()}}>Claim Notifier</button> -->
+<!-- <button on:click={() => sendText()}>Send Text</button> -->
 
 <!-- { JSON.stringify(error) } -->
 <div class="invisible-outer">

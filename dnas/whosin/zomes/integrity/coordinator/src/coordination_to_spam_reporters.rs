@@ -17,11 +17,7 @@ pub fn validate_create_link_coordination_to_spam_reporters(
             ),
         )?;
     if target_address != action.author.clone().into() {
-        return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do this".into(),
-            ),
-        );
+        return Ok(ValidateCallbackResult::Invalid("Only the agent can do this".into()));
     }
     Ok(ValidateCallbackResult::Valid)
 }
@@ -44,11 +40,7 @@ pub fn validate_delete_link_coordination_to_spam_reporters(
             ),
         )?;
     if target_address != action.author.clone().into() {
-        return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do this".into(),
-            ),
-        );
+        return Ok(ValidateCallbackResult::Invalid("Only the agent can do this".into()));
     }
     Ok(ValidateCallbackResult::Valid)
 }
@@ -70,12 +62,9 @@ pub fn validate_create_link_spam_reporter_to_coordinations(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
-    // TODO: add the appropriate validation rules
     if base_address != action.author.clone().into() {
         return Ok(
-            ValidateCallbackResult::Invalid(
-                "Only the agent can do report spam".into(),
-            ),
+            ValidateCallbackResult::Invalid("Only the agent can do report spam".into()),
         );
     }
     Ok(ValidateCallbackResult::Valid)
@@ -99,7 +88,6 @@ pub fn validate_delete_link_spam_reporter_to_coordinations(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
-    // TODO: add the appropriate validation rules
     if base_address != action.author.clone().into() {
         return Ok(
             ValidateCallbackResult::Invalid(

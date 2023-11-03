@@ -364,3 +364,10 @@ vaadin-date-time-picker {
 * {
   transition: all 0.2s ease-in-out;
 }
+
+/* .form-container {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  margin: auto;
+} */
