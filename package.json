@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "start": "AGENTS=2 npm run network",
-    "online": "AGENTS=1 npm run online:network",
+    "online": "AGENTS=2 npm run online:network",
     "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
     "online:network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:online\" \"holochain-playground\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",

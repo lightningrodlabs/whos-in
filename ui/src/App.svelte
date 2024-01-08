@@ -105,6 +105,7 @@
             payload: null,
         });
         notifier = record;
+        // console.log(notifier)
     } catch (e) {
         // console.log(e)
         let error = e;
@@ -129,8 +130,17 @@
     }
     console.log("client... ", client.appInfo())
 
+    // client.on(
+    //   'signal', 
+    //   (signal) => {
+    //     console.log(signal)
+    //     if (signal.data.payload.signal_type == "notification") {
+    //       console.log(signal.data.payload)
+    //     }
+    //   } 
+    // );
 
-    await checkForNotifier();
+    // await checkForNotifier();
 
     if (currentView == "home") {
       checkIfNew()

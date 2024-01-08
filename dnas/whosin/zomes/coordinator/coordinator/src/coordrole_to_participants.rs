@@ -139,6 +139,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         destination: String::from("send_notification_tip"),
     };
 
+    debug!("Sending notification tip");
     emit_signal(tip.clone())?;
 
     // if links_length > maximum as usize - 2 {
