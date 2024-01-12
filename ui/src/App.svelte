@@ -4,7 +4,8 @@
   import { AppAgentWebsocket } from '@holochain/client';
   import '@material/mwc-circular-progress';
   import { view, viewHash, navigate } from './store.js';
-  import { clientContext } from './contexts';
+  import { clientContext, profilesStoreContext } from './contexts';
+  import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import Header from './whosin/coordinator/Header.svelte';
   import CreateCoordination from './whosin/coordinator/CreateCoordination.svelte';
   import AllCoordinations from './whosin/coordinator/AllCoordinations.svelte';
@@ -12,25 +13,12 @@
   import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
   import Instructions from './whosin/coordinator/Instructions.svelte';
   import MyCoordinations from './whosin/coordinator/MyCoordinations.svelte';
-  import { WeClient, isWeContext } from '@lightningrodlabs/we-applet';
   import CreateTwilioCredentials from './whosin/notifications/CreateTwilioCredentials.svelte';
   import CreateContact from './whosin/notifications/CreateContact.svelte';
   import NotificationsHandler from './whosin/notifications/NotificationsHandler.svelte';
   import Holochain from "./assets/holochain.png";
+  import { WeClient, isWeContext, initializeHotReload, type HrlWithContext, type Hrl } from '@lightningrodlabs/we-applet';  
 
-  // import {
-  //   ProfilesStore,
-  //   ProfilesClient,
-  //   CreateProfile,
-  //   ProfilePrompt,
-  //   profilesStoreContext,
-  //   MyProfile,
-  //   ProfilesContext,
-  //   AgentAvatar,
-  //   ProfileDetail,
-  //   ListProfiles,
-  // } from '@holochain-open-dev/profiles';
-  
   const dispatch = createEventDispatcher();
 
   let client: AppAgentClient | undefined;
@@ -40,36 +28,9 @@
   let currentHash: Uint8Array;
   let notifier: AgentPubKey | undefined;
   let dna;
+  let profilesStore = undefined;
 
   $: client, loading, store, notifier, dna;
-
-  // if (!customElements.get('profiles-context')){
-  //   customElements.define('profiles-context', ProfilesContext)
-  // }
-
-  // if (!customElements.get('my-profile')){
-  //   customElements.define('my-profile', MyProfile)
-  // }
-
-  // if (!customElements.get('profile-prompt')){
-  //   customElements.define('profile-prompt', ProfilePrompt)
-  // }
-
-  // if (!customElements.get('agent-avatar')){
-  //   customElements.define('agent-avatar', AgentAvatar)
-  // }
-
-  // if (!customElements.get('agent-avatar')){
-  //   customElements.define('agent-avatar', AgentAvatar)
-  // }
-  
-  // if (!customElements.get('profile-detail')){
-  //   customElements.define('profile-detail', ProfileDetail)
-  // }
-
-  // if (!customElements.get('list-profiles')){
-  //   customElements.define('list-profiles', ListProfiles)
-  // }
 
   async function checkIfNew() {
       try {
@@ -113,6 +74,14 @@
   }
 
   onMount(async () => {
+    if ((import.meta as any).env.DEV) {
+      try {
+        await initializeHotReload();
+      } catch (e) {
+        console.warn("Could not initialize applet hot-reloading. This is only expected to work in a We context in dev mode.")
+      }
+    }
+
     if (isWeContext()) {
       const weClient = await WeClient.connect();
       console.log(weClient.renderInfo)
@@ -123,10 +92,18 @@
       ) throw new Error("This Applet only implements the applet main view.");
 
       client = weClient.renderInfo.appletClient;
-      // const profilesClient = weClient.renderInfo.profilesClient;
+      console.log("client... ", client)
+      profilesStore = new ProfilesStore(weClient.renderInfo.profilesClient, {
+        avatarMode: "avatar-optional",
+        minNicknameLength: 3,
+      })
     } else {
       // We pass '' as url because it will dynamically be replaced in launcher environments
       client = await AppAgentWebsocket.connect('', 'whosin');
+      profilesStore = new ProfilesStore(new ProfilesClient(client, 'whosin'), {
+        avatarMode: "avatar-optional",
+        minNicknameLength: 3,
+      });
     }
     console.log("client... ", client.appInfo())
 
@@ -174,6 +151,10 @@
 
   setContext(clientContext, {
     getClient: () => client,
+  });
+
+  setContext(profilesStoreContext, {
+    getProfileStore: () => profilesStore,
   });
 
   view.subscribe(value => {

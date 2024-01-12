@@ -24,11 +24,11 @@
   let coordination: Coordination | undefined;
   let coordRoles; //: Coordrole[] | undefined;
   let sponsors;
-  let commitingInProcess = false;
+  let committingInProcess = false;
   
   let errorSnackbar: Snackbar;
     
-  $: error, loading, coordination, sponsors, commitingInProcess;
+  $: error, loading, coordination, sponsors, committingInProcess;
   
   // onMount(() => fetchCoordination());
   // onMount(() => fetchRoles());
@@ -180,7 +180,7 @@
   }
   
   async function commitMe(coordRole) {
-    commitingInProcess = true;
+    committingInProcess = true;
     let coordRoleHash = coordRole;
     
     try {
@@ -196,10 +196,11 @@
       fetchRoles();
       // navigate("all-coordinations", {})
       coordRole.committed = true;
+      committingInProcess = false;
     } catch (e: any) {
       fetchRoles();
       coordRole.committed = true;
-      commitingInProcess = false;
+      committingInProcess = false;
       console.log(e)
       errorSnackbar.labelText = `Error commiting to the coordination: ${e.data.data}`;
       errorSnackbar.show();
@@ -291,7 +292,7 @@
         <!-- {JSON.stringify(role.committed)} -->
         <!-- {JSON.stringify(role.participants.includes(client.myPubKey))} -->
         
-        {#if commitingInProcess}
+        {#if committingInProcess}
         <div class="commit" style="padding: 0; height: fit-content">
           <mwc-circular-progress indeterminate></mwc-circular-progress>
         </div>
