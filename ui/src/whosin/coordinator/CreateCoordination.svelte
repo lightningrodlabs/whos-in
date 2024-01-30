@@ -9,6 +9,8 @@
   import '@material/mwc-textfield';
   import '@material/mwc-textarea';
   import { view, viewHash, navigate } from '../../store.js';
+  import AttachmentsDialog from '../../AttachmentsDialog.svelte';
+  import { isWeContext } from '@lightningrodlabs/we-applet';
   
   import '@vaadin/date-time-picker/theme/material/vaadin-date-time-picker.js';
   let client: AppAgentClient = (getContext(clientContext) as any).getClient();
@@ -16,6 +18,8 @@
   const dispatch = createEventDispatcher();
   
   
+  let attachmentsDialog : AttachmentsDialog
+  let attachments = []
   let title: string | undefined;
   let description: string | undefined;
   let happeningDate: number | undefined;
@@ -30,7 +34,7 @@
   
   let errorSnackbar: Snackbar;
   
-  $: title, description, happeningDate, signupDeadline, reminderDate, coordRoles, roleTitle, roleDescription, minimum, maximum;
+  $: title, description, happeningDate, signupDeadline, reminderDate, coordRoles, roleTitle, roleDescription, minimum, maximum, attachments;
   $: isCoordinationValid = title !== undefined && description !== undefined && coordRoles.length > 0; //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
   $: isCoordRoleValid = roleTitle != undefined && roleDescription != undefined && minimum != undefined && maximum != undefined && minimum <= maximum && minimum > 0;
   
@@ -42,6 +46,12 @@
       signup_deadline: signupDeadline!,
       reminder_date: reminderDate!,
       coordroles: coordRoles!,
+      attachments: attachments.map(a => {
+        return {
+          hrl: JSON.stringify(a.hrl),
+          context: a.context
+        }
+      }),
     };
     
     try {
@@ -139,6 +149,19 @@
         <vaadin-date-time-picker label="Reminder Date"  on:change={e => { reminderDate = new Date(e.target.value).valueOf() * 1000;} } required></vaadin-date-time-picker>          
       </div>
     </div> -->
+    {#if isWeContext}
+    <div style="display:flex; flex-wrap:wrap; align-items: center; margin-bottom:10px;">
+      <h2>Attachments &nbsp;
+
+      </h2>
+    <AttachmentsDialog bind:this={attachmentsDialog} bind:attachments on:add-attachments={
+      (e) => {
+        console.log("add-attachments", e.detail)
+        attachments = e.detail.attachments
+      }
+    }></AttachmentsDialog>
+    </div>
+  {/if}
   
     <div style="display: flex; flex-direction: column">
       <h2>Roles</h2>
@@ -171,6 +194,9 @@
       </div>
   
     </div>
+
+
+
   
     <br>
     <mwc-button class="add-role"
@@ -179,7 +205,7 @@
     disabled={!isCoordRoleValid}
     on:click={() => addCoordrole(roleTitle, roleDescription, minimum, maximum)}
     >
-    </mwc-button>  
+    </mwc-button>
     <br>
     <mwc-button 
       raised

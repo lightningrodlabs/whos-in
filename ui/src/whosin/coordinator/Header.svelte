@@ -12,6 +12,7 @@ import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEnt
 import { onMount, setContext, getContext } from 'svelte';
 import { decode } from '@msgpack/msgpack';
 import Avatar from "./Avatar.svelte";
+import { isWeContext } from "@lightningrodlabs/we-applet";
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 let currentView;
@@ -41,9 +42,17 @@ navigate("all-coordinations", {});
   <nav class="navbar">
     <div class="container-fluid converge-header">
       <div>
+        {#if !isWeContext()}
         <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>
           <img class="logo-image" src={Logo} alt="whos-in logo"/>
-        </a>    
+        </a>
+        {:else}
+        <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>
+
+        <h1 id="whosin-title">Who's In?</h1>
+        <!-- <small id="subtitle">for Moss</small> -->
+        </a>
+        {/if}
       </div>
     <div>
 
@@ -99,6 +108,11 @@ navigate("all-coordinations", {});
       </div>
     </li>
 
+
+    <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
+    <li class="notifications-li">
+      <Avatar showNickname={true} agentPubKey={client.myPubKey}  size={24} namePosition="row"></Avatar>
+    </li>
     <!-- if no agent linked to my agent as notifier -->
     <!-- {#if !notifier}
       <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
@@ -131,3 +145,27 @@ navigate("all-coordinations", {});
     </div><!-- /.container-fluid -->
   </nav>
 </header>
+
+<style>
+  .converge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #whosin-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1952bb;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 3.15px;
+    font-style: italic;
+  }
+  #subtitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3fadab;
+    margin: 0;
+    letter-spacing: 1.15px;
+  }
+</style>

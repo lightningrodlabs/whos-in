@@ -12,6 +12,8 @@ import type {
   DeleteLink
 } from '@holochain/client';
 
+import type { HrlB64WithContext, Hrl } from '@lightningrodlabs/we-applet';
+
 export type CoordinatorSignal = {
   type: 'EntryCreated';
   action: SignedActionHashed<Create>;
@@ -55,6 +57,8 @@ export interface Coordination {
   reminder_date: number | null;
 
   coordroles: Array<Coordrole>;
+
+  attachments?: HrlB64WithContext[];
 }
 
 

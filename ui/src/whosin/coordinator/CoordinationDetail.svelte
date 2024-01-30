@@ -10,6 +10,8 @@
   import '@material/mwc-snackbar';
   import '@material/mwc-icon-button';
   import { navigate } from '../../store.js';
+  import AttachmentsList from '../../AttachmentsList.svelte';
+  import { isWeContext } from '@lightningrodlabs/we-applet';
   
   const dispatch = createEventDispatcher();
   
@@ -20,6 +22,7 @@
   let loading = true;
   let error: any = undefined;
   
+  let attachments = [];
   // let record: Record | undefined;
   let coordination: Coordination | undefined;
   let coordRoles; //: Coordrole[] | undefined;
@@ -58,6 +61,12 @@
       });
       if (record) {
         coordination = decode((record.entry as any).Present.entry) as Coordination;
+        attachments = coordination.attachments?.map((attachment) => {
+          return {
+            hrl: JSON.parse(attachment.hrl),
+            context: attachment.context
+          }
+        })
       }
     } catch (e) {
       error = e;
@@ -240,12 +249,17 @@
   <span>Error fetching the coordination: {error.data.data}</span>
   {:else}
   
-  <div class="white-container" style="display: flex; flex-direction: column">
 
-    <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <div style="display: flex; flex-direction: row; margin-bottom: 0px">
       <h1>{ coordination.title }</h1>
     </div>
   
+    {#if isWeContext}
+      <div style="display: flex; flex-direction: row; margin-bottom: 5px">
+        <AttachmentsList {attachments} allowDelete={false}/>
+      </div>
+    {/if}
+
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="white-space: pre-line">{ coordination.description }</span>
     </div>
@@ -324,7 +338,6 @@
     {/if}
   
   <div class="invisible" on:click={() => markSpam()}>.</div>
-  </div>
   {/if}
   
   

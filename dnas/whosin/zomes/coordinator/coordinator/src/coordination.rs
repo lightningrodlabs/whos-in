@@ -13,6 +13,7 @@ pub struct CreateCoordinationInput {
     reminder_date: Option<Timestamp>,
     signup_deadline: Option<Timestamp>,
     coordroles: Vec<Coordrole>,
+    attachments: Option<Vec<HrlB64WithContext>>,
 }
 #[hdk_extern]
 pub fn get_dna_hash(_:()) -> ExternResult<String> {
@@ -36,6 +37,7 @@ pub fn create_coordination(input: CreateCoordinationInput) -> ExternResult<Recor
         reminder_date: input.reminder_date,
         signup_deadline: input.signup_deadline,
         coordroles: coordrole_hashes.clone(),
+        attachments: input.attachments,
     };
     let coordination_hash = create_entry(
         &EntryTypes::Coordination(coordination.clone()),

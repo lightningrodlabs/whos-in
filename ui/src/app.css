@@ -25,7 +25,6 @@ main {
 .role-outer {
   background-color: white;
   display: inline-block;
-  width: 100%;
   margin: 6px 6px 6px 0px;
   vertical-align: top;
   box-shadow: 0px 0px 6px #00000019;
@@ -34,6 +33,13 @@ main {
   border-radius: 12px;
   transition: all 0s ease;
   width: calc(50% - 9px);
+}
+
+/* role-outer has full width in mobile*/
+@media only screen and (max-width: 600px) {
+  .role-outer {
+    width: calc(100% - 28px);
+  }
 }
 
 .role-item {
@@ -179,7 +185,7 @@ nav logo {
 
 .icon {
   width: 22px;
-  height: 22px;
+  /* height: 22px; */
 }
 
 .middle-of-header-right {
@@ -371,3 +377,10 @@ vaadin-date-time-picker {
   width: 300px;
   margin: auto;
 } */
+
+.attachment-container {
+  background-color: white;
+  padding: 25px;
+  height: 100vh;
+  width: calc(100vw - 65px);
+}
