@@ -807,7 +807,7 @@ checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 [[package]]
 name = "hc_zome_notifications"
 version = "0.0.1"
-source = "git+https://github.com/holochain-open-dev/notifications?branch=0.2-merge#099143d0fd411fa765bd915e927e6cd573f5bc24"
+source = "git+https://github.com/holochain-open-dev/notifications?branch=0.2-merge#22461b189c33bbd2bd19f0e6b4e11687d4da21c8"
 dependencies = [
  "hc_zome_notifications_integrity",
  "hdk",
@@ -817,7 +817,7 @@ dependencies = [
 [[package]]
 name = "hc_zome_notifications_integrity"
 version = "0.0.1"
-source = "git+https://github.com/holochain-open-dev/notifications?branch=0.2-merge#099143d0fd411fa765bd915e927e6cd573f5bc24"
+source = "git+https://github.com/holochain-open-dev/notifications?branch=0.2-merge#22461b189c33bbd2bd19f0e6b4e11687d4da21c8"
 dependencies = [
  "hdi",
  "serde",

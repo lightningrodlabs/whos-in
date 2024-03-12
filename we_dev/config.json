@@ -37,14 +37,14 @@
             "joiningAgents": [2]
           },
           {
-            "name": "gamez",
-            "instanceName": "gamez",
+            "name": "kando",
+            "instanceName": "kando",
             "registeringAgent": 1,
             "joiningAgents": [2]
           },
           {
-            "name": "kando",
-            "instanceName": "kando",
+            "name": "threads",
+            "instanceName": "threads",
             "registeringAgent": 1,
             "joiningAgents": [2]
           }
@@ -90,6 +90,19 @@
         "source": {
           "type": "https",
           "url": "https://github.com/holochain-apps/kando/releases/download/v0.8.18/kando.webhapp"
+        }
+      },
+      {
+        "name": "threads",
+        "subtitle": "threads",
+        "description": "threads",
+        "icon": {
+          "type": "filesystem",
+          "path": "/home/leo/hApps/whosin/we_dev/threads.svg"
+        },
+        "source": {
+          "type": "https",
+          "url": "https://github.com/lightningrodlabs/threads/releases/download/we-applet-rc/threads-we_applet-notifs.webhapp"
         }
       }
     ]
