@@ -84,7 +84,7 @@ async function createCoordrole() {
 
   <mwc-button 
     raised
-    label="Create Coordrole"
+    label="Propose coordrole"
     disabled={!isCoordroleValid}
     on:click={() => createCoordrole()}
   ></mwc-button>

@@ -46,8 +46,8 @@
 
 </script>
 
-<div class="white-container" style="display: flex; flex-direction: column">
-  <h1>My Commitments</h1>
+<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
+  <label>My coordinations</label>
   {#if coordinations && coordinations.length}
   {#each coordinations.reverse() as hash}
     <CoordinationListItem coordinationHash={hash}></CoordinationListItem>

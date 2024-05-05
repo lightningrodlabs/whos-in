@@ -9,10 +9,20 @@ pub struct HrlB64WithContext {
 
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
+pub enum CoordinationType {
+    Event,
+    Project,
+    Agreement,
+}
+
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
 pub struct Coordination {
     pub title: String,
     pub description: String,
-    pub happening_date: Option<Timestamp>,
+    pub coordination_type: CoordinationType,
+    pub starts_date: Option<Timestamp>,
+    pub ends_date: Option<Timestamp>,
     pub signup_deadline: Option<Timestamp>,
     pub reminder_date: Option<Timestamp>,
     pub coordroles: Vec<ActionHash>,

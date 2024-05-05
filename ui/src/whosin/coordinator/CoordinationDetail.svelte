@@ -12,6 +12,7 @@
   import { navigate } from '../../store.js';
   import AttachmentsList from '../../AttachmentsList.svelte';
   import { isWeContext } from '@lightningrodlabs/we-applet';
+  import SvgIcon from './SvgIcon.svelte';
   
   const dispatch = createEventDispatcher();
   
@@ -28,6 +29,21 @@
   let coordRoles; //: Coordrole[] | undefined;
   let sponsors;
   let committingInProcess = false;
+
+  let stringStartDate;
+  let stringEndDate;
+  let stringExpiresDate;
+  let coordination_type;
+  const coordination_type_icons = {
+    "Event": "faCalendar",
+    "Project": "faTask",
+    "Agreement": "faAgreement"
+  }
+  const coordination_type_colors = {
+    "Event": "357cff",
+    "Project": "#ff951d",
+    "Agreement": "#5301ae"
+  }
   
   let errorSnackbar: Snackbar;
     
@@ -67,6 +83,21 @@
             context: attachment.context
           }
         })
+        let options: Intl.DateTimeFormatOptions = { 
+          weekday: 'long',
+          year: 'numeric', 
+          month: 'long',
+          day: 'numeric', 
+          hour: 'numeric', 
+          minute: 'numeric', 
+          hour12: true 
+        };
+        coordination_type = Object.keys(coordination.coordination_type)[0]
+        stringStartDate = new Date(coordination.starts_date / 1000).toLocaleDateString(undefined, options);
+        // if year is current year, don't show year
+        stringStartDate = stringStartDate.replace(" " + new Date().getFullYear() + " ", " ");
+        stringEndDate = new Date(coordination.ends_date / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
+        stringExpiresDate = new Date(coordination.signup_deadline / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
       }
     } catch (e) {
       error = e;
@@ -211,7 +242,7 @@
       coordRole.committed = true;
       committingInProcess = false;
       console.log(e)
-      errorSnackbar.labelText = `Error commiting to the coordination: ${e.data.data}`;
+      errorSnackbar.labelText = `Error commiting to the coordination: ${e}`;
       errorSnackbar.show();
     }
   }
@@ -251,7 +282,14 @@
   
 
     <div style="display: flex; flex-direction: row; margin-bottom: 0px">
-      <h1>{ coordination.title }</h1>
+      <h1 style="margin: 0; font-weight: bold;">
+        { coordination.title }</h1>
+        <div class="type-label" style="background: {coordination_type_colors[coordination_type]}">
+          <SvgIcon color="#fff" size=15 icon="{coordination_type_icons[coordination_type]}" /> 
+          <div style="margin: 2px;">
+            {coordination_type}
+          </div>
+        </div>
     </div>
   
     {#if isWeContext}
@@ -259,17 +297,57 @@
         <AttachmentsList {attachments} allowDelete={false}/>
       </div>
     {/if}
+  
+    <!-- <div style="display: flex; flex-direction: row; margin-bottom: 0px">
+      <SvgIcon size=16 icon="{coordination_type_icons[coordination_type]}" /> 
+      <div style="margin: 2px;">
+        {coordination_type}
+      </div>
+    </div> -->
 
-    <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    {#if coordination.signup_deadline}
+      <div class="action-details">
+        <!-- deadline to signup -->
+        <div class="action-date">
+          <SvgIcon color="#484848" size=16 icon="faClock" />
+          Deadline to signup: <span style="white-space: pre-line">{ stringExpiresDate }</span>
+        </div>
+      </div>
+    {/if}
+
+    {#if coordination.starts_date}
+      <div class="action-details">
+        <!-- if start date and end date are on the same day -->
+        {#if stringStartDate.split(',')[0] == stringEndDate.split(',')[0]}
+          <div class="action-date">
+            <SvgIcon color="#484848" size=16 icon="faClock" />
+            Event date: <span style="white-space: pre-line">{ stringStartDate.split(" at")[0] } {stringStartDate.split('at ')[1]} to {stringEndDate.split('at ')[1]}</span>
+          </div>
+        {:else}
+          <div class="action-date">
+            <SvgIcon color="#484848" size=16 icon="faClock" />
+            Event dates: <span style="white-space: pre-line">{ stringStartDate }</span>
+            to <span style="white-space: pre-line">{ stringEndDate }</span>
+          </div>
+        {/if}
+      </div>
+    {:else if coordination.ends_date}
+      <div class="action-date">
+        <SvgIcon color="#484848" size=16 icon="faClock" />
+        Deadline to complete: <span style="white-space: pre-line">{ stringEndDate }</span>
+      </div>
+    {/if}
+
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px; margin-top: 10px;">
       <span style="white-space: pre-line">{ coordination.description }</span>
     </div>
-  
+
     <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-      Happening on:&nbsp;<span style="white-space: pre-line">{ new Date(coordination.happening_date / 1000).toLocaleString() }</span>
-    </div> -->
-  
-    <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-      Deadline: &nbsp;<span style="white-space: pre-line">{ new Date(coordination.signup_deadline / 1000).toLocaleString() }</span>
+      Ends on: &nbsp;<span style="white-space: pre-line">{ new Date(coordination.ends_date / 1000).toLocaleString() }</span>
+    </div>
+
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      Signup deadline: &nbsp;<span style="white-space: pre-line">{ new Date(coordination.signup_deadline / 1000).toLocaleString() }</span>
     </div> -->
   
     <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -279,58 +357,62 @@
     <h2 style="float: left; width: 10px;">Roles</h2>
   
     {#if coordRoles}
-    {#each coordRoles as role}
-    <div class="role-outer">
-      <div class="action-section">
-          
-        <div class="role-item">
-          <strong>{decode(role.coordrole.entry.Present.entry)["title"]}</strong>
-        </div>
-  
-        <div class="role-item">
-          {decode(role.coordrole.entry.Present.entry)["description"]}
-        </div>
-  
-        <div class="progress-extraouter">
-          <div class="participation-meter participation-meter-outer">
-            <div class="participation-progress" style="
-            width: {role.participants/decode(role.coordrole.entry.Present.entry)["minimum"] * 100}%;
-            background-color: rgba(255, 196, 0, 0.75);">
-              &nbsp;
-            </div>
-          </div>
-        </div>
-  
-        <!-- {Object.is(role.participants[0], client.myPubKey)} -->
-        <!-- {JSON.stringify(role.participants/decode(role.coordrole.entry.Present.entry)["minimum"] * 100)} -->
-        <!-- {JSON.stringify(role.committed)} -->
-        <!-- {JSON.stringify(role.participants.includes(client.myPubKey))} -->
+      <div style="display:flex; flex-wrap: wrap;">
+        {#each coordRoles as role}
+          <div class="role-outer">
+            <div class="coordrole-details-section">
+                
+              <div class="role-item" style="margin-bottom: 6px;">
+                <strong>{decode(role.coordrole.entry.Present.entry)["title"]}</strong>
+              </div>
         
-        {#if committingInProcess}
-        <div class="commit" style="padding: 0; height: fit-content">
-          <mwc-circular-progress indeterminate></mwc-circular-progress>
-        </div>
-        {:else}
-        {#if role.committed}
-          <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>
-        {:else if role.participants < decode(role.coordrole.entry.Present.entry)["maximum"]}
-          <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash)} >Add me</button>
-        {/if}
-        {/if}
-        </div>
-  
-      <div class="action-section">
-        <div class="role-item">{role.participants} committed
-          {#if role.participants < decode(role.coordrole.entry.Present.entry)["minimum"]}
-            and {decode(role.coordrole.entry.Present.entry)["minimum"] - role.participants} more needed
-          {:else}
-            ✔
-          {/if}
-        </div>
+              <div class="role-item">
+                {decode(role.coordrole.entry.Present.entry)["description"]}
+              </div>
+        
+              <div class="progress-extraouter">
+                <div class="participation-meter participation-meter-outer">
+                  <div class="participation-progress" style="
+                  width: {decode(role.coordrole.entry.Present.entry)["minimum"] > 0 ? (role.participants/decode(role.coordrole.entry.Present.entry)["minimum"] * 100) : 100}%;
+                  background-color: rgba(255, 196, 0, 0.75);">
+                    &nbsp;
+                  </div>
+                </div>
+              </div>
+        
+              <!-- {Object.is(role.participants[0], client.myPubKey)} -->
+              <!-- {JSON.stringify(role.participants/decode(role.coordrole.entry.Present.entry)["minimum"] * 100)} -->
+              <!-- {JSON.stringify(role.committed)} -->
+              <!-- {JSON.stringify(role.participants.includes(client.myPubKey))} -->
+              
+              
+              </div>
+        
+            <div class="action-section">
+              <div class="role-item" style="margin-top: 8px;">{role.participants} committed
+                {#if role.participants < decode(role.coordrole.entry.Present.entry)["minimum"]}
+                  and {decode(role.coordrole.entry.Present.entry)["minimum"] - role.participants} more needed
+                {:else}
+                  ✔
+                {/if}
+              </div>
+
+              {#if committingInProcess}
+                  <div class="commit" style="padding: 0; height: fit-content">
+                    <mwc-circular-progress indeterminate></mwc-circular-progress>
+                  </div>
+                  {:else}
+                  {#if role.committed}
+                    <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>
+                  {:else if role.participants < decode(role.coordrole.entry.Present.entry)["maximum"]}
+                    <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash)} >Add me</button>
+                  {/if}
+                {/if}
+            </div>
+        
+          </div>
+        {/each}
       </div>
-  
-    </div>
-    {/each}
     {/if}
 
     {#if sponsors && sponsors.length && sponsors.length == 1 && sponsors.includes(client.myPubKey.join())}
@@ -339,5 +421,3 @@
   
   <div class="invisible" on:click={() => markSpam()}>.</div>
   {/if}
-  
-  

@@ -1,5 +1,6 @@
 <script lang="ts">
-import Logo from "../../assets/logo.png";
+// import Logo from "../../assets/logo.png";
+import Logo from "../../assets/whosin.svg";
 import FaPlusCircle from 'svelte-icons/fa/FaPlusCircle.svelte';
 import FaBell from 'svelte-icons/fa/FaBell.svelte';
 import FaBullhorn from 'svelte-icons/fa/FaBullhorn.svelte';
@@ -47,9 +48,13 @@ navigate("all-coordinations", {});
           <img class="logo-image" src={Logo} alt="whos-in logo"/>
         </a>
         {:else}
-        <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>
-
-        <h1 id="whosin-title">Who's In?</h1>
+        <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>  
+          <h1 id="whosin-title" style="display: flex; align-items: center;">
+            <img id="minilogo" src={Logo} alt="whos-in logo"/>
+            <span>
+              Who's In?
+            </span>
+          </h1>
         <!-- <small id="subtitle">for Moss</small> -->
         </a>
         {/if}
@@ -104,7 +109,7 @@ navigate("all-coordinations", {});
         </div>
         <!-- <i class="fas fa-plus white-circle-plus"></i> -->
         <!-- <img class="nav-image" src="/assets/add_circle_black_24dp-b42cee553b2665d6f62bd5d9ffc02837cf3c5a3084fc6a5674f5edf83776f565.svg" alt="Add circle black 24dp" border="0"> -->
-        <span id="new-action">New action</span>
+        <span id="new-action">New coordination</span>
       </div>
     </li>
 
@@ -153,13 +158,22 @@ navigate("all-coordinations", {});
     align-items: center;
   }
   #whosin-title {
-    font-size: 24px;
+    /* font-size: 24px;
     font-weight: 600;
     color: #1952bb;
     margin: 0;
     font-family: 'Montserrat', sans-serif;
     letter-spacing: 3.15px;
-    font-style: italic;
+    font-style: italic; */
+
+    font-size: 24px;
+    font-weight: 600;
+    color: #1952bb;
+    margin: 0;
+    font-family: Montserrat, sans-serif;
+    letter-spacing: 3.15px;
+    padding: 4px 10px;
+
   }
   #subtitle {
     font-size: 12px;
@@ -167,5 +181,16 @@ navigate("all-coordinations", {});
     color: #3fadab;
     margin: 0;
     letter-spacing: 1.15px;
+  }
+
+  #minilogo {
+    width: 1.7em;
+    margin: 1px 6px 0 -4px;
+    padding: 1px;
+    box-shadow: none;
+  }
+
+  #logo {
+    cursor: pointer;
   }
 </style>

@@ -1,4 +1,4 @@
-extern crate hc_zome_notifications;
+extern crate hc_zome_notifications_coordinator;
 use hdk::prelude::{*};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CoordrolesOutput {
@@ -13,7 +13,8 @@ pub struct CoordrolesOutput {
 pub struct Coordination {
     pub title: String,
     pub description: String,
-    pub happening_date: Option<Timestamp>,
+    pub starts_date: Option<Timestamp>,
+    pub ends_date: Option<Timestamp>,
     pub signup_deadline: Option<Timestamp>,
     pub reminder_date: Option<Timestamp>,
     pub coordroles: Vec<ActionHash>,

@@ -1,5 +1,6 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateCoordroleInput {
     coordrole: Coordrole,
@@ -9,7 +10,9 @@ pub struct CreateCoordroleInput {
 pub struct CreateCoordinationInput {
     title: String,
     description: String,
-    happening_date: Option<Timestamp>,
+    coordination_type: String,
+    starts_date: Option<Timestamp>,
+    ends_date: Option<Timestamp>,
     reminder_date: Option<Timestamp>,
     signup_deadline: Option<Timestamp>,
     coordroles: Vec<Coordrole>,
@@ -30,10 +33,21 @@ pub fn create_coordination(input: CreateCoordinationInput) -> ExternResult<Recor
         let coordrole_hash = create_entry(&EntryTypes::Coordrole(role.clone()))?;
         coordrole_hashes.push(coordrole_hash);
     }
+
+    // coordiation_type_enum is a CoordinationType enum from a input.coordination_type which is a string
+    let coordination_type_enum: CoordinationType = match input.coordination_type.as_str() {
+        "event" => CoordinationType::Event,
+        "project" => CoordinationType::Project,
+        "agreement" => CoordinationType::Agreement,
+        _ => CoordinationType::Event,
+    };
+
     let coordination: Coordination = Coordination {
         title: input.title,
         description: input.description,
-        happening_date: input.happening_date,
+        coordination_type: coordination_type_enum,
+        starts_date: input.starts_date,
+        ends_date: input.ends_date,
         reminder_date: input.reminder_date,
         signup_deadline: input.signup_deadline,
         coordroles: coordrole_hashes.clone(),

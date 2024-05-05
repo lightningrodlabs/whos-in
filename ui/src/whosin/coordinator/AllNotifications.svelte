@@ -62,7 +62,7 @@
     }
 </script>
 
-<!-- <button on:click={() => {notifierPopup()}}>Claim Notifier</button> -->
+<button on:click={() => {notifierPopup()}}>Claim Notifier</button>
 <!-- <button on:click={() => sendText()}>Send Text</button> -->
 
 <!-- { JSON.stringify(error) } -->

@@ -113,13 +113,13 @@ async function fetchCoordinations() {
 {:else if error}
 <span>Error fetching the coordinations: {error.data.data}.</span>
 {:else if hashes.length === 0}
-<div class="white-container" style="display: flex; flex-direction: column">
-  <h1>Actions Bulletin</h1>
-  <span>No actions yet.</span>
+<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
+  <label>All coordinations</label>
+  <span>No coordinations yet.</span>
 </div>
 {:else}
-<div class="white-container" style="display: flex; flex-direction: column">
-  <h1>Actions Bulletin</h1>
+<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
+  <label>All coordinations</label>
   {#if hashes.length > 0}
     
   {#each hashes as hash}
@@ -131,4 +131,3 @@ async function fetchCoordinations() {
   {/if}
 </div>
 {/if}
-

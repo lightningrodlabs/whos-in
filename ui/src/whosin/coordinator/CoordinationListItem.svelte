@@ -9,6 +9,7 @@
     import type { Snackbar } from '@material/mwc-snackbar';
     import '@material/mwc-snackbar';
     import '@material/mwc-icon-button';
+    import SvgIcon from './SvgIcon.svelte';
     import { view, viewHash, navigate } from '../../store.js';
 
     const dispatch = createEventDispatcher();
@@ -26,7 +27,21 @@
     let totalMin = 0;
     let totalUnderMin = 0;
     let totalParticipants = 0;
-    
+    let stringStartDate;
+    let stringEndDate
+    let stringExpiresDate
+    let coordination_type;
+    const coordination_type_icons = {
+      "Event": "faCalendar",
+      "Project": "faTask",
+      "Agreement": "faAgreement"
+    }
+    const coordination_type_colors = {
+      "Event": "357cff",
+      "Project": "#ff951d",
+      "Agreement": "#5301ae"
+    }
+
     let errorSnackbar: Snackbar;
       
     $: error, loading, record, coordination;
@@ -55,7 +70,22 @@
           payload: coordinationHash,
         });
         if (record) {
+          let options: Intl.DateTimeFormatOptions = { 
+            weekday: 'long',
+            year: 'numeric', 
+            month: 'long',
+            day: 'numeric', 
+            hour: 'numeric', 
+            minute: 'numeric', 
+            hour12: true 
+          };
           coordination = decode((record.entry as any).Present.entry) as Coordination;
+          coordination_type = Object.keys(coordination.coordination_type)[0]
+          stringStartDate = new Date(coordination.starts_date / 1000).toLocaleDateString(undefined, options);
+          // if year is current year, don't show year
+          stringStartDate = stringStartDate.replace(" " + new Date().getFullYear() + " ", " ");
+          stringEndDate = new Date(coordination.ends_date / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
+          stringExpiresDate = new Date(coordination.signup_deadline / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
         }
       } catch (e) {
         error = e;
@@ -113,20 +143,71 @@
     
     <div on:mousedown={goToFullview} class="dashboard-item" style="margin-bottom: 8px;">
       <div style="display: flex; flex-direction: row; margin-bottom: 2px">
-        <div class="action-title"> { coordination.title }</div>
+        <div class="action-title"> { coordination.title }
+        </div>
+        <div class="type-label" style="background: {coordination_type_colors[coordination_type]}">
+          <SvgIcon color="#fff" size=15 icon="{coordination_type_icons[coordination_type]}" /> 
+          <div style="margin: 2px;">
+            {coordination_type}
+          </div>
+        </div>
       </div>
 
-      <!-- <div class="progress-extraouter"> -->
+      {#if coordination.signup_deadline}
+      <div class="action-details">
+        <!-- deadline to signup -->
+        <div class="action-date">
+          <SvgIcon color="#484848" size=16 icon="faClock" />
+          Deadline to signup: <span style="white-space: pre-line">{ stringExpiresDate }</span>
+        </div>
+      </div>
+    {/if}
+
+    {#if coordination.starts_date}
+      <div class="action-details">
+        <!-- if start date and end date are on the same day -->
+        {#if stringStartDate.split(',')[0] == stringEndDate.split(',')[0]}
+          <div class="action-date">
+            <SvgIcon color="#484848" size=16 icon="faClock" />
+            Event date: <span style="white-space: pre-line">{ stringStartDate.split(" at")[0] } {stringStartDate.split('at ')[1]} to {stringEndDate.split('at ')[1]}</span>
+          </div>
+        {:else}
+          <div class="action-date">
+            <SvgIcon color="#484848" size=16 icon="faClock" />
+            Event dates: <span style="white-space: pre-line">{ stringStartDate }</span>
+            to <span style="white-space: pre-line">{ stringEndDate }</span>
+          </div>
+        {/if}
+      </div>
+    {:else if coordination.ends_date}
+      <div class="action-date">
+        <SvgIcon color="#484848" size=16 icon="faClock" />
+        Deadline to complete: <span style="white-space: pre-line">{ stringEndDate }</span>
+      </div>
+    {/if}
+
+      <div style="display: flex; flex-direction: row; margin-bottom: 2px">
+        <div class="action-description"> { coordination.description }</div>
+      </div>
+
+      <div class="progress-extraouter">
         <div class="participation-meter participation-meter-outer">
           <div class="participation-progress" style="
-          width: {totalUnderMin/totalMin * 100}%;
+          width: {totalMin > 0 ? totalUnderMin/totalMin * 100 : 100}%;
           background-color: rgba(255, 196, 0, 0.75);">
             &nbsp;
           </div>
         </div>
-      <!-- </div> -->
+        <div class="participation-label">
+          {#if totalUnderMin < totalMin}
+          {totalUnderMin}/{totalMin} participation
+          {:else}
+            ✔
+          {/if}
+        </div>
+      </div>
 
-      <div class="action-section">
+      <!-- <div class="action-section">
         <div class="role-item">{totalParticipants} committed
           {#if totalUnderMin < totalMin}
             and {totalMin - totalUnderMin} more needed
@@ -134,7 +215,7 @@
             ✔
           {/if}
         </div>
-      </div>
+      </div> -->
 
       <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="white-space: pre-line">{ new Date(coordination.happening_date / 1000).toLocaleString() }</span>

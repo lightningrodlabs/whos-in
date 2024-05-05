@@ -1,9 +1,15 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
+use zome_utils::*;
+
 #[hdk_extern]
 pub fn get_all_coordinations(_: ()) -> ExternResult<Vec<Record>> {
     let path = Path::from("all_coordinations");
-    let links = get_links(path.path_entry_hash()?, LinkTypes::AllCoordinations, None)?;
+    let links = get_links(
+        link_input(
+            path.path_entry_hash()?, LinkTypes::AllCoordinations, None
+        )
+    )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| GetInput::new(
@@ -20,7 +26,11 @@ pub fn get_all_coordinations(_: ()) -> ExternResult<Vec<Record>> {
 #[hdk_extern]
 pub fn search_all_coordinations(query: String) -> ExternResult<Vec<ActionHash>> {
     let path = Path::from("all_coordinations");
-    let links = get_links(path.path_entry_hash()?, LinkTypes::AllCoordinations, None)?;
+    let links = get_links(
+        link_input(
+            path.path_entry_hash()?, LinkTypes::AllCoordinations, None)
+        )
+    ?;
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| GetInput::new(

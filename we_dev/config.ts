@@ -38,18 +38,18 @@ export default defineConfig({
           registeringAgent: 1,
           joiningAgents: [2],
         },
-        {
-          name: 'gamez',
-          instanceName: 'gamez',
-          registeringAgent: 1,
-          joiningAgents: [2],
-        },
-        {
-          name: 'notebooks',
-          instanceName: 'notebooks',
-          registeringAgent: 1,
-          joiningAgents: [2],
-        },
+        // {
+        //   name: 'Converge',
+        //   instanceName: 'Converge',
+        //   registeringAgent: 1,
+        //   joiningAgents: [2],
+        // },
+        // {
+        //   name: 'talking-stickies',
+        //   instanceName: 'talking-stickies',
+        //   registeringAgent: 1,
+        //   joiningAgents: [2],
+        // },
       ],
     },
   ],
@@ -60,7 +60,7 @@ export default defineConfig({
       description: 'store it!',
       icon: {
         type: 'filesystem',
-        path: './we_dev/logo.png',
+        path: './we_dev/whosin.png',
       },
       source: {
         type: 'localhost',
@@ -69,29 +69,29 @@ export default defineConfig({
       },
     },
     {
-        name: 'gamez',
-        subtitle: 'play!',
+        name: 'Converge',
+        subtitle: 'Decide stuff with others!',
         description: 'Real-time games based on syn',
         icon: {
           type: "https",
-          url: "https://raw.githubusercontent.com/holochain-apps/gamez/main/we_dev/gamez_icon.svg"
+          url: "https://raw.githubusercontent.com/lightningrodlabs/converge/273cba658883f5d9cc866d88980d45e8453d3fda/we_dev/converge.svg"
         },
         source: {
           type: "https",
-          url: "https://github.com/holochain-apps/gamez/releases/download/v0.3.100/gamez.webhapp"
+          url: "https://github.com/lightningrodlabs/converge/releases/download/0.0.6/converge.webhapp"
         },
       },
       {
-      name: 'notebooks',
-      subtitle: 'Collaborative note taking',
-      description: 'Real-time notetaking based on syn',
+      name: 'talking-stickies',
+      subtitle: 'talking stickies',
+      description: 'Real-time stickies based on syn',
       icon: {
         type: 'https',
-        url: 'https://lightningrodlabs.org/projects/notebooks.png',
+        url: 'https://raw.githubusercontent.com/holochain-apps/talking-stickies/main/we_dev/talking-stickies_icon.png',
       },
       source: {
         type: 'https',
-        url: 'https://github.com/lightningrodlabs/notebooks/releases/download/v0.2.0/notebooks.webhapp',
+        url: 'https://github.com/holochain-apps/talking-stickies/releases/download/v0.9.1/talking-stickies.webhapp',
       },
     },
   ],

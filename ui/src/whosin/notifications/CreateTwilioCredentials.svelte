@@ -53,10 +53,10 @@ async function createTwilioCredentials() {
       role_name: 'whosin',
       zome_name: 'notifications',
       fn_name: 'claim_notifier',
-      payload: null,
+      payload: "I am a great notifier.",
     });
   } catch (e) {
-    console.log(e.data.data)
+    console.log(e)
   } 
 }
 

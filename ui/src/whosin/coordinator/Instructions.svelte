@@ -29,7 +29,7 @@
       <li>Don't act unless all roles are filled</li>
     </ol>
 
-    <p>Get started and <button on:click={() => gotToAllCoordinations()}>View public actions</button> or <button on:click={() => goToCreate()}>create a new action</button>.</p>
+    <p>Get started and <button class="gotoButton" on:click={() => gotToAllCoordinations()}>View public coordinations</button> or <button class="gotoButton" on:click={() => goToCreate()}>create a new agreement</button>.</p>
     </div>
 </div>
 </div>
@@ -121,4 +121,17 @@
         margin: 0;
         padding: 0;
     } */
+
+    .gotoButton {
+        border: 0;
+        background: #1952bb;
+        padding: 6px;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+    }
+
+    .gotoButton:hover {
+        background: #457de3;
+    }
 </style>

@@ -1,5 +1,6 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
+use zome_utils::*;
 #[hdk_extern]
 pub fn add_spam_reporter_for_coordination(
     coordination_hash: ActionHash,
@@ -24,9 +25,11 @@ pub fn get_spam_reporters_for_coordination(
     coordination_hash: ActionHash,
 ) -> ExternResult<Vec<AgentPubKey>> {
     let links = get_links(
-        coordination_hash,
-        LinkTypes::CoordinationToSpamReporters,
-        None,
+        link_input(
+            coordination_hash,
+            LinkTypes::CoordinationToSpamReporters,
+            None,
+        )
     )?;
     let agents: Vec<AgentPubKey> = links
         .into_iter()
@@ -44,7 +47,11 @@ pub fn get_spam_reporters_for_coordination(
 pub fn get_coordinations_for_spam_reporter(
     spam_reporter: AgentPubKey,
 ) -> ExternResult<Vec<Record>> {
-    let links = get_links(spam_reporter, LinkTypes::SpamReporterToCoordinations, None)?;
+    let links = get_links(
+        link_input(
+            spam_reporter, LinkTypes::SpamReporterToCoordinations, None
+        )
+    )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| GetInput::new(
@@ -65,9 +72,11 @@ pub fn remove_spam_reporter_for_coordination(
 ) -> ExternResult<()> {
     let spam_reporter: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
     let links = get_links(
-        coordination_hash.clone(),
-        LinkTypes::CoordinationToSpamReporters,
-        None,
+        link_input(
+            coordination_hash.clone(),
+            LinkTypes::CoordinationToSpamReporters,
+            None,
+        )
     )?;
     for link in links {
         if AgentPubKey::from(EntryHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()).eq(&spam_reporter) {
@@ -75,9 +84,11 @@ pub fn remove_spam_reporter_for_coordination(
         }
     }
     let links = get_links(
-        spam_reporter.clone(),
-        LinkTypes::SpamReporterToCoordinations,
-        None,
+        link_input(
+            spam_reporter.clone(),
+            LinkTypes::SpamReporterToCoordinations,
+            None,
+        )
     )?;
     for link in links {
         if             ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().eq(&coordination_hash) {

@@ -6,6 +6,7 @@ pub struct Coordrole {
     pub description: String,
     pub minimum: i32,
     pub maximum: i32,
+    pub approved_participants: Option<Vec<ActionHash>>,
 }
 pub fn validate_create_coordrole(
     _action: EntryCreationAction,

@@ -24,7 +24,8 @@ main {
 
 .role-outer {
   background-color: white;
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
   margin: 6px 6px 6px 0px;
   vertical-align: top;
   box-shadow: 0px 0px 6px #00000019;
@@ -32,7 +33,7 @@ main {
   padding: 14px 18px;
   border-radius: 12px;
   transition: all 0s ease;
-  width: calc(50% - 9px);
+  width: calc(50% - 44px);
 }
 
 /* role-outer has full width in mobile*/
@@ -76,20 +77,59 @@ main {
   vertical-align: top;
   box-shadow: 0px 0px 6px #00000019;
   border: 1px solid #efefef;
+  background-color: white;
   padding: 14px 18px;
   border-radius: 12px;
   cursor: pointer;
 }
 
+.dashboard-item:hover {
+  box-shadow: 0px 0px 6px 4px #00000034;
+  /* background-color: #f5f8ff;
+  border: 1px solid #f5f8ff; */
+  /* padding: 18px 22px; */
+  /* margin: 0px; */
+  /* text-decoration: underline; */
+}
+
 .action-title {
-  font: normal normal bold 18px Helvetica Neue;
-  margin-bottom: 8px;
+  /* font: normal normal bold 18px Helvetica Neue;
+  margin-bottom: 8px; */
+  font-family: Roboto, 'Montserrat', sans-serif;
+  padding: 5px;
+  padding-left: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.action-description {
+  margin: 10px 0px;
+  font: normal normal 300 14px Roboto;
+  color: #0000009A;
+}
+
+.action-date {
+  font-family: Roboto;
+  font-weight: lighter;
+  font-size: 14px;
+  color: #003EB4E6;
+  margin-bottom: 10px;
+  display: inline-block;
+  margin: 0;
+}
+
+.coordrole-details-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 30px;
 }
 
 .action-section {
-  display: inline-block;
+  display: flex;
+  flex-direction: row;
   width: 100%;
-  height: 30px;
+  min-height: 30px;
 }
 
 .commit {
@@ -115,6 +155,10 @@ main {
   position: relative;
 }
 
+.commit:hover {
+  background-color: #ceddfb;
+}
+
 /* md-standard-icon-button { */
 /* my-profile { */
   /* position: relative; */
@@ -128,7 +172,7 @@ main {
   border-radius: 0;
   background-color: #ffffff;
   border: none;
-  margin-bottom: 50px;
+  /* margin-bottom: 50px; */
   box-shadow: 0px 3px 6px #0000001A;
   position: relative;
   z-index: 1;
@@ -197,8 +241,14 @@ nav logo {
   height: 26px;
   color: #d6ddeb;
   /* margin: 0 10px; */
-  margin-right: 10px;
+  /* margin-right: 10px; */
   cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+}
+
+.notifications:hover, .dashboard:hover, .bulletin:hover {
+  background-color: #b5bed4;
 }
 
 update-profile {
@@ -234,6 +284,10 @@ update-profile {
   cursor: pointer;
 }
 
+#notifications > li:hover {
+  background-color: #b5bed4;
+}
+
 #notifications-count {
   position: relative;
   top: -14px;
@@ -267,15 +321,24 @@ h1 {
   /* margin: 0px 20px; */
   margin: 0;
   font-weight: 500;
-  display: block;
+  display: inline-block;
   text-decoration: none;
   vertical-align: middle;
   cursor: pointer;
+  height: 22px;
+}
+
+.new-action-button:hover {
+  background-color: #3875e8;
 }
 
 .new-action-button > * {
   display: inline-block;
   vertical-align: middle;
+}
+
+.new-action-button > #new-action {
+  height: 19px;
 }
 
 mwc-textfield, mwc-textarea {
@@ -318,13 +381,26 @@ h2 {
 .participation-meter {
   height: 7px !important;
   width: 200px;
-  background-color: #f4f5f8;
+  background-color: #ededed;
   position: relative;
   top: 4px;
   margin-top: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   display: inline-block;
-  width: 100%;
+  width: calc(100% - 200px);
+}
+
+.progress-extraouter {
+  /* display: flex;  */
+}
+
+.progress-extraouter > .participation-label {
+  /* margin: 8px 0px 0px 7px; */
+  display: inline-block !important;
+  position: relative;
+  color: #B8BFD0 !important;
+  font: normal normal normal 12px Helvetica Neue !important;
+  font-size: 16px !important;
 }
 
 .role {
@@ -332,9 +408,15 @@ h2 {
   /* background-color: #D5DAE540; */
 }
 
-.role > mwc-textfield {
+.role > input {
   display: inline-block;
-  width: 200px;
+  /* width: 200px;
+  width: 20%; */
+  height: 30px;
+  background-color: #f5f5f5;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 20px;
 }
 
 .dates {
@@ -356,7 +438,7 @@ vaadin-date-time-picker {
 }
 
 .created-role {
-  margin: 20px;
+  margin-top: 20px;
   text-align: left;
   width: fit-content;
   display: inline-block;
@@ -383,4 +465,24 @@ vaadin-date-time-picker {
   padding: 25px;
   height: 100vh;
   width: calc(100vw - 65px);
+}
+
+.white-container > label {
+  font-size: 1.5rem;
+  font-weight: 200;
+  margin-bottom: 1rem;
+  font-family: "Roboto", "Montserrat", sans-serif;
+  color: #777777;
+}
+
+.type-label {
+  display: flex;
+  margin: 2px;
+  background: #357cff;
+  padding: 6px 10px;
+  border-radius: 20px;
+  margin-left: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
 }

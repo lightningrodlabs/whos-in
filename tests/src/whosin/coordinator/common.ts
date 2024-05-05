@@ -8,7 +8,8 @@ export async function sampleCoordination(cell: CallableCell, partialCoordination
         ...{
 	  title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
 	  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-	  happening_date: 1674053334548000,
+	  starts_date: 1674053334548000,
+	  ends_date: 1674053334548000,
 	  signup_deadline: 1674053334548000,
 	  reminder_date: 1674053334548000,
 	  coordroles: [(await fakeActionHash())],

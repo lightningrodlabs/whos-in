@@ -1,5 +1,6 @@
 use hdk::prelude::{*, tracing::field::debug};
 use coordinator_integrity::*;
+use zome_utils::*;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddParticipantForCoordroleInput {
     coordrole_hash: ActionHash,
@@ -43,15 +44,19 @@ pub struct NotificationTip {
 pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
     let coordination_hash = get_links(
-        coordrole_hash.clone(),
-        LinkTypes::CoordroleToCoordinations,
-        None,
+        link_input(
+            coordrole_hash.clone(),
+            LinkTypes::CoordroleToCoordinations,
+            None,
+        )
     )?;
     let coordination_hash = coordination_hash[0].target.clone();
     let sponsor_links = get_links(
-        coordrole_hash.clone(),
-        LinkTypes::CoordinationToSponsors,
-        None,
+        link_input(
+            coordrole_hash.clone(),
+            LinkTypes::CoordinationToSponsors,
+            None,
+        )
     )?;
     let mut already_sponsored = false;
     for link in sponsor_links {
@@ -74,9 +79,11 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         )?;
     }
     let links = get_links(
-        coordrole_hash.clone(),
-        LinkTypes::CoordroleToParticipants,
-        None,
+        link_input(
+            coordrole_hash.clone(),
+            LinkTypes::CoordroleToParticipants,
+            None,
+        )
     )?;
     let links_length = links.len();
     let mut already_committed = false;
@@ -162,9 +169,11 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
 pub fn uncommit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
     let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
     let links = get_links(
-        coordrole_hash.clone(),
-        LinkTypes::CoordroleToParticipants,
-        None,
+        link_input(
+            coordrole_hash.clone(),
+            LinkTypes::CoordroleToParticipants,
+            None,
+        )
     )?;
     for link in links {
         if AgentPubKey::from(EntryHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()).eq(&participant) {
@@ -172,9 +181,11 @@ pub fn uncommit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         }
     }
     let links = get_links(
-        participant.clone(),
-        LinkTypes::ParticipantToCoordroles,
-        None,
+        link_input(
+            participant.clone(),
+            LinkTypes::ParticipantToCoordroles,
+            None,
+        )
     )?;
     for link in links {
         if ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap()
@@ -188,7 +199,11 @@ pub fn uncommit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
 pub fn get_participants_for_coordrole(
     coordrole_hash: ActionHash,
 ) -> ExternResult<Vec<AgentPubKey>> {
-    let links = get_links(coordrole_hash, LinkTypes::CoordroleToParticipants, None)?;
+    let links = get_links(
+        link_input(
+            coordrole_hash, LinkTypes::CoordroleToParticipants, None
+        )
+    )?;
     let agents: Vec<AgentPubKey> = links
         .into_iter()
         .map(|link| AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()))
@@ -199,7 +214,11 @@ pub fn get_participants_for_coordrole(
 pub fn get_coordroles_for_participant(
     participant: AgentPubKey,
 ) -> ExternResult<Vec<Record>> {
-    let links = get_links(participant, LinkTypes::ParticipantToCoordroles, None)?;
+    let links = get_links(
+        link_input(
+            participant, LinkTypes::ParticipantToCoordroles, None
+        )
+    )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| GetInput::new(

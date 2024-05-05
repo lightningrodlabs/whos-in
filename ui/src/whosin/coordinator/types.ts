@@ -50,7 +50,11 @@ export interface Coordination {
 
   description: string;
 
-  happening_date: number | null;
+  coordination_type: string | null;
+
+  starts_date: number | null;
+
+  ends_date: number | null;
 
   signup_deadline: number | null;
 

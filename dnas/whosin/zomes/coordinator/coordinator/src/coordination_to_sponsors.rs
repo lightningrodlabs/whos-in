@@ -1,5 +1,7 @@
-use hdk::prelude::*;
+use hdk::{hdi::link, prelude::*};
 use coordinator_integrity::*;
+use zome_utils::*;
+
 #[hdk_extern]
 pub fn add_sponsor_for_coordination(coordination_hash: ActionHash) -> ExternResult<()> {
     let sponsor: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
@@ -21,7 +23,11 @@ pub fn add_sponsor_for_coordination(coordination_hash: ActionHash) -> ExternResu
 pub fn get_sponsors_for_coordination(
     coordination_hash: ActionHash,
 ) -> ExternResult<Vec<AgentPubKey>> {
-    let links = get_links(coordination_hash, LinkTypes::CoordinationToSponsors, None)?;
+    let links = get_links(
+        link_input(
+            coordination_hash, LinkTypes::CoordinationToSponsors, None
+        )
+    )?;
     let agents: Vec<AgentPubKey> = links
         .into_iter()
         .map(|link| AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()))
@@ -36,7 +42,11 @@ pub fn get_sponsors_for_coordination(
 }
 #[hdk_extern]
 pub fn get_coordinations_for_sponsor(sponsor: AgentPubKey) -> ExternResult<Vec<Record>> {
-    let links = get_links(sponsor, LinkTypes::SponsorToCoordinations, None)?;
+    let links = get_links(
+        link_input(
+            sponsor, LinkTypes::SponsorToCoordinations, None
+        )
+    )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| GetInput::new(
@@ -58,9 +68,11 @@ pub fn remove_sponsor_for_coordination(
 ) -> ExternResult<()> {
     let sponsor: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
     let links = get_links(
-        coordination_hash.clone(),
-        LinkTypes::CoordinationToSponsors,
-        None,
+        link_input(
+            coordination_hash.clone(),
+            LinkTypes::CoordinationToSponsors,
+            None,
+        )
     )?;
     for link in links {
         if AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap())
@@ -69,7 +81,11 @@ pub fn remove_sponsor_for_coordination(
             delete_link(link.create_link_hash)?;
         }
     }
-    let links = get_links(sponsor.clone(), LinkTypes::SponsorToCoordinations, None)?;
+    let links = get_links(
+        link_input(
+            sponsor.clone(), LinkTypes::SponsorToCoordinations, None
+        )
+    )?;
     for link in links {
         if             ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().eq(&coordination_hash) {
             delete_link(link.create_link_hash)?;

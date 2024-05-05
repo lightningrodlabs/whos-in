@@ -12,4 +12,6 @@ hdi = { workspace = true }
 
 serde = { workspace = true }
 
-hc_zome_notifications_integrity = { git = "https://github.com/holochain-open-dev/notifications", branch = "0.2-merge" }
+hc_zome_notifications_integrity = { git = "https://github.com/holochain-open-dev/notifications", branch = "0.3" }
+
+zome_utils.workspace = true

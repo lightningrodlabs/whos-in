@@ -25,14 +25,17 @@
   import CreateContact from './whosin/notifications/CreateContact.svelte';
   import NotificationsHandler from './whosin/notifications/NotificationsHandler.svelte';
   import Holochain from "./assets/holochain.png";
-  import { WeClient, isWeContext, initializeHotReload, type HrlWithContext, type Hrl } from '@lightningrodlabs/we-applet';  
+  import { WeClient, isWeContext, initializeHotReload } from '@lightningrodlabs/we-applet';  
   import { appletServices } from './we';
+  import SvgIcon from './SvgIcon.svelte';
+  import { fade } from 'svelte/transition'
   
   const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'converge'
   const roleName = 'converge'
   const appPort = import.meta.env.VITE_APP_PORT ? import.meta.env.VITE_APP_PORT : 8888
   const adminPort = import.meta.env.VITE_ADMIN_PORT
   const url = `ws://localhost:${appPort}`;
+
   const dispatch = createEventDispatcher();
 
   let client: AppAgentClient | undefined;
@@ -44,7 +47,6 @@
   let dna;
   let profilesStore = undefined;
   let connected = false
-  let hrlWithContext: HrlWithContext
   let weClient: WeClient
   $: client, loading, store, notifier, dna;
 
@@ -103,7 +105,9 @@
     if (!isWeContext()) {
       console.log("adminPort is", adminPort)
       if (adminPort) {
-        const adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`))
+        const url = `ws://localhost:${adminPort}`
+        console.log("connecting to admin port at:", url)
+        const adminWebsocket = await AdminWebsocket.connect({url: new URL(url)})
         const x = await adminWebsocket.listApps({})
         console.log("apps", x)
         const cellIds = await adminWebsocket.listCellIds()
@@ -111,7 +115,7 @@
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
       console.log("appPort and Id is", appPort, appId)
-      client = await AppAgentWebsocket.connect(new URL(url), appId)
+      client = await AppAgentWebsocket.connect(appId,{url: new URL(url)})
       profilesClient = new ProfilesClient(client, appId);
     
       // client = await AppAgentWebsocket.connect('', 'dcan');
@@ -197,7 +201,7 @@
   }
 
   onMount(async () => {
-   initialize()
+   await initialize()
     // client.on(
     //   'signal', 
     //   (signal) => {
@@ -314,31 +318,60 @@
             <mwc-circular-progress indeterminate />
           </div>
           {:else if currentView == "coordination"}
-          <div class="white-container" style="display: flex; flex-direction: column">
+          <div class="white-container" style="display: flex; flex-direction: column; margin-top: 30px;" in:fade={{duration: 200}} out:fade={{duration: 100}}>
           <CoordinationDetail coordinationHash={currentHash}></CoordinationDetail>
           </div>
           {:else if currentView == "create-coordination"}
-          <CreateCoordination></CreateCoordination>
+          <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+            <CreateCoordination></CreateCoordination>
+          </span>
           <!-- HI -->
           {:else if currentView == "notifications"}
-            {#if true && !loading && !notifier && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
+            <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+              {#if true && !loading && !notifier && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
               <button on:click={() => navigate('notificant')}>Sign up for text notifications</button>
-            {/if}
-            <AllNotifications></AllNotifications>
+              {/if}
+              <AllNotifications></AllNotifications>
+            </span>
           {:else if currentView == "dashboard"}
-            <MyCoordinations></MyCoordinations>
+            <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+              <MyCoordinations></MyCoordinations>
+            </span>
           {:else if currentView == "all-coordinations"}
-            <AllCoordinations></AllCoordinations>
+            <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+              <AllCoordinations></AllCoordinations>
+            </span>
           {:else if currentView == "notifier"}
-            <CreateTwilioCredentials></CreateTwilioCredentials>
+            <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+              <CreateTwilioCredentials></CreateTwilioCredentials>
+            </span>
           {:else if currentView == "notificant"}
-            <CreateContact></CreateContact>
+            <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+              <CreateContact></CreateContact>
+            </span>
           {:else}
-            <Instructions></Instructions>
+            <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+              <Instructions></Instructions>
+            </span>
           {/if}
+
+        <footer style="margin: 10px;">
+          <!-- feedback button -->
+          <SvgIcon icon="faBug" size="24" color="#000000" />
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSdzwS5D1HP3Eq6JV2lSD2cTXZoVTJJR2b7vEuAKgk9izVFRIw/viewform" target="_blank" class="feedback-button">
+            <span>Submit feedback</span>
+          </a>
+          :)
+        {#if !isWeContext && dna && !loading && currentView != "instructions" && currentView != "" && (!weClient || weClient.renderInfo.view.type != "attachable")}
+        <small>
+          <img class="holochain-logo" src={Holochain} alt="holochain logo"/>
+          Private Holochain network: {dna}
+        </small>
+        {/if}
+        </footer>
         <!-- </profile-prompt> -->
         <!-- </profiles-context> -->
-        {#if dna && !loading && currentView != "instructions" && currentView != ""}
+        {#if false && dna && !loading && currentView != "instructions" && currentView != ""}
         <footer style="margin: 10px;">
         <small>
           <img class="holochain-logo" src={Holochain} alt="holochain logo"/>
