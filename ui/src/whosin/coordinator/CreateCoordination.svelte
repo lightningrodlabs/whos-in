@@ -139,7 +139,6 @@
   <mwc-snackbar bind:this={errorSnackbar} leading>
   </mwc-snackbar>
   
-  <div class="white-container" style="display: flex; flex-direction: column; margin-top: 30px;">
 
     <!-- {:else} -->
       <!-- {#if !agreementType} -->
@@ -313,7 +312,6 @@
     
     {/if}
 
-  </div>
   
   <!-- <button on:click={() => {addToNotifiers()}}>.</button> -->
 

@@ -9,7 +9,9 @@
     "start": "AGENTS=2 npm run network",
     "online": "AGENTS=2 npm run online:network",
     "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) SIGNAL_PORT=$(port) BOOTSTRAP_PORT=$(port) UI_PORT=8888 npm run x",
+    "dev:online": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) SIGNAL_PORT=$(port) BOOTSTRAP_PORT=$(port) UI_PORT=8888 npm run x",
     "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run start:happ\" \"hc run-local-services -b $BOOTSTRAP_PORT -s $SIGNAL_PORT\"",
+    "x:online": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run start:happ\" \"hc run-local-services -b $BOOTSTRAP_PORT -s $SIGNAL_PORT\"",
     "tool-dev": " UI_PORT=8888 npm run tool-devy",
     "tool-devy": "concurrently \"npm start -w ui\" \"sleep 1 && we-dev-cli --agent-idx 1 --dev-config we_dev/config.ts\" \"sleep 10 && we-dev-cli --agent-idx 2 --dev-config we_dev/config.ts\"",
     "tool-devx": "BPORT=46263 SPORT=46262; concurrently \"hc run-local-services -b $BPORT -s $SPORT\" \"npm start -w ui\" \"./we_dev/we.AppImage  --dev-config we_dev/config.json --agent-num 1 -b http://127.0.0.1:$BPORT -s ws://127.0.0.1:$SPORT\" \"sleep 10 && ./we_dev/we.AppImage --dev-config we_dev/config.json --agent-num 2 -b http://127.0.0.1:$BPORT -s ws://127.0.0.1:$SPORT\"",
@@ -18,7 +20,7 @@
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
     "launch:happ": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/whosin.happ --ui-port $UI_PORT network mem",
     "launch:online2": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/whosin.happ --ui-port $UI_PORT network webrtc \"wss://127.0.0.1:18929\"",
-    "launch:online": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/whosin.happ --ui-port $UI_PORT network --bootstrap https://bootstrap.holo.host webrtc wss://signal.holo.host",
+    "launch:online": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/whosin.happ --ui-port $UI_PORT network --bootstrap https://bootstrap-2.infra.holochain.org webrtc wss://signal-2.infra.holochain.org",
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
     "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"

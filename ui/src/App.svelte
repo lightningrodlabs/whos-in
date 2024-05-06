@@ -154,13 +154,19 @@
             case "block":
               switch(weClient.renderInfo.view.block) {
                 case "active_boards":
-                  renderType = RenderType.BlockActiveBoards
+                  currentView = "dashboard"
                   break;
                 default:
                   throw new Error("Unknown applet-view block type:"+weClient.renderInfo.view.block);
               }
               break;
-            case "attachable":
+            case "creatable":
+              switch (weClient.renderInfo.view.name) {
+                case "Coordination":
+                currentView = "create-coordination-mini"
+              }
+              break;
+            case "asset":
               switch (weClient.renderInfo.view.roleName) {
                 case "whosin":
                   switch (weClient.renderInfo.view.integrityZomeName) {
@@ -168,7 +174,7 @@
                       switch (weClient.renderInfo.view.entryType) {
                         case "coordination":
                           currentView = "coordination"
-                          currentHash = weClient.renderInfo.view.hrlWithContext.hrl[1]
+                          currentHash = weClient.renderInfo.view.wal.hrl[1]
                           // console.log("weClient.renderInfo.view", weClient.renderInfo.view)
                           // hrlWithContext = weClient.renderInfo.view.hrlWithContext
                           break;
@@ -301,7 +307,10 @@
 
       <NotificationsHandler></NotificationsHandler>
       <main style="width: 100vw;">
-          <Header></Header>
+
+          {#if currentView != "create-coordination-mini"}
+            <Header></Header>
+          {/if}
 
           {#if !loading && !notifier && allNotifiers.length > 1 && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
             <p class="notice" style="margin: auto; border-radius: 0 0 4px 4px">Want to receive texts or emails when coordinations reach minimum participation?
@@ -320,10 +329,16 @@
           <div class="white-container" style="display: flex; flex-direction: column; margin-top: 30px;" in:fade={{duration: 200}} out:fade={{duration: 100}}>
           <CoordinationDetail coordinationHash={currentHash}></CoordinationDetail>
           </div>
+          {:else if currentView == "create-coordination-mini"}
+            <div style="padding: 10px;">
+              <CreateCoordination></CreateCoordination>
+            </div>
           {:else if currentView == "create-coordination"}
-          <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
-            <CreateCoordination></CreateCoordination>
-          </span>
+            <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+              <div class="white-container" style="display: flex; flex-direction: column; margin-top: 30px;">
+                <CreateCoordination></CreateCoordination>
+              </div>
+            </span>
           <!-- HI -->
           {:else if currentView == "notifications"}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>

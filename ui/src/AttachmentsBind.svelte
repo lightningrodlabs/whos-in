@@ -4,7 +4,7 @@
     // import type { GamezSignal, GamezStore } from "./store";
     // import type { Board } from "./board";
     import SvgIcon from "./SvgIcon.svelte";
-    import type { AppletInfo, AttachmentType } from "@lightningrodlabs/we-applet";
+    import type { AppletInfo } from "@lightningrodlabs/we-applet";
     import { HoloHashMap, type EntryHashMap } from "@holochain-open-dev/utils";
     import type { EntryHash } from "@holochain/client";
     import { hashEqual } from "./util";
@@ -19,58 +19,59 @@
         weClient = value;
     });
   
-    type AppletTypes = {
-      appletName: string,
-      attachmentTypes: Record<string,AttachmentType>
-    }
+    // type AppletTypes = {
+    //   appletName: string,
+    //   attachmentTypes: Record<string,AttachmentType>
+    // }
   
     type Groups = {
       logo_src: string,
       name: string,
     }
   
-    let groups: HoloHashMap<EntryHash, Groups> = new HoloHashMap
+    let allGroups: HoloHashMap<EntryHash, Groups> = new HoloHashMap
     let appletInfos: HoloHashMap<EntryHash, AppletInfo> = new HoloHashMap
     $: attachmentTypes= []
-    $: groups
+    $: allGroups
   
     export const refresh = async () => {
-      console.log("refresh")
-      console.log(weClient.attachmentTypes)
+    //   console.log("refresh")
+    //   console.log(weClient.attachmentTypes)
       attachmentTypes = Array.from(weClient.attachmentTypes.entries())
       console.log(attachmentTypes)
-      groups = new HoloHashMap
+        allGroups = new HoloHashMap<EntryHash, Groups>
       appletInfos = new HoloHashMap
       for (const [hash, aType] of attachmentTypes) {
           let appletInfo = appletInfos.get(hash)
           if (!appletInfo) {
               appletInfo = await weClient.appletInfo(hash)
               appletInfos.set(hash, appletInfo)
+            //   if (appletInfo.appletName === "threads") {
+            //     threadsInfos.set(hash, appletInfo)
+            //   }
             }
-          console.log(appletInfo)
+        //   console.log("88888",appletInfo)
           for (const groupHash of appletInfo.groupsIds) {
               let groupTypes = weClient.attachmentTypes.get(groupHash)
               if (!groupTypes) {
                   const profile = await weClient.groupProfile(groupHash)
-                  groups.set(groupHash, {
+                  allGroups.set(groupHash, {
                       logo_src: profile.logo_src,
                       name: profile.name,
                   })
               }
           }
       }
-      groups = groups
+      allGroups = allGroups
       attachmentTypes = attachmentTypes
-    }  
+    }
   
   </script>
   
-  {#if false}
-  {JSON.stringify(weClient)}
+  {#if true}
   <div>
-      <h3>Create Bound Item From:</h3>
-      {#each Array.from(groups.entries()) as [groupHash, group]}
-      <!-- {JSON.stringify(groupHash)} -->
+      <!-- <h3>Create Bound Item From:</h3> -->
+      {#each Array.from(allGroups.entries()) as [groupHash, group]}
       <!-- {#if group.name} -->
           <div style="display:flex;flex-direction:column">
               <div style="display:flex;align-items:center;">

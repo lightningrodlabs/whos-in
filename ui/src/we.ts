@@ -1,6 +1,6 @@
 import { asyncDerived, pipe, sliceAndJoin, toPromise } from '@holochain-open-dev/stores';
 import { LazyHoloHashMap } from '@holochain-open-dev/utils';
-import type { AppletHash, AppletServices, AttachableInfo, Hrl, HrlWithContext, WeServices } from '@lightningrodlabs/we-applet';
+import type { AppletHash, AppletServices, WAL,AssetInfo, WeServices } from '@lightningrodlabs/we-applet';
 import type { AppAgentClient, RoleName, ZomeName } from '@holochain/client';
 import { getMyDna, hrlWithContextToB64 } from './util';
 import { AppWebsocket, AppAgentWebsocket, AdminWebsocket } from '@holochain/client';
@@ -21,81 +21,32 @@ const MINILOGO = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><c
 
 export const appletServices: AppletServices = {
     // Types of attachment that this Applet offers for other Applets to attach
-    attachmentTypes: async (
-      appletClient: AppAgentClient,
-      appletHash: AppletHash,
-      weServices: WeServices
-    ) => ({
-      // No way to specify the context so we can't create a board.
-      // deliberation: {
-      //   label: "Coordination",
-      //   icon_src: CARD_ICON_SRC,
-      //   async create(attachToHrlWithContext: HrlWithContext) {
-      //     const hrlB64 = hrlWithContextToB64(attachToHrlWithContext)
-      //     const dnaHash = await getMyDna(ROLE_NAME, appletClient)
-      //     console.log("context", attachToHrlWithContext)
-
-      //     // const deliberationEntry: Deliberation = { 
-      //     //   title: attachToHrlWithContext.context.title!,
-      //     //   description: attachToHrlWithContext.context.description!,
-      //     //   settings: JSON.stringify(attachToHrlWithContext.context.settings!),
-      //     //   attachments: [hrlB64]
-      //     // };
-
-      //     const deliberationEntry: Coordination = { 
-      //       title: "Deliberation",
-      //       description: "",
-      //       settings: "",
-      //       attachments: [{
-      //         hrl: JSON.stringify(hrlB64.hrl),
-      //         context: JSON.stringify("attachToHrlWithContext.context")
-      //       }]
-      //     };
-        
-      //     console.log("createDeliberation", deliberationEntry)
-      //     let record;
-
-      //     try {
-      //       record = await appletClient.callZome({
-      //         cap_secret: null,
-      //         role_name: 'converge',
-      //         zome_name: 'converge',
-      //         fn_name: 'create_deliberation',
-      //         payload: deliberationEntry,
-      //       });
-        
-      //       // join deliberation
-      //       await appletClient.callZome({
-      //         cap_secret: null,
-      //         role_name: 'converge',
-      //         zome_name: 'converge',
-      //         fn_name: 'add_deliberation_for_deliberator',
-      //         payload: {
-      //           base_deliberator: appletClient.myPubKey,
-      //           target_deliberation_hash: record.signed_action.hashed.hash
-      //         },
-      //       });
-      //     } catch (e) {
-      //       console.log(e)
-      //     }
-
-      //     console.log("hash", record.signed_action.hashed.hash)
-
-      //     return {
-      //       hrl: [dnaHash, record.signed_action.hashed.hash],
-      //     };
-      //   },
-      // },
-    }),
+    creatables: {
+      'Coordination': {
+        label: "Deliberation",
+        icon_src: MINILOGO,
+      }
+    },
     // Types of UI widgets/blocks that this Applet supports
-    blockTypes: {},
-    getAttachableInfo: async (
+    blockTypes: {
+      'my_deliberations': {
+        label: 'My Deliberations',
+        icon_src: 
+        `<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 96C0 60.7 28.7 32 64 32H448c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zm64 0v64h64V96H64zm384 0H192v64H448V96zM64 224v64h64V224H64zm384 0H192v64H448V224zM64 352v64h64V352H64zm384 0H192v64H448V352z"/></svg>`,
+        view: "applet-view",
+      },      
+    },
+    bindAsset: async (appletClient: AppAgentClient,
+      srcWal: WAL, dstWal: WAL): Promise<void> => {
+      console.log("Bind requested.  Src:", srcWal, "  Dst:", dstWal)
+    },  
+    getAssetInfo: async (
       appletClient: AppAgentClient,
       roleName: RoleName,
       integrityZomeName: ZomeName,
       entryType: string,
-      hrlWithContext: HrlWithContext
-    ): Promise<AttachableInfo | undefined> => {
+      wal: WAL
+    ): Promise<AssetInfo | undefined> => {
         let dnaHash = await getMyDna(ROLE_NAME, appletClient)
         let coordination: Coordination;
         let record: any;
@@ -107,7 +58,7 @@ export const appletServices: AppletServices = {
             role_name: 'whosin',
             zome_name: 'coordinator',
             fn_name: 'get_coordination',
-            payload: hrlWithContext.hrl[1],
+            payload: wal.hrl[1],
           });
           if (record) {
             console.log("record", record)
@@ -127,8 +78,8 @@ export const appletServices: AppletServices = {
       appletHash: AppletHash,
       weServices: WeServices,
       searchFilter: string
-    ): Promise<Array<HrlWithContext>> => {
-      let hashes: HrlWithContext[];
+    ): Promise<Array<WAL>> => {
+      let hashes: WAL[];
       let dnaHash = await getMyDna(ROLE_NAME, appletClient)
 
       try {

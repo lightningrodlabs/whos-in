@@ -1,22 +1,23 @@
 <script lang="ts">
-  import { type HrlB64WithContext, isWeContext, type HrlWithContext } from "@lightningrodlabs/we-applet";
+  import { isWeContext, type WAL, weaveUrlFromWal } from "@lightningrodlabs/we-applet";
   import { cloneDeep } from "lodash";
   // import type { Board, Piece } from "./board";
   import { getContext, onMount } from "svelte";
   // import type { GamezStore } from "./store";
-  import { hrlWithContextToB64} from "./util";
   import SvgIcon from "./SvgIcon.svelte";
   import '@shoelace-style/shoelace/dist/components/button/button.js';
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
   import AttachmentsList from "./AttachmentsList.svelte";
-  import AttachmentsBind from "./AttachmentsBind.svelte";
+  // import AttachmentsBind from "./AttachmentsBind.svelte";
   import { weClientStored } from './store.js';
   import { createEventDispatcher } from 'svelte';
+  import type { WALUrl } from "./util";
 
   // const { getStore } :any = getContext("gzStore");
   // let store: GamezStore = getStore();
   // let piece: Piece | undefined
-  export let attachments: Array<HrlB64WithContext> = []
+  export let attachmentsLimit: number = Infinity;
+  export let attachments: Array<WALUrl>
   const dispatch = createEventDispatcher();
  
   let weClient;
@@ -53,15 +54,20 @@
   }
 
   const addAttachment = async () => {
-    const hrl = await weClient.userSelectHrl()
-    if (hrl) {
-      _addAttachment(hrl)
+    const wal = await weClient.userSelectWal()
+    if (wal) {
+      _addAttachment(wal)
     }
   }
 
-  const _addAttachment = (hrl: HrlWithContext) => {
-    attachments.push(hrlWithContextToB64(hrl))
+  const _addAttachment = (wal: WAL) => {
+    if (attachmentsLimit == attachments.length) {
+      removeAttachment(0)
+    }
+    attachments.push(weaveUrlFromWal(wal))
     attachments = attachments
+    // dispatch
+    dispatch('add-attachment', weaveUrlFromWal(wal))
     // handleSave()
   }
 
@@ -80,10 +86,9 @@
     // }
   // }
 
-  onMount(async () => {
-    bind.refresh()
-    dialog.show()
-  })
+  // onMount(async () => {
+  //   bind.refresh()
+  // })
 </script>
 
 <!-- <sl-dialog label="Add links" bind:this={dialog}> -->
@@ -96,11 +101,20 @@
     <SvgIcon icon=link size=16/>
   </button>
   
-  <AttachmentsBind
-  bind:this = {bind}
-  on:add-binding={(e)=>_addAttachment(e.detail)} 
-  />
-  
+  <!-- <button on:click={() => {dialog.show(); bind.refresh()}}>
+    <SvgIcon icon=faPlus size=16/>
+  </button>
+
+  <sl-dialog label="Create bound item from:" bind:this={dialog}>
+    <AttachmentsBind
+    bind:this = {bind}
+    on:add-binding={(e)=>{
+      console.log(e.detail);
+      _addAttachment(e.detail);
+    }}
+    />
+  </sl-dialog> -->
+    
   <div style="display:block; width: 100%">
     <AttachmentsList attachments={attachments}
         on:remove-attachment={(e)=>removeAttachment(e.detail)}/>

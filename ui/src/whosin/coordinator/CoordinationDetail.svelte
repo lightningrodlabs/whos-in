@@ -2,7 +2,7 @@
   import { createEventDispatcher, onMount, getContext } from 'svelte';
   import '@material/mwc-circular-progress';
   import { decode } from '@msgpack/msgpack';
-  import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey } from '@holochain/client';
+  import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
   import { clientContext } from '../../contexts';
   import type { Coordination, Coordrole } from './types';
   import '@material/mwc-circular-progress';
@@ -11,10 +11,11 @@
   import '@material/mwc-icon-button';
   import { navigate } from '../../store.js';
   import AttachmentsList from '../../AttachmentsList.svelte';
-  import { isWeContext } from '@lightningrodlabs/we-applet';
+  import { isWeContext, type WAL } from '@lightningrodlabs/we-applet';
   import SvgIcon from './SvgIcon.svelte';
   import Avatar from './Avatar.svelte';
-  import { countViewed, addToViewed, add_notification } from '../../store.js';
+  import { getMyDna } from '../../util';
+  import { countViewed, addToViewed, add_notification, weClientStored } from '../../store.js';
 
   const dispatch = createEventDispatcher();
   
@@ -31,6 +32,11 @@
   let coordRoles; //: Coordrole[] | undefined;
   let sponsors;
   let committingInProcess = {};
+  let weClient;
+  weClientStored.subscribe(value => {
+    weClient = value;
+  });
+  let dnaHash;
   
   let totalMin = 0;
   let totalUnderMin = 0;
@@ -59,6 +65,7 @@
   // onMount(() => fetchRoles());
   
   onMount(async () => {
+    dnaHash = await getMyDna("whosin", client)
     await fetchCoordination()
     // .then(() => {
     await fetchRoles()
@@ -67,6 +74,12 @@
 
     getSponsors()
   });
+
+
+  const copyWalToPocket = () => {
+    const attachment: WAL = { hrl: [dnaHash, coordinationHash], context: "" }
+    weClient?.walToPocket(attachment)
+  }
   
   async function fetchCoordination() {
     loading = true;
@@ -309,14 +322,58 @@
   {:else}
   
 
-    <div style="display: flex; flex-direction: row; margin-bottom: 0px">
-      <h1 style="margin: 0; font-weight: bold;">
-        { coordination.title }</h1>
-        <div class="type-label" style="background: {coordination_type_colors[coordination_type]}">
-          <SvgIcon color="#fff" size=15 icon="{coordination_type_icons[coordination_type]}" /> 
-          <div style="margin: 2px;">
-            {coordination_type}
+  <div style="display: flex; flex-direction: row; margin-bottom: 0px; justify-content: space-between">
+        <div style="display: flex; flex-direction: row; margin-bottom: 0px">
+          <h1 style="margin: 0; font-weight: bold;">
+            { coordination.title }
+          </h1>
+          <!-- <div class="type-label" style="background: {coordination_type_colors[coordination_type]}">
+            <SvgIcon color="#fff" size=15 icon="{coordination_type_icons[coordination_type]}" /> 
+            <div style="margin: 2px;">
+              {coordination_type}
+            </div>
+          </div> -->
+        </div>
+          
+        <div style="display: flex; flex-direction: row; margin-bottom: 0px">
+          <div class="type-label" style="background: {coordination_type_colors[coordination_type]};     margin-top: 0;
+          margin-bottom: 10px;
+          margin-right: 8px;
+          padding: 3px 10px;
+          font-weight: 100;
+          font-size: 14px;">
+            <SvgIcon style="height: 0" color="#fff" size=15 icon="{coordination_type_icons[coordination_type]}" /> 
+            <div style="margin: 2px; height: 0;">
+              {coordination_type}
+            </div>
           </div>
+          <div class="status-label">
+            <!-- active, happening today, expired, gathering participation -->
+            {#if coordination.ends_date && coordination.ends_date < (new Date().getTime() * 1000)}
+              <div style="background: #ff0000; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
+                Expired
+              </div>
+            {:else if totalUnderMin >= totalMin && coordination.starts_date && coordination.starts_date < (new Date().getTime() * 1000)}
+              <div style="background: #cd1dff; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
+                Happening today
+              </div>
+            {:else if totalMin > 0 && totalUnderMin < totalMin}
+              <div style="background: #ff951d; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
+                Gathering participation
+              </div>
+            {:else if totalUnderMin >= totalMin}
+              <div style="background: #57ca01; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
+                Active
+              </div>
+            {/if}
+          </div>
+          <button title="Add Board to Pocket" class="attachment-button" style="margin-right:10px; cursor: pointer; margin-right: 10px;
+          cursor: pointer;
+          height: 24px;
+          width: 40px;
+          padding: 0px;" on:click={()=>copyWalToPocket()} >          
+            <SvgIcon icon="addToPocket" size="20px"/>
+          </button>
         </div>
     </div>
   

@@ -143,12 +143,39 @@
     {:else if coordination_type == filterType || filterType == "All"}
     <div on:mousedown={goToFullview} class="dashboard-item" style="margin-bottom: 8px;">
       <div style="display: flex; flex-direction: row; margin-bottom: 2px">
-        <div class="action-title"> { coordination.title }
-        </div>
-        <div class="type-label" style="background: {coordination_type_colors[coordination_type]}">
-          <SvgIcon color="#fff" size=15 icon="{coordination_type_icons[coordination_type]}" /> 
-          <div style="margin: 2px;">
-            {coordination_type}
+        <div class="action-title" style="display: flex; justify-content: space-between; width: 100%;"> 
+          
+          <div style="display: flex;">
+            <div style="margin: auto; margin-right: 8px;">
+              { coordination.title }
+            </div>
+          </div>
+
+          <div class="status-label" style="display: flex; font-size: 14px">
+            <div class="type-label" style="background: {coordination_type_colors[coordination_type]}; margin: 7px; padding: 2px 10px; font-weight: 100; font-size: 14px">
+              <SvgIcon style="height: 0" color="#fff" size=15 icon="{coordination_type_icons[coordination_type]}" /> 
+              <div style="margin: 2px; height: 0;">
+                {coordination_type}
+              </div>
+            </div>
+            <!-- active, happening today, expired, gathering participation -->
+            {#if coordination.ends_date && coordination.ends_date < (new Date().getTime() * 1000)}
+              <div style="background: #ff0000; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+                Expired
+              </div>
+            {:else if totalUnderMin >= totalMin && coordination.starts_date && coordination.starts_date < (new Date().getTime() * 1000) && ((coordination.starts_date < (new Date().getTime() * 1000 + (24 * 60 * 60 * 1000)))) || ((!coordination.ends_date || coordination.ends_date > (new Date().getTime() * 1000)))}
+              <div style="background: #cd1dff; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+                Happening today
+              </div>
+            {:else if totalMin > 0 && totalUnderMin < totalMin}
+              <div style="background: #ff951d; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+                Gathering participation
+              </div>
+            {:else if totalUnderMin >= totalMin}
+              <div style="background: #57ca01; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+                Active
+              </div>
+            {/if}
           </div>
         </div>
       </div>
