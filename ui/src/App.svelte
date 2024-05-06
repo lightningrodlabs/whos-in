@@ -28,6 +28,7 @@
   import { WeClient, isWeContext, initializeHotReload } from '@lightningrodlabs/we-applet';  
   import { appletServices } from './we';
   import SvgIcon from './SvgIcon.svelte';
+  import AllViewed from './whosin/coordinator/AllViewed.svelte';
   import { fade } from 'svelte/transition'
   
   const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'converge'
@@ -44,6 +45,7 @@
   let currentView: String;
   let currentHash: Uint8Array;
   let notifier: AgentPubKey | undefined;
+  let allNotifiers: Array<AgentPubKey> | undefined;
   let dna;
   let profilesStore = undefined;
   let connected = false
@@ -75,6 +77,17 @@
 
   async function checkForNotifier() {
     try {
+        const record2 = await client
+        .callZome({
+          cap_secret: null,
+          role_name: 'whosin',
+          zome_name: 'notifications',
+          fn_name: 'list_notifiers',
+          payload: null,
+        });
+        console.log("all notifiers", record2)
+        allNotifiers = record2;
+
         const record = await client
         .callZome({
             cap_secret: null,
@@ -83,9 +96,10 @@
             fn_name: 'get_my_notifier',
             payload: null,
         });
+        console.log("notifier", record)
         notifier = record;
-        // console.log(notifier)
-    } catch (e) {
+
+      } catch (e) {
         // console.log(e)
         let error = e;
     }
@@ -201,7 +215,8 @@
   }
 
   onMount(async () => {
-   await initialize()
+    await initialize()
+    await checkForNotifier()
     // client.on(
     //   'signal', 
     //   (signal) => {
@@ -286,32 +301,16 @@
 
       <NotificationsHandler></NotificationsHandler>
       <main style="width: 100vw;">
-        <!-- <button on:click={() => alert_ui()}>alert ui</button> -->
-        <!-- <TwilioCredentialsDetail></TwilioCredentialsDetail> -->
-        <!-- <profiles-context store={store}> -->
-          <!-- <agent-avatar /> -->
-
-          <!-- <profile-detail agentPubKey={client.myPubKey}> -->
-        <!-- </profile-detail> -->
-          <!-- </agent-avatar> -->
-        <!-- </profiles-context> -->
-        <!-- <profiles-context store={store}> -->
-          <!-- <agent-avatar></agent-avatar> -->
-
-          <!-- <profile-detail /> -->
-          <!-- <list-profiles /> -->
           <Header></Header>
-          <!-- <profile-prompt> -->
-            <!-- <profile-detail /> -->
 
-          <!-- <agent-avatar></agent-avatar> -->
-          <!-- <profile-details></profile-details> -->
-            <!-- <my-profile></my-profile> -->
-          <!-- <div style="margin: 20px;"></div> -->
-
-          <!-- <CreateContact></CreateContact> -->
-          <!-- <ContactDetail></ContactDetail> -->
-
+          {#if !loading && !notifier && allNotifiers.length > 1 && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
+            <p class="notice" style="margin: auto; border-radius: 0 0 4px 4px">Want to receive texts or emails when coordinations reach minimum participation?
+              <button on:click={() => navigate('notificant')}>Click here</button>
+              <!-- {#if String(currentView) != "notifications"}
+                <button>Dismiss</button>
+              {/if} -->
+            </p>
+          {/if}
           
           {#if loading}
           <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -328,9 +327,6 @@
           <!-- HI -->
           {:else if currentView == "notifications"}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
-              {#if true && !loading && !notifier && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
-              <button on:click={() => navigate('notificant')}>Sign up for text notifications</button>
-              {/if}
               <AllNotifications></AllNotifications>
             </span>
           {:else if currentView == "dashboard"}
@@ -379,6 +375,8 @@
         </small>
         </footer>
         {/if}
+
+        <AllViewed />
       </main>
       {:else}
       <div class="attachment-container" style="display: flex; flex-direction: column">

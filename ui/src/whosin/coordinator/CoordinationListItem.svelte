@@ -15,6 +15,7 @@
     const dispatch = createEventDispatcher();
     
     export let coordinationHash: ActionHash;
+    export let filterType: string;
     
     let client: AppAgentClient = (getContext(clientContext) as any).getClient();
     
@@ -139,8 +140,7 @@
     </div>
     {:else if error}
     <span>Error fetching the coordination: {error.data.data}</span>
-    {:else}
-    
+    {:else if coordination_type == filterType || filterType == "All"}
     <div on:mousedown={goToFullview} class="dashboard-item" style="margin-bottom: 8px;">
       <div style="display: flex; flex-direction: row; margin-bottom: 2px">
         <div class="action-title"> { coordination.title }
@@ -190,7 +190,7 @@
         <div class="action-description"> { coordination.description }</div>
       </div>
 
-      <div class="progress-extraouter">
+      <div class="progress-extraouter" style="display: flex;">
         <div class="participation-meter participation-meter-outer">
           <div class="participation-progress" style="
           width: {totalMin > 0 ? totalUnderMin/totalMin * 100 : 100}%;
@@ -198,9 +198,14 @@
             &nbsp;
           </div>
         </div>
-        <div class="participation-label">
+        <!-- <div class="participation-label"> -->
+        <div class="participation-label" style="margin-top: 8px; margin-left: 8px; display: flex; flex-direction: row;">
           {#if totalUnderMin < totalMin}
-          {totalUnderMin}/{totalMin} participation
+            <span
+              style="display: flex; width: max-content;"
+            >
+              {totalUnderMin/totalMin}%
+            </span>
           {:else}
             ✔
           {/if}

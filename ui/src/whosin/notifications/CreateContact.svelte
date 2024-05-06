@@ -168,7 +168,7 @@ const handleWhatsappPhoneInput = (event) => {
 
 </script>
 
-<div class="white-container" style="display: flex; flex-direction: column">
+<div class="white-container" style="display: flex; flex-direction: column; margin-top: 30px;">
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">

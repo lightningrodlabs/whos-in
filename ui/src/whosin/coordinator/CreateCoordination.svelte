@@ -11,7 +11,7 @@
   import { view, viewHash, navigate } from '../../store.js';
   import AttachmentsDialog from '../../AttachmentsDialog.svelte';
   import { isWeContext } from '@lightningrodlabs/we-applet';
-  
+  import { countViewed, addToViewed } from '../../store.js';
   import '@vaadin/date-time-picker/theme/material/vaadin-date-time-picker.js';
   import SvgIcon from './SvgIcon.svelte';
   let client: AppAgentClient = (getContext(clientContext) as any).getClient();
@@ -75,6 +75,8 @@
         fn_name: 'create_coordination',
         payload: coordinationEntry
       });
+
+      addToViewed(record.signed_action.hashed.hash, client)
   
       dispatch('coordination-created', { 
         coordinationHash: record.signed_action.hashed.hash 
@@ -140,12 +142,16 @@
   <div class="white-container" style="display: flex; flex-direction: column; margin-top: 30px;">
 
     <!-- {:else} -->
-      Choose a coordination type
+      <!-- {#if !agreementType} -->
+        <h3>
+          Coordination type
+        </h3>
+      <!-- {/if} -->
       <div class="choose-type">
         <div on:click={() => {agreementType = "event"}} style="margin-right: 8px; background: {agreementType == "event" ? "#dfe4e9" : "#fff"}">
           <SvgIcon icon="faCalendar" />
           Event</div>
-        <div on:click={() => {agreementType = "project"}} style="margin: 8px; background: {agreementType == "project" ? "#dfe4e9" : "#fff"}">
+        <div on:click={() => {agreementType = "project"}} style="background: {agreementType == "project" ? "#dfe4e9" : "#fff"}">
           <SvgIcon icon="faTask" />
           Project</div>
         <div on:click={() => {agreementType = "agreement"}} style="margin-left: 8px; background: {agreementType == "agreement" ? "#dfe4e9" : "#fff"}">
@@ -158,16 +164,32 @@
       <!-- <h1 style="font-size: 24px; font-weight: 400; text-align: left;">Create {agreementTypeGrammar[agreementType]}</h1> -->
     
       <div style="margin-bottom: 16px; text-align: left;">
-        <mwc-textfield label="Title"  on:input={e => { title = e.target.value; } } required></mwc-textfield>
+        <h3 style="text-transform: capitalize;">{agreementType} Title</h3>
+        <input class="title-input" placeholder="Type Here"  on:input={e => { title = e.target.value; } } />
       </div>
                 
       <div style="margin-bottom: 16px; text-align: left;">
-        <mwc-textarea label="Description"  on:input={e => { description = e.target.value;} } ></mwc-textarea>
+        <h3 style="text-transform: capitalize;">{agreementType} Description</h3>
+        <textarea class="description-input" placeholder="Type Here"  on:input={e => { description = e.target.value;} } />
       </div>
+
+      {#if isWeContext}
+        <div style="display:flex; flex-wrap:wrap; align-items: center; margin-bottom:10px;">
+          <h2>Attachments &nbsp;
+
+          </h2>
+        <AttachmentsDialog bind:this={attachmentsDialog} bind:attachments on:add-attachments={
+          (e) => {
+            console.log("add-attachments", e.detail)
+            attachments = e.detail.attachments
+          }
+        }></AttachmentsDialog>
+        </div>
+      {/if}
     
       <div class="dates">
         <div style="margin-bottom: 16px; text-align: left;">
-          Deadline to signup (optional)
+          Deadline to signup
           <input type="datetime-local" id="signup-deadline" name="signup-deadline" 
             on:input={e => {
               signupDeadline = new Date(e.target.value).valueOf() * 1000;}
@@ -175,16 +197,23 @@
           <!-- <vaadin-date-time-picker label="Signup Deadline"  on:change={e => { signupDeadline = new Date(e.target.value).valueOf() * 1000;} } required></vaadin-date-time-picker>           -->
         </div>
 
+      </div>
+      <div class="dates">
+
         {#if agreementType == "event"}
           <div style="margin-bottom: 16px; text-align: left;">
             <!-- datetime -->
-            Starts
+            <span style="text-transform: capitalize">
+              {agreementType}
+            </span> starts
             <input type="datetime-local" id="start-date" name="start-date" on:input={e => { startsDate = new Date(e.target.value).valueOf() * 1000;} } required>
             <!-- <vaadin-date-time-picker label="Starts"  on:change={e => { startsDate = new Date(e.target.value).valueOf() * 1000;} } required></vaadin-date-time-picker>           -->
           </div>
 
           <div style="margin-bottom: 16px; text-align: left;">
-            Ends
+            <span style="text-transform: capitalize">
+              {agreementType}
+            </span> ends
             <input type="datetime-local" id="end-date" name="end-date"
               on:input={e => { 
                 let newEndsDate = new Date(e.target.value).valueOf() * 1000;
@@ -197,7 +226,7 @@
           </div>
         {:else if agreementType == "project"}
         <div style="margin-bottom: 16px; text-align: left;">
-          Deadline to complete (optional)
+          Deadline to complete
           <input type="datetime-local" id="end-date" name="end-date"
             on:input={e => { 
               let newEndsDate = new Date(e.target.value).valueOf() * 1000;
@@ -215,19 +244,6 @@
           <input type="datetime-local" id="reminder-date" name="reminder-date" on:input={e => { reminderDate = new Date(e.target.value).valueOf() * 1000;} } required>
         </div> -->
       </div>
-      {#if isWeContext}
-        <div style="display:flex; flex-wrap:wrap; align-items: center; margin-bottom:10px;">
-          <h2>Attachments &nbsp;
-
-          </h2>
-        <AttachmentsDialog bind:this={attachmentsDialog} bind:attachments on:add-attachments={
-          (e) => {
-            console.log("add-attachments", e.detail)
-            attachments = e.detail.attachments
-          }
-        }></AttachmentsDialog>
-        </div>
-      {/if}
     
       <div style="display: flex; flex-direction: column">
         <h2>Roles</h2>
@@ -254,20 +270,24 @@
         </div>
 
       <div class="role">
-        <input style="width: 20%" id="role-title-field"
+        <input placeholder="Role Title" style="width: 78%" id="role-title-field"
           bind:value={roleTitle}
           />
-        <input style="width: 40%" id="role-title-field"
-        bind:value={roleDescription}
-        />
+
+        <div style="display: flex; margin: 0;">
+          <input placeholder="Min" style="width: 60px" type="number" id="minimum-field"
+          bind:value={minimum}
+          />
+          <input placeholder="Max" style="width: 60px" type="number" id="maximum-field"
+          bind:value={maximum}
+          />
+        </div>
       </div>
       <div class="role">
-        <input style="width: 40px" type="number" id="minimum-field"
-          bind:value={minimum}
+        <input placeholder="Role Description" style="width: 88%" id="role-title-field"
+        bind:value={roleDescription}
         />
-        <input style="width: 40px" type="number" id="maximum-field"
-          bind:value={maximum}
-        />
+        
         <button class="add-role"
           disabled={!isCoordRoleValid}
           on:click={async () => {
@@ -283,6 +303,7 @@
       </div>
 
       <br>
+      <p class="notice">Warning: After proposing a {agreementType}, it belongs to everyone and cannot be edited or deleted.</p>
       <mwc-button 
         raised
         label="Propose {agreementType}"
@@ -301,7 +322,7 @@
       display: flex;
       flex-direction: row;
       justify-content: space-around;
-      margin-top: 16px;
+      /* margin-top: 16px; */
     }
 
     .choose-type > div {
@@ -310,7 +331,9 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       width: 100%;
-      margin: 8px 0;
+      margin: 0;
+      margin-bottom: 16px;
+      /* margin: 0; */
       padding: 20px;
     }
 
@@ -318,7 +341,49 @@
       background-color: #f0f0f0;
     }
 
-    mwc-textfield {
+    /* mwc-textfield {
       width: calc(100% - 20px);
+    } */
+
+    .title-input {
+      width: calc(100% - 20px);
+      height: 30px;
+      padding: 8px 14px;
+      background: #D5DAE540;
+      border: 0;
+      border-radius: 4px;
+    }
+
+    .description-input {
+      width: calc(100% - 20px);
+      height: 100px;
+      padding: 14px;
+      background: #D5DAE540;
+      border: 0;
+      border-radius: 4px;
+    }
+
+    .role {
+      display: flex;
+    }
+
+    .add-role {
+      height: 50px;
+      border: 0;
+      border-radius: 4px;
+      margin: 4px;
+      background-color: #608bdb;
+      color: white;
+      font-weight: bold;
+      width: 100px;
+      cursor: pointer;
+    }
+
+    .add-role:hover {
+      background-color: #9ab8ee;
+    }
+
+    mwc-button {
+      --mdc-theme-primary: #3360b3; /* Change this to your desired color */
     }
   </style>

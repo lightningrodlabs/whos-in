@@ -1,3 +1,5 @@
+pub mod viewed;
+pub use viewed::*;
 pub mod coordination_to_spam_reporters;
 pub use coordination_to_spam_reporters::*;
 pub mod coordination_to_sponsors;
@@ -20,6 +22,8 @@ use hdi::prelude::*;
 pub enum EntryTypes {
     Coordination(Coordination),
     Coordrole(Coordrole),
+    #[entry_type(name = "Viewed", visibility = "private")]
+    Viewed(Viewed),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
@@ -69,6 +73,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 coordrole,
                             )
                         }
+                        EntryTypes::Viewed(viewed) => {
+                            validate_create_viewed(
+                                EntryCreationAction::Create(action),
+                                viewed,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -83,6 +93,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_coordrole(
                                 EntryCreationAction::Update(action),
                                 coordrole,
+                            )
+                        }
+                        EntryTypes::Viewed(viewed) => {
+                            validate_create_viewed(
+                                EntryCreationAction::Update(action),
+                                viewed,
                             )
                         }
                     }
@@ -147,6 +163,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         EntryTypes::Coordrole(coordrole) => {
                             validate_delete_coordrole(action, original_action, coordrole)
+                        }
+                        EntryTypes::Viewed(viewed) => {
+                            validate_delete_viewed(action, original_action, viewed)
                         }
                     }
                 }
@@ -360,6 +379,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 coordrole,
                             )
                         }
+                        EntryTypes::Viewed(viewed) => {
+                            validate_create_viewed(
+                                EntryCreationAction::Create(action),
+                                viewed,
+                            )
+                        }
                     }
                 }
                 OpRecord::UpdateEntry {
@@ -445,6 +470,37 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
+                        EntryTypes::Viewed(viewed) => {
+                            let result = validate_create_viewed(
+                                EntryCreationAction::Update(action.clone()),
+                                viewed.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_viewed: Option<Viewed> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
+                                let original_viewed = match original_viewed {
+                                    Some(viewed) => viewed,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_viewed(
+                                    action,
+                                    viewed,
+                                    original_action,
+                                    original_viewed,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -511,6 +567,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 original_action,
                                 original_coordrole,
+                            )
+                        }
+                        EntryTypes::Viewed(original_viewed) => {
+                            validate_delete_viewed(
+                                action,
+                                original_action,
+                                original_viewed,
                             )
                         }
                     }

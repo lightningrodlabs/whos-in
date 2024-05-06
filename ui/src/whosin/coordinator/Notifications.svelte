@@ -4,7 +4,9 @@
     import { clientContext } from '../../contexts';
     import type { Coordination, CoordinatorSignal } from './types';
     import { decode } from '@msgpack/msgpack';
-    import { notifications, notifications_update } from '../../store.js';
+    import { WeClient, isWeContext, initializeHotReload, type WAL, type Hrl } from '@lightningrodlabs/we-applet';  
+    import { notifications, add_notification } from '../../store.js';
+    import { appletServices } from '../../we';
     
     let client: AppAgentClient = (getContext(clientContext) as any).getClient();
     // export let client: AppAgentClient;
@@ -15,16 +17,21 @@
     let loading = true;
     let error: any = undefined;
     let unseen_notifications = 0;
-    let next_unseen_notifications = 0;
+    let weClient: WeClient
+
+    // let unseen_notifications = 0;
+    // let next_unseen_notifications = 0;
     
-    $: coordinations, loading, error, unseen_notifications, next_unseen_notifications;
+    $: coordinations, loading, error, unseen_notifications;
     
     onMount(async () => {
         // let test = "";
+        weClient = await WeClient.connect(appletServices);
+
         if (typeof client != "undefined") {
             setInterval( () => {
                 fetchNotifications();
-            }, 10000);
+            }, 30000);
         }
         else {
             // alert(client)
@@ -36,6 +43,7 @@
 
     notifications.subscribe(value => {
         local_notifications = value;
+        unseen_notifications = value.filter(notification => notification.seen == false).length;
     });
 
     async function fetchCoordination(coordination) {
@@ -78,19 +86,42 @@
                     if (seen % 2 != 0) {
                         seenBool = true;
                     }
-
-                    coordination_details.push (
+                    
+                    let new_notification = 
                         {
                             "timestamp": record[0].coordrole.signed_action.hashed.content.timestamp,
                             "type": "coordination-activation",
-                            "description": "The Action " + formatted_coordination.title + " has reached minimum participation",
+                            "description": "The "  + Object.keys(formatted_coordination.coordination_type)[0].toLocaleLowerCase() + " " + formatted_coordination.title + " has reached minimum participation",
                             "hash": coordination_hash,
                             "seen": seen,
                         }
-                    );
 
-                    notifications_update(coordination_details)
-                    return seenBool
+                    console.log("----------------------------------", new_notification, local_notifications)
+                    // if new_notification not in coordination_details yet, add
+                    let alread_in = false;
+                    local_notifications.forEach(notification => {
+                        if (notification.timestamp == new_notification.timestamp) {
+                            alread_in = true;
+                        }
+                    })
+                    console.log("alread_in", alread_in)
+                        
+                    if (!alread_in) {
+                        add_notification(new_notification)
+
+                        if (new_notification.seen == 0) {
+                            weClient.notifyFrame([{
+                                title: "Coordination Activated",
+                                body: new_notification.description,
+                                notification_type: "change",
+                                icon_src: undefined,
+                                urgency: "high",
+                                timestamp: Date.now()
+                            }])
+                        }
+                    }
+                            
+                    // return seenBool
                 }
 
             }
@@ -115,22 +146,26 @@
             // coordinations = records.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
             coordinations = records;
 
-            coordination_details = [];
-            next_unseen_notifications = 0;
-            let items_processed = 0;
+            // coordination_details = [];
+            // next_unseen_notifications = 0;
+            // let items_processed = 0;
 
-            coordinations.forEach(c => {
-                let seen = fetchCoordination(c);
-                seen.then(function(result) {
-                    if (result == false) {
-                        next_unseen_notifications += 1;
-                    }
-                    items_processed += 1;
-                    if (items_processed === coordinations.length) {
-                        unseen_notifications = next_unseen_notifications;
-                    }
-                });
-            })
+            for (const coordination of coordinations) {
+                await fetchCoordination(coordination);
+            }
+            // coordinations.forEach(c => {
+            //     fetchCoordination(c);
+                // let seen = fetchCoordination(c);
+                // seen.then(function(result) {
+                    // if (result == false) {
+                        // next_unseen_notifications += 1;
+                    // }
+                    // items_processed += 1;
+                    // if (items_processed === coordinations.length) {
+                    //     unseen_notifications = next_unseen_notifications;
+                    // }
+                // });
+            // })
 
         } catch (e) {
             error = e;

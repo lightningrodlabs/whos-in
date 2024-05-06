@@ -13,7 +13,9 @@
   import AttachmentsList from '../../AttachmentsList.svelte';
   import { isWeContext } from '@lightningrodlabs/we-applet';
   import SvgIcon from './SvgIcon.svelte';
-  
+  import Avatar from './Avatar.svelte';
+  import { countViewed, addToViewed, add_notification } from '../../store.js';
+
   const dispatch = createEventDispatcher();
   
   export let coordinationHash: ActionHash;
@@ -28,11 +30,15 @@
   let coordination: Coordination | undefined;
   let coordRoles; //: Coordrole[] | undefined;
   let sponsors;
-  let committingInProcess = false;
-
+  let committingInProcess = {};
+  
+  let totalMin = 0;
+  let totalUnderMin = 0;
+  let totalParticipants = 0;
   let stringStartDate;
   let stringEndDate;
   let stringExpiresDate;
+
   let coordination_type;
   const coordination_type_icons = {
     "Event": "faCalendar",
@@ -52,11 +58,12 @@
   // onMount(() => fetchCoordination());
   // onMount(() => fetchRoles());
   
-  onMount(() => {
-    fetchCoordination()
-    .then(() => {
-      fetchRoles()
-    })
+  onMount(async () => {
+    await fetchCoordination()
+    // .then(() => {
+    await fetchRoles()
+    // })
+    addToViewed(coordinationHash, client)
 
     getSponsors()
   });
@@ -120,6 +127,15 @@
         payload: coordinationHash,
       });
       if (record) {
+        record.forEach(r => {
+          let min = decode(r.coordrole.entry.Present.entry)["minimum"];
+          let underMin = Math.min(r.participants, min);
+          totalParticipants += r.participants;
+          totalMin += min;
+          totalUnderMin += underMin;
+          totalMin = totalMin;
+          totalUnderMin = totalUnderMin;
+        })
         // console.log(record)
         coordRoles = record;//decode((record.entry as any).Present.entry) as Coordrole[];
       } else {
@@ -219,9 +235,10 @@
     return decode((coordroleCoded.entry).Present.entry)
   }
   
-  async function commitMe(coordRole) {
-    committingInProcess = true;
-    let coordRoleHash = coordRole;
+  async function commitMe(coordRoleHash, coordroleTimestamp) {
+    console.log(coordRoleHash)
+    // let coordRoleHash = coordRole;
+    committingInProcess[JSON.stringify(coordRoleHash)] = true;
     
     try {
       await client.callZome({
@@ -231,16 +248,27 @@
         fn_name: 'commit_to_coordrole',
         payload: coordRoleHash,
       });
+      totalParticipants += 1;
+      totalUnderMin += 1;
       // dispatch('coordrole-committed', { coo: coordinationHash });
       // navigate("coordination", coordinationHash);
-      fetchRoles();
+      await fetchRoles();
       // navigate("all-coordinations", {})
-      coordRole.committed = true;
-      committingInProcess = false;
+      // coordRole.committed = true;
+      if (totalUnderMin >= totalMin) {
+        add_notification({
+          "timestamp": coordroleTimestamp,
+          "type": "coordination-activation",
+          "description": "The " + Object.keys(coordination.coordination_type)[0].toLocaleLowerCase() + " " + coordination.title + " has reached minimum participation",
+          "hash": coordinationHash,
+          "seen": false,
+        })
+      }
+      committingInProcess[JSON.stringify(coordRoleHash)] = false;
     } catch (e: any) {
-      fetchRoles();
-      coordRole.committed = true;
-      committingInProcess = false;
+      await fetchRoles();
+      // coordRole.committed = true;
+      committingInProcess[JSON.stringify(coordRoleHash)] = false;
       console.log(e)
       errorSnackbar.labelText = `Error commiting to the coordination: ${e}`;
       errorSnackbar.show();
@@ -338,8 +366,8 @@
       </div>
     {/if}
 
-    <div style="display: flex; flex-direction: row; margin-bottom: 16px; margin-top: 10px;">
-      <span style="white-space: pre-line">{ coordination.description }</span>
+    <div style="display: flex; flex-direction: row; margin-bottom: 0; margin-top: 10px;">
+      <span class="action-description" style="white-space: pre-line">{ coordination.description }</span>
     </div>
 
     <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -354,7 +382,12 @@
       Reminder on: <span style="white-space: pre-line">{ new Date(coordination.reminder_date / 1000).toLocaleString() }</span>
     </div> -->
   
-    <h2 style="float: left; width: 10px;">Roles</h2>
+    <h2 style="
+      float: left;
+      width: 10px;
+      font-weight: bold;
+      font-size: 18px;
+    ">Roles</h2>
   
     {#if coordRoles}
       <div style="display:flex; flex-wrap: wrap;">
@@ -378,6 +411,25 @@
                     &nbsp;
                   </div>
                 </div>
+                <div class="role-item" style="display: flex; flex-direction: row; color: #a5a5a5; margin: 4px; padding: 7px; font-weight: 600; font-size: 12px;">
+                  {decode(role.coordrole.entry.Present.entry)["minimum"] > 0 ? (role.participants/decode(role.coordrole.entry.Present.entry)["minimum"] * 100) : 100}%
+                </div>
+
+
+                <!-- <div class="role-item" style="margin-top: 8px; display: flex; flex-direction: row;">
+                    <div style="display: flex; width: max-content; margin: 0 4px;">
+                      {role.participants} committed
+                    </div>
+                  {#if role.participants < decode(role.coordrole.entry.Present.entry)["minimum"]}
+                    <div style="display: flex; width: max-content; margin: 0 4px;">
+                      and {decode(role.coordrole.entry.Present.entry)["minimum"] - role.participants} more needed
+                    </div>
+                  {:else}
+                    <span>
+                      ✔
+                    </span>
+                  {/if}
+                </div> -->
               </div>
         
               <!-- {Object.is(role.participants[0], client.myPubKey)} -->
@@ -388,26 +440,58 @@
               
               </div>
         
-            <div class="action-section">
-              <div class="role-item" style="margin-top: 8px;">{role.participants} committed
+            <div class="action-section" style="padding: 0 10px; display: flex; justify-content: space-between;">
+              <!-- <div class="role-item" style="margin-top: 8px;">{role.participants} committed
                 {#if role.participants < decode(role.coordrole.entry.Present.entry)["minimum"]}
                   and {decode(role.coordrole.entry.Present.entry)["minimum"] - role.participants} more needed
                 {:else}
                   ✔
                 {/if}
+              </div> -->
+
+              <!-- {JSON.stringify(decode(role.coordrole.entry.Present.entry))} -->
+              <!-- {JSON.stringify(role.participants_details)} -->
+
+              <div class="role-item" style="margin-top: 8px; display: flex; flex-direction: row;">
+
+                {#each role.participants_details.slice(0, 5) as participant}
+                  <div class="role-item" style="margin-left: -13px">
+                    <Avatar showNickname={false} agentPubKey={participant}  size={24} namePosition="row"></Avatar>
+                  </div>
+                {/each}
+                {#if role.participants_details.length > 5}
+                  <div class="role-item">
+                    + {role.participants_details.length - 5}
+                  </div>
+                {/if}
+
+                <div style="display: flex; width: max-content; margin: 4px; color: #5e5e5e;">
+                  {role.participants} committed
+                </div>
+                {#if role.participants < decode(role.coordrole.entry.Present.entry)["minimum"]}
+                  <div style="display: flex; width: max-content; margin: 4px; color: #5e5e5e;">
+                    • {decode(role.coordrole.entry.Present.entry)["minimum"] - role.participants} more needed
+                  </div>
+                {:else}
+                  <span style="margin: 4px; color: #5e5e5e;">
+                    ✔
+                  </span>
+                {/if}
               </div>
 
-              {#if committingInProcess}
-                  <div class="commit" style="padding: 0; height: fit-content">
-                    <mwc-circular-progress indeterminate></mwc-circular-progress>
-                  </div>
-                  {:else}
-                  {#if role.committed}
-                    <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>
-                  {:else if role.participants < decode(role.coordrole.entry.Present.entry)["maximum"]}
-                    <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash)} >Add me</button>
-                  {/if}
+              {#if committingInProcess[JSON.stringify(role.coordrole.signed_action.hashed.hash)]}
+                <div class="commit" style="padding: 0; height: fit-content">
+                  <mwc-circular-progress indeterminate></mwc-circular-progress>
+                </div>
+
+              <!-- not past the signup deadeline and not past the end date -->
+              {:else if (!coordination.signup_deadline || coordination.signup_deadline > (new Date().getTime() * 1000)) && (!coordination.ends_date || coordination.ends_date > (new Date().getTime() * 1000))}
+                {#if role.committed}
+                  <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>
+                {:else if role.participants < decode(role.coordrole.entry.Present.entry)["maximum"]}
+                  <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash, role.coordrole.signed_action.hashed.content.timestamp)} >Add me</button>
                 {/if}
+              {/if}
             </div>
         
           </div>
@@ -416,7 +500,7 @@
     {/if}
 
     {#if sponsors && sponsors.length && sponsors.length == 1 && sponsors.includes(client.myPubKey.join())}
-      <p>Since no one else has signed up for a role yet, you can still hide this action from the bulletin. <button on:click={() => unsponsor()}>Hide</button></p>
+      <p class="notice">Since no one else has signed up for a role yet, you can still hide this {coordination_type.toLowerCase()} from the front page. <button id="hide" on:click={() => unsponsor()}>Hide</button></p>
     {/if}
   
   <div class="invisible" on:click={() => markSpam()}>.</div>

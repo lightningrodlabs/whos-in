@@ -1,3 +1,4 @@
+pub mod viewed;
 pub mod coordination_to_spam_reporters;
 pub mod coordination_to_sponsors;
 pub mod viewer_to_coordinations;

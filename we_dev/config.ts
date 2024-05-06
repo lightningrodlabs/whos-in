@@ -34,7 +34,7 @@ export default defineConfig({
       applets: [
         {
           name: 'Whosin Hot Reload',
-          instanceName: 'Tables Hot Reload',
+          instanceName: 'Whosin Hot Reload',
           registeringAgent: 1,
           joiningAgents: [2],
         },
@@ -56,8 +56,8 @@ export default defineConfig({
   applets: [
     {
       name: 'Whosin Hot Reload',
-      subtitle: 'Tables',
-      description: 'store it!',
+      subtitle: 'Whosin Hot Reload',
+      description: 'whosin',
       icon: {
         type: 'filesystem',
         path: './we_dev/whosin.png',

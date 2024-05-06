@@ -2,8 +2,7 @@
     import { onMount, getContext } from 'svelte';
     import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
     import { clientContext } from '../../contexts';
-    import { notifications } from '../../store.js';
-    import { navigate } from '../../store.js';
+    import { notifications, navigate, setSeenNotification } from '../../store.js';
     
     let client: AppAgentClient = (getContext(clientContext) as any).getClient();
     
@@ -21,24 +20,28 @@
         local_notifications = value;
     });
 
-    async function goToCoordination(coordinationHash, seen) {
-        if (!seen) {
-            try {
-                const records = await client
-                .callZome({
-                    cap_secret: null,
-                    role_name: 'whosin',
-                    zome_name: 'coordinator',
-                    fn_name: 'add_coordination_for_viewer',
-                    payload: coordinationHash,
-                });
-                navigate("coordination", coordinationHash);
-                records
-            } catch (e) {
-                error = e;
-            }
+    async function seeNotification(notification) {
+        setSeenNotification(notification)
+        try {
+            await client
+            .callZome({
+                cap_secret: null,
+                role_name: 'whosin',
+                zome_name: 'coordinator',
+                fn_name: 'add_coordination_for_viewer',
+                payload: notification.hash,
+            });
+        } catch (e) {
+            error = e;
+        }
+    }
+
+    async function goToCoordination(notification) {
+        if (!notification.seen) {
+            await seeNotification(notification);
+            navigate("coordination", notification.hash);
         } else {
-            navigate("coordination", coordinationHash);
+            navigate("coordination", notification.hash);
         }
     }
 
@@ -62,19 +65,56 @@
     }
 </script>
 
-<button on:click={() => {notifierPopup()}}>Claim Notifier</button>
+<!-- <button on:click={() => {notifierPopup()}}>Claim Notifier</button> -->
 <!-- <button on:click={() => sendText()}>Send Text</button> -->
 
 <!-- { JSON.stringify(error) } -->
 <div class="invisible-outer">
-    <h1>Notifications</h1>
+    <h1
+        style="display: flex;"
+    >Notifications
+        <button
+            class="mark-all-as-read-button"
+            on:click={() => {
+                local_notifications.forEach(n => {
+                    if (!n.seen) {
+                        console.log(n)
+                        seeNotification(n);
+                    }
+                });
+            }}
+        >Mark all as read</button>
+    </h1>
     <ul id="notifications">
     {#each local_notifications as n}
         {#if !n.seen}
-            <li on:click={() => goToCoordination(n.hash, n.seen)}><b>{n.description}</b></li>
+            <li on:click={() => goToCoordination(n)}><b>{n.description}</b></li>
         {:else}
-            <li on:click={() => goToCoordination(n.hash, n.seen)}>{n.description}</li>
+            <li on:click={() => goToCoordination(n)}>{n.description}</li>
         {/if}
     {/each}
     </ul>
 </div>
+
+<style>
+    h1 {
+        font-size: 1.5rem;
+        font-weight: 200;
+        font-family: "Roboto", "Montserrat", sans-serif;
+        color: #777777;
+        display: flex;
+    }
+
+    .mark-all-as-read-button {
+        margin-left: 14px;
+        border: 0; 
+        background: #5baaff; 
+        border-radius: 4px; 
+        cursor: pointer;
+        color: white; 
+        padding: 4px 8px;    
+    }
+    .mark-all-as-read-button:hover {
+        background: #85bfff;
+    }
+</style>
