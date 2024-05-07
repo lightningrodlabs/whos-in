@@ -41,7 +41,7 @@
         top: 0;
         z-index: 0;
         position: absolute;
-        background: url("../../assets/whosin-background.jpg");
+        background: url("../../assets/backgrounds/natalie-pedigo-wJK9eTiEZHY-unsplash.jpg");
         background-size: cover;
         /* slow fade in background */
         -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
@@ -58,7 +58,7 @@
         margin-right:auto;
         width:300px; */
 
-        margin-top: 200px;
+        margin-top: 150px;
         width:100%; 
         position:relative;
         z-index:1;
