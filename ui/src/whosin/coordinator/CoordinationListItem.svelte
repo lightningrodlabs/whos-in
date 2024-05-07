@@ -163,7 +163,7 @@
               <div style="background: #ff0000; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Expired
               </div>
-            {:else if totalUnderMin >= totalMin && coordination.starts_date && coordination.starts_date < (new Date().getTime() * 1000) && ((coordination.starts_date < (new Date().getTime() * 1000 + (24 * 60 * 60 * 1000)))) || ((!coordination.ends_date || coordination.ends_date > (new Date().getTime() * 1000)))}
+            {:else if totalUnderMin >= totalMin && coordination.starts_date && coordination.starts_date < (new Date().getTime() * 1000)}
               <div style="background: #cd1dff; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Happening today
               </div>
