@@ -51,7 +51,6 @@ export const appletServices: AppletServices = {
         let coordination: Coordination;
         let record: any;
 
-        console.log("hihi")
         try {
           record = await appletClient.callZome({
             cap_secret: null,
@@ -61,7 +60,7 @@ export const appletServices: AppletServices = {
             payload: wal.hrl[1],
           });
           if (record) {
-            console.log("record", record)
+            // console.log("record", record)
             coordination = decode((record.entry as any).Present.entry) as Coordination;
           }
         } catch (e) {

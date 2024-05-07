@@ -27,12 +27,12 @@
     
   $: editing,  error, loading, record, twilioCredentials;
   
-  onMount(async () => {
+  // onMount(async () => {
     // receive a dispatch signal from the backend
-    client.on(
-      'signal', 
-      (signal) => {
-        console.log(signal)
+    // client.on(
+    //   'signal', 
+    //   (signal) => {
+        // console.log(signal)
         // wait a few seconds before executing
         // setTimeout(() => {
         //   try {
@@ -66,8 +66,8 @@
         //     console.log(e.data.data)
         //   }
         // }, 1000);
-      });
-    });
+    //   });
+    // });
 
   async function fetchTwilioCredentials() {
     try {

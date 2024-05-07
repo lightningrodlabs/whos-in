@@ -247,8 +247,8 @@
             fn_name: 'get_dna_hash',
             payload: null,
         });
-        console.log("dna")
-      console.log(dna)
+        // console.log("dna")
+      // console.log(dna)
     } catch (e) {
       console.log("no dna")
 

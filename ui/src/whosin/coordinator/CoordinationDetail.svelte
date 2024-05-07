@@ -249,7 +249,7 @@
   }
   
   async function commitMe(coordRoleHash, coordroleTimestamp) {
-    console.log(coordRoleHash)
+    // console.log(coordRoleHash)
     // let coordRoleHash = coordRole;
     committingInProcess[JSON.stringify(coordRoleHash)] = true;
     

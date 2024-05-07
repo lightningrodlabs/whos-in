@@ -96,7 +96,7 @@
                             "seen": seen,
                         }
 
-                    console.log("----------------------------------", new_notification, local_notifications)
+                    // console.log("----------------------------------", new_notification, local_notifications)
                     // if new_notification not in coordination_details yet, add
                     let alread_in = false;
                     local_notifications.forEach(notification => {
@@ -104,7 +104,7 @@
                             alread_in = true;
                         }
                     })
-                    console.log("alread_in", alread_in)
+                    // console.log("alread_in", alread_in)
                         
                     if (!alread_in) {
                         add_notification(new_notification)
