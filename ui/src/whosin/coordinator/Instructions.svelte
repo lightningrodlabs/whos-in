@@ -15,7 +15,7 @@
 <div class="content">
     <div style="margin-left:auto;margin-right:auto;width:600px;">
         <h1>Welcome to <strong>Who's In?</strong></h1>
-        <h3>Collaborate with strangers or friends.</h3>
+        <h3>Coordinate with strangers or friends.</h3>
         <!-- <h3>Work together with less risk.</h3> -->
     
     <!-- <h3>Plan get-togethers, events or actions of any kind.</h3> -->
@@ -23,13 +23,13 @@
     
     <h2>How it works</h2>
     <ol>
-      <li>Think of an action or event</li>
+      <li>Think of an event, project or agreement</li>
       <li>Explain all necessary roles</li>
       <li>Invite people to fill those roles</li>
       <li>Don't act unless all roles are filled</li>
     </ol>
 
-    <p>Get started and <button class="gotoButton" on:click={() => gotToAllCoordinations()}>View public coordinations</button> or <button class="gotoButton" on:click={() => goToCreate()}>create a new agreement</button>.</p>
+    <p>Get started and <button class="gotoButton" on:click={() => gotToAllCoordinations()}>View public coordinations</button> or <button class="gotoButton" on:click={() => goToCreate()}>create a new coordination</button>.</p>
     </div>
 </div>
 </div>
