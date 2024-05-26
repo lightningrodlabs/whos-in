@@ -1,9 +1,8 @@
 import { asyncDerived, pipe, sliceAndJoin, toPromise } from '@holochain-open-dev/stores';
 import { LazyHoloHashMap } from '@holochain-open-dev/utils';
-import type { AppletHash, AppletServices, WAL,AssetInfo, WeServices } from '@lightningrodlabs/we-applet';
-import type { AppAgentClient, RoleName, ZomeName } from '@holochain/client';
+import type { AppletHash, AppletServices, WAL,AssetInfo, WeaveServices, RecordInfo } from '@lightningrodlabs/we-applet';
+import type { AppClient, RoleName, ZomeName, AdminWebsocket } from '@holochain/client';
 import { getMyDna, hrlWithContextToB64 } from './util';
-import { AppWebsocket, AppAgentWebsocket, AdminWebsocket } from '@holochain/client';
 import type { Coordination } from './whosin/coordinator/types';
 import { decode } from '@msgpack/msgpack';
 
@@ -36,16 +35,14 @@ export const appletServices: AppletServices = {
         view: "applet-view",
       },      
     },
-    bindAsset: async (appletClient: AppAgentClient,
+    bindAsset: async (appletClient: AppClient,
       srcWal: WAL, dstWal: WAL): Promise<void> => {
       console.log("Bind requested.  Src:", srcWal, "  Dst:", dstWal)
     },  
     getAssetInfo: async (
-      appletClient: AppAgentClient,
-      roleName: RoleName,
-      integrityZomeName: ZomeName,
-      entryType: string,
-      wal: WAL
+      appletClient: AppClient,
+      wal: WAL,
+      recordInfo: RecordInfo
     ): Promise<AssetInfo | undefined> => {
         let dnaHash = await getMyDna(ROLE_NAME, appletClient)
         let coordination: Coordination;
@@ -73,9 +70,9 @@ export const appletServices: AppletServices = {
         };
     },
     search: async (
-      appletClient: AppAgentClient,
+      appletClient: AppClient,
       appletHash: AppletHash,
-      weServices: WeServices,
+      weServices: WeaveServices,
       searchFilter: string
     ): Promise<Array<WAL>> => {
       let hashes: WAL[];

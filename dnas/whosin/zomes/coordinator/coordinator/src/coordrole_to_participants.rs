@@ -1,6 +1,6 @@
 use hdk::prelude::{*, tracing::field::debug};
 use coordinator_integrity::*;
-use zome_utils::*;
+use crate::utils::link_input;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddParticipantForCoordroleInput {
     coordrole_hash: ActionHash,

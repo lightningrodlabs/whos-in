@@ -2,7 +2,7 @@
   import { createEventDispatcher, onMount, getContext } from 'svelte';
   import '@material/mwc-circular-progress';
   import { decode } from '@msgpack/msgpack';
-  import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
+  import type { Record, ActionHash, AppClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
   import { clientContext } from '../../contexts';
   import type { Coordination, Coordrole } from './types';
   import '@material/mwc-circular-progress';
@@ -12,7 +12,7 @@
   import { navigate } from '../../store.js';
   import AttachmentsList from '../../AttachmentsList.svelte';
   import { isWeContext, type WAL } from '@lightningrodlabs/we-applet';
-  import SvgIcon from './SvgIcon.svelte';
+  import SvgIcon from '../../SvgIcon.svelte';
   import Avatar from './Avatar.svelte';
   import { getMyDna } from '../../util';
   import { countViewed, addToViewed, add_notification, weClientStored } from '../../store.js';
@@ -21,7 +21,7 @@
   
   export let coordinationHash: ActionHash;
   
-  let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+  let client: AppClient = (getContext(clientContext) as any).getClient();
   
   let loading = true;
   let error: any = undefined;
@@ -112,7 +112,7 @@
           minute: 'numeric', 
           hour12: true 
         };
-        coordination_type = Object.keys(coordination.coordination_type)[0]
+        coordination_type = coordination.coordination_type
         stringStartDate = new Date(coordination.starts_date / 1000).toLocaleDateString(undefined, options);
         // if year is current year, don't show year
         stringStartDate = stringStartDate.replace(" " + new Date().getFullYear() + " ", " ");
@@ -469,7 +469,7 @@
                   </div>
                 </div>
                 <div class="role-item" style="display: flex; flex-direction: row; color: #a5a5a5; margin: 4px; padding: 7px; font-weight: 600; font-size: 12px;">
-                  {decode(role.coordrole.entry.Present.entry)["minimum"] > 0 ? (role.participants/decode(role.coordrole.entry.Present.entry)["minimum"] * 100) : 100}%
+                  {decode(role.coordrole.entry.Present.entry)["minimum"] > 0 ? (Math.round(role.participants/decode(role.coordrole.entry.Present.entry)["minimum"] * 100)) : 100}%
                 </div>
 
 

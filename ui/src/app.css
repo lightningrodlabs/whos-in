@@ -527,6 +527,7 @@ vaadin-date-time-picker {
 }
 
 .type-label {
+  height: 20px;
   display: flex;
   margin: 2px;
   background: #357cff;
@@ -536,6 +537,11 @@ vaadin-date-time-picker {
   font-size: 14px;
   font-weight: bold;
   color: white;
+}
+
+.status-label > div {
+  height: 20px;
+  width: max-content;
 }
 
 .filter-by-label {

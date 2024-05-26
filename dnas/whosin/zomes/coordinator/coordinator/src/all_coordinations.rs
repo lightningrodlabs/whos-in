@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
-use zome_utils::*;
+use crate::utils::link_input;
 
 #[hdk_extern]
 pub fn get_all_coordinations(_: ()) -> ExternResult<Vec<Record>> {

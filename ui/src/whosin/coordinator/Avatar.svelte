@@ -3,7 +3,7 @@
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { getContext } from "svelte";
     import type { ProfilesStore } from "@holochain-open-dev/profiles";
-    import SvgIcon from "./SvgIcon.svelte";
+    import SvgIcon from "../../SvgIcon.svelte";
     import { profilesStoreContext } from '../../contexts';
     
     let profilesStore: ProfilesStore = (getContext(profilesStoreContext) as any).getProfileStore();

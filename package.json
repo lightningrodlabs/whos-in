@@ -21,7 +21,7 @@
     "launch:happ": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/whosin.happ --ui-port $UI_PORT network mem",
     "launch:online2": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/whosin.happ --ui-port $UI_PORT network webrtc \"wss://127.0.0.1:18929\"",
     "launch:online": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/whosin.happ --ui-port $UI_PORT network --bootstrap https://bootstrap-2.infra.holochain.org webrtc wss://signal-2.infra.holochain.org",
-    "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
+    "package": "rm -f ui/dist.zip && rm -rf ui/dist && npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
     "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"
   },

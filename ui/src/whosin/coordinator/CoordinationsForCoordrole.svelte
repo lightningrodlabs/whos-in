@@ -1,14 +1,14 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import type { Record, ActionHash, EntryHash, AgentPubKey, AppAgentClient, NewEntryAction } from '@holochain/client';
+import type { Record, ActionHash, EntryHash, AgentPubKey, AppClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import CoordinationDetail from './CoordinationDetail.svelte';
 import type { CoordinatorSignal } from './types';
 
 export let coordroleHash: ActionHash;
 
-let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let client: AppClient = (getContext(clientContext) as any).getClient();
 
 let hashes: Array<ActionHash> | undefined;
 

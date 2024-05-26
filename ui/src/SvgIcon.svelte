@@ -8,11 +8,13 @@
 
     $:iconStr = () => {
         let i = svgIcons[icon]
-        if (!i) console.log("missing icon for ", icon)
-        if (color) {
-            i = i.replace("<svg",`<svg fill="${color}"`)
+        if (!i) console.log("missing icon for ", icon, svgIcons, svgIcons[icon])
+        if (i != undefined) {
+            if (color) {
+                i = i.replace("<svg",`<svg fill="${color}"`)
+            }
+            return `data:image/svg+xml;charset=utf-8,${i.replace("#","%23")}`
         }
-        return `data:image/svg+xml;charset=utf-8,${i.replace("#","%23")}`
     }
     $:styleStr = `${size ? "width:"+size:""};`
 </script>

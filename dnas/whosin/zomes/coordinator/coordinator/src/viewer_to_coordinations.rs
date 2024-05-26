@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
-use zome_utils::*;
+use crate::utils::link_input;
 #[hdk_extern]
 pub fn add_coordination_for_viewer(
     target_coordination_hash: ActionHash,

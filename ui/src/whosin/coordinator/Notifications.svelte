@@ -1,15 +1,15 @@
 <script lang="ts">
     import { onMount, setContext, getContext } from 'svelte';
-    import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
+    import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction } from '@holochain/client';
     import { clientContext } from '../../contexts';
     import type { Coordination, CoordinatorSignal } from './types';
     import { decode } from '@msgpack/msgpack';
-    import { WeClient, isWeContext, initializeHotReload, type WAL, type Hrl } from '@lightningrodlabs/we-applet';  
+    import { WeaveClient, isWeContext, initializeHotReload, type WAL, type Hrl } from '@lightningrodlabs/we-applet';  
     import { notifications, add_notification } from '../../store.js';
     import { appletServices } from '../../we';
     
-    let client: AppAgentClient = (getContext(clientContext) as any).getClient();
-    // export let client: AppAgentClient;
+    let client: AppClient = (getContext(clientContext) as any).getClient();
+    // export let client: AppClient;
     
     let coordinations: Array<ActionHash> | undefined;
     let coordination_details = [];
@@ -17,7 +17,7 @@
     let loading = true;
     let error: any = undefined;
     let unseen_notifications = 0;
-    let weClient: WeClient
+    let weClient: WeaveClient
 
     // let unseen_notifications = 0;
     // let next_unseen_notifications = 0;
@@ -26,7 +26,7 @@
     
     onMount(async () => {
         // let test = "";
-        weClient = await WeClient.connect(appletServices);
+        weClient = await WeaveClient.connect(appletServices);
 
         if (typeof client != "undefined") {
             setInterval( () => {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, setContext } from 'svelte';
-  import type { ActionHash, AgentPubKey, AppAgentClient, AppSignalCb } from '@holochain/client';
-  import { AppAgentWebsocket, AdminWebsocket } from '@holochain/client';
+  import type { ActionHash, AgentPubKey, AppClient, AppSignalCb } from '@holochain/client';
+  import { AppWebsocket, AdminWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -11,7 +11,7 @@
   import "@holochain-open-dev/profiles/dist/elements/profile-detail.js";
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import '@material/mwc-circular-progress';
-  import { view, viewHash, navigate, setWeClient } from './store.js';
+  import { view, viewHash, navigate, setWeaveClient } from './store.js';
   import { clientContext, profilesStoreContext } from './contexts';
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import Header from './whosin/coordinator/Header.svelte';
@@ -25,7 +25,7 @@
   import CreateContact from './whosin/notifications/CreateContact.svelte';
   import NotificationsHandler from './whosin/notifications/NotificationsHandler.svelte';
   import Holochain from "./assets/holochain.png";
-  import { WeClient, isWeContext, initializeHotReload } from '@lightningrodlabs/we-applet';  
+  import { WeaveClient, isWeContext, initializeHotReload } from '@lightningrodlabs/we-applet';  
   import { appletServices } from './we';
   import SvgIcon from './SvgIcon.svelte';
   import AllViewed from './whosin/coordinator/AllViewed.svelte';
@@ -39,7 +39,7 @@
 
   const dispatch = createEventDispatcher();
 
-  let client: AppAgentClient | undefined;
+  let client: AppClient | undefined;
   let loading = true;
   let store = undefined;
   let currentView: String;
@@ -49,7 +49,7 @@
   let dna;
   let profilesStore = undefined;
   let connected = false
-  let weClient: WeClient
+  let weClient: WeaveClient
   $: client, loading, store, notifier, dna;
 
   async function checkIfNew() {
@@ -129,21 +129,21 @@
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
       console.log("appPort and Id is", appPort, appId)
-      client = await AppAgentWebsocket.connect(appId,{url: new URL(url)})
+      client = await AppWebsocket.connect(appId,{url: new URL(url)})
       profilesClient = new ProfilesClient(client, appId);
     
-      // client = await AppAgentWebsocket.connect('', 'dcan');
+      // client = await AppWebsocket.connect('', 'dcan');
       // profilesStore = new ProfilesStore(new ProfilesClient(client, 'converge'), {
       //   avatarMode: "avatar-optional",
       //   minNicknameLength: 3,
       // });
     }
     else {
-      // const weClient = await WeClient.connect();
-      weClient = await WeClient.connect(appletServices);
+      // const weClient = await WeaveClient.connect();
+      weClient = await WeaveClient.connect(appletServices);
       // store set
-      setWeClient(weClient)
-      // weClient = await WeClient.connect();
+      setWeaveClient(weClient)
+      // weClient = await WeaveClient.connect();
 
       switch (weClient.renderInfo.type) {
         case "applet-view":
@@ -167,11 +167,11 @@
               }
               break;
             case "asset":
-              switch (weClient.renderInfo.view.roleName) {
+              switch (weClient.renderInfo.view.recordInfo.roleName) {
                 case "whosin":
-                  switch (weClient.renderInfo.view.integrityZomeName) {
+                  switch (weClient.renderInfo.view.recordInfo.integrityZomeName) {
                     case "coordinator_integrity":
-                      switch (weClient.renderInfo.view.entryType) {
+                      switch (weClient.renderInfo.view.recordInfo.entryType) {
                         case "coordination":
                           currentView = "coordination"
                           currentHash = weClient.renderInfo.view.wal.hrl[1]
@@ -179,15 +179,15 @@
                           // hrlWithContext = weClient.renderInfo.view.hrlWithContext
                           break;
                         default:
-                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.entryType);
+                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.recordInfo.entryType);
                       }
                       break;
                     default:
-                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.integrityZomeName);
+                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.recordInfo.integrityZomeName);
                   }
                   break;
                 default:
-                  throw new Error("Unknown role name:"+weClient.renderInfo.view.roleName);
+                  throw new Error("Unknown role name:"+weClient.renderInfo.view.recordInfo.roleName);
               }
               break;
             default:
@@ -303,7 +303,7 @@
 {#if profilesStore}
   <profiles-context store="{profilesStore}">
     <profile-prompt>
-      {#if weClient.renderInfo.view.type != "attachable"}
+      {#if weClient.renderInfo.view.type != "asset"}
 
       <NotificationsHandler></NotificationsHandler>
       <main style="width: 100vw;">
@@ -312,7 +312,7 @@
             <Header></Header>
           {/if}
 
-          {#if !loading && !notifier && allNotifiers.length > 1 && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
+          {#if !loading && !notifier && allNotifiers?.length > 1 && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
             <p class="notice" style="margin: auto; border-radius: 0 0 4px 4px">Want to receive texts or emails when coordinations reach minimum participation?
               <button on:click={() => navigate('notificant')}>Click here</button>
               <!-- {#if String(currentView) != "notifications"}
@@ -368,7 +368,7 @@
 
         <footer style="margin: 10px;">
           <!-- feedback button -->
-          <SvgIcon icon="faBug" size="24" color="#000000" />
+          <SvgIcon icon=faBug size="24" color="#000000" />
           <a href="https://docs.google.com/forms/d/e/1FAIpQLSdzwS5D1HP3Eq6JV2lSD2cTXZoVTJJR2b7vEuAKgk9izVFRIw/viewform" target="_blank" class="feedback-button">
             <span>Submit feedback</span>
           </a>

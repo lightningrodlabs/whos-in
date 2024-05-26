@@ -1,13 +1,13 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
-import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
+import type { AppClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { SentNotification } from './types';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 
-let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let client: AppClient = (getContext(clientContext) as any).getClient();
 
 const dispatch = createEventDispatcher();
 

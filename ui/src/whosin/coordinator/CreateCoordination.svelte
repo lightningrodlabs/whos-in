@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, getContext } from 'svelte';
-  import { type AppAgentClient, type Record } from '@holochain/client';
+  import { type AppClient, type Record } from '@holochain/client';
   import { clientContext } from '../../contexts';
   import type { Coordination, Coordrole } from './types';
   import '@material/mwc-button';
@@ -13,8 +13,8 @@
   import { isWeContext } from '@lightningrodlabs/we-applet';
   import { countViewed, addToViewed } from '../../store.js';
   import '@vaadin/date-time-picker/theme/material/vaadin-date-time-picker.js';
-  import SvgIcon from './SvgIcon.svelte';
-  let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+  import SvgIcon from '../../SvgIcon.svelte';
+  let client: AppClient = (getContext(clientContext) as any).getClient();
   
   const dispatch = createEventDispatcher();
   

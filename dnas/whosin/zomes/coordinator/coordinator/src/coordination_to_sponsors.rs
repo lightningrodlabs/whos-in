@@ -1,6 +1,6 @@
 use hdk::{hdi::link, prelude::*};
 use coordinator_integrity::*;
-use zome_utils::*;
+use crate::utils::link_input;
 
 #[hdk_extern]
 pub fn add_sponsor_for_coordination(coordination_hash: ActionHash) -> ExternResult<()> {

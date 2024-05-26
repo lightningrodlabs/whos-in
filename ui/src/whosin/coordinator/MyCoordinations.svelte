@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount, setContext, getContext } from 'svelte';
-  import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
+  import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction } from '@holochain/client';
   import { clientContext } from '../../contexts';
   import type { Coordination, CoordinatorSignal } from './types';
   import { decode, encode } from '@msgpack/msgpack';
   import CoordinationListItem from './CoordinationListItem.svelte';
   import FaList from 'svelte-icons/fa/FaList.svelte';
-  import SvgIcon from './SvgIcon.svelte';
+  import SvgIcon from '../../SvgIcon.svelte';
 
   // import { notifications, notifications_update } from '../../store.js';
   
   // export let author: AgentPubKey; // = (getContext(clientContext) as any).getClient();
   
-  let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+  let client: AppClient = (getContext(clientContext) as any).getClient();
   
   // let coordinations: Array<ActionHash> | [];
     let coordinations;

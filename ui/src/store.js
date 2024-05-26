@@ -45,7 +45,7 @@ export function setSeenNotification(notification) {
 //     console.log(notificationHash)
 // }
 
-export function setWeClient(client) {
+export function setWeaveClient(client) {
     weClientStored.update(v => client);
 }
 

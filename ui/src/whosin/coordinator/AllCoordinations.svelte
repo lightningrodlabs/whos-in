@@ -1,14 +1,14 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
+import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { CoordinatorSignal, Coordination } from './types';
 import CoordinationListItem from './CoordinationListItem.svelte';
-import SvgIcon from './SvgIcon.svelte';
+import SvgIcon from '../../SvgIcon.svelte';
 import FaBullhorn from 'svelte-icons/fa/FaBullhorn.svelte';
 
-let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let client: AppClient = (getContext(clientContext) as any).getClient();
 
 let hashes: Array<any> | undefined;
 let allSponsors = {};
@@ -114,7 +114,7 @@ async function fetchCoordinations() {
   <mwc-circular-progress indeterminate></mwc-circular-progress>
 </div>
 {:else if error}
-<span>Error fetching the coordinations: {error.data.data}.</span>
+<span>Error fetching the coordinations: {error}.</span>
 {:else if hashes.length === 0}
 <div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
   <label>Public Coordinations</label>

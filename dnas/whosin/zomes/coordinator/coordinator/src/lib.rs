@@ -7,6 +7,7 @@ pub mod coordrole_to_participants;
 pub mod coordination_to_coordroles;
 pub mod coordrole;
 pub mod coordination;
+pub mod utils;
 use hdk::prelude::*;
 use coordinator_integrity::*;
 #[hdk_extern]

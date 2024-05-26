@@ -13,5 +13,3 @@ hdk = { workspace = true }
 serde = { workspace = true }
 
 coordinator_integrity = { workspace = true } 
-
-zome_utils.workspace = true

@@ -2,14 +2,14 @@
     import { createEventDispatcher, onMount, getContext } from 'svelte';
     import '@material/mwc-circular-progress';
     import { decode } from '@msgpack/msgpack';
-    import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey } from '@holochain/client';
+    import type { Record, ActionHash, AppClient, EntryHash, AgentPubKey } from '@holochain/client';
     import { clientContext } from '../../contexts';
     import type { Coordination } from './types';
     import '@material/mwc-circular-progress';
     import type { Snackbar } from '@material/mwc-snackbar';
     import '@material/mwc-snackbar';
     import '@material/mwc-icon-button';
-    import SvgIcon from './SvgIcon.svelte';
+    import SvgIcon from '../../SvgIcon.svelte';
     import { view, viewHash, navigate } from '../../store.js';
 
     const dispatch = createEventDispatcher();
@@ -17,7 +17,7 @@
     export let coordinationHash: ActionHash;
     export let filterType: string;
     
-    let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+    let client: AppClient = (getContext(clientContext) as any).getClient();
     
     let loading = true;
     let error: any = undefined;
@@ -81,7 +81,7 @@
             hour12: true 
           };
           coordination = decode((record.entry as any).Present.entry) as Coordination;
-          coordination_type = Object.keys(coordination.coordination_type)[0]
+          coordination_type = coordination.coordination_type
           stringStartDate = new Date(coordination.starts_date / 1000).toLocaleDateString(undefined, options);
           // if year is current year, don't show year
           stringStartDate = stringStartDate.replace(" " + new Date().getFullYear() + " ", " ");
@@ -231,7 +231,7 @@
             <span
               style="display: flex; width: max-content;"
             >
-              {totalUnderMin/totalMin}%
+              {Math.round((totalUnderMin/totalMin) * 100)}%
             </span>
           {:else}
             ✔
