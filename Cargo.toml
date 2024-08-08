@@ -27,7 +27,7 @@ path = "dnas/whosin/zomes/coordinator/notifications"
 path = "dnas/whosin/zomes/integrity/notifications"
 
 [workspace.dependencies.profiles]
-path = "dnas/converge/zomes/coordinator/profiles"
+path = "dnas/whosin/zomes/coordinator/profiles"
 
 [workspace.dependencies.profiles_integrity]
-path = "dnas/converge/zomes/integrity/profiles"
+path = "dnas/whosin/zomes/integrity/profiles"

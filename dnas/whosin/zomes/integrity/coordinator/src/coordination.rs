@@ -26,7 +26,7 @@ pub struct Coordination {
     pub signup_deadline: Option<Timestamp>,
     pub reminder_date: Option<Timestamp>,
     pub coordroles: Vec<ActionHash>,
-    pub attachments: Option<Vec<HrlB64WithContext>>,
+    pub attachments: Option<Vec<String>>,
 }
 pub fn validate_create_coordination(
     _action: EntryCreationAction,

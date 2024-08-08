@@ -167,8 +167,13 @@
               <div style="background: #cd1dff; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Happening today
               </div>
+
+            {:else if totalMin > 0 && totalUnderMin < totalMin && coordination.signup_deadline && coordination.signup_deadline < (new Date().getTime() * 1000)}
+              <div style="background: gray; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+                Did not reach minimum participation
+              </div>
             {:else if totalMin > 0 && totalUnderMin < totalMin}
-              <div style="background: #ff951d; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+              <div style="background: rgb(255, 196, 17); color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Gathering participation
               </div>
             {:else if totalUnderMin >= totalMin}

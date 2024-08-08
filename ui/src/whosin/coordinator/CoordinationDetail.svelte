@@ -16,6 +16,7 @@
   import Avatar from './Avatar.svelte';
   import { getMyDna } from '../../util';
   import { countViewed, addToViewed, add_notification, weClientStored } from '../../store.js';
+    import Loading from '../Loading.svelte';
 
   const dispatch = createEventDispatcher();
   
@@ -98,11 +99,14 @@
       if (record) {
         coordination = decode((record.entry as any).Present.entry) as Coordination;
         attachments = coordination.attachments?.map((attachment) => {
-          return {
-            hrl: JSON.parse(attachment.hrl),
-            context: attachment.context
-          }
+          return attachment
         })
+        // attachments = coordination.attachments?.map((attachment) => {
+        //   return {
+        //     hrl: JSON.parse(attachment.hrl),
+        //     context: attachment.context
+        //   }
+        // })
         let options: Intl.DateTimeFormatOptions = { 
           weekday: 'long',
           year: 'numeric', 
@@ -269,10 +273,11 @@
       // navigate("all-coordinations", {})
       // coordRole.committed = true;
       if (totalUnderMin >= totalMin) {
+        console.log("------------", coordination.coordination_type)
         add_notification({
           "timestamp": coordroleTimestamp,
           "type": "coordination-activation",
-          "description": "The " + Object.keys(coordination.coordination_type)[0].toLocaleLowerCase() + " " + coordination.title + " has reached minimum participation",
+          "description": "The " + coordination.coordination_type.toLocaleLowerCase() + " " + coordination.title + " has reached minimum participation",
           "hash": coordinationHash,
           "seen": false,
         })
@@ -357,8 +362,12 @@
               <div style="background: #cd1dff; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
                 Happening today
               </div>
+            {:else if totalMin > 0 && totalUnderMin < totalMin && coordination.signup_deadline && coordination.signup_deadline < (new Date().getTime() * 1000)}
+              <div style="background: gray; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
+                Did not reach minimum participation
+              </div>
             {:else if totalMin > 0 && totalUnderMin < totalMin}
-              <div style="background: #ff951d; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
+              <div style="background: rgb(255, 196, 17); color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
                 Gathering participation
               </div>
             {:else if totalUnderMin >= totalMin}
@@ -367,13 +376,15 @@
               </div>
             {/if}
           </div>
-          <button title="Add Board to Pocket" class="attachment-button" style="margin-right:10px; cursor: pointer; margin-right: 10px;
-          cursor: pointer;
-          height: 24px;
-          width: 40px;
-          padding: 0px;" on:click={()=>copyWalToPocket()} >          
-            <SvgIcon icon="addToPocket" size="20px"/>
-          </button>
+          {#if isWeContext()}
+            <button title="Add Board to Pocket" class="attachment-button" style="margin-right:10px; cursor: pointer; margin-right: 10px;
+            cursor: pointer;
+            height: 24px;
+            width: 40px;
+            padding: 0px;" on:click={()=>copyWalToPocket()} >          
+              <SvgIcon icon="addToPocket" size="20px"/>
+            </button>
+          {/if}
         </div>
     </div>
   
@@ -537,8 +548,10 @@
               </div>
 
               {#if committingInProcess[JSON.stringify(role.coordrole.signed_action.hashed.hash)]}
-                <div class="commit" style="padding: 0; height: fit-content">
-                  <mwc-circular-progress indeterminate></mwc-circular-progress>
+                <div class="commit" style="padding: 0; height: fit-content; width: 88px; text-align: center; padding: 2px;">
+                  <!-- <mwc-circular-progress indeterminate></mwc-circular-progress> -->
+                   <!-- custom loading -->
+                  <Loading size=28 />
                 </div>
 
               <!-- not past the signup deadeline and not past the end date -->

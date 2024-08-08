@@ -10,10 +10,17 @@
     let local_notifications;
     let loading = true;
     let error: any = undefined;
+    let notifier = undefined;
     
-    $: coordinations, loading, error;
+    $: coordinations, loading, error, notifier;
     
     onMount(async () => {
+        try {
+            notifier = await getMyNotifier();
+            console.log("notifier", notifier)
+        } catch (e) {
+            console.log("no notifiers")
+        }
     });
 
     notifications.subscribe(value => {
@@ -61,7 +68,24 @@
     }
 
     async function notifierPopup() {
-        navigate("notifier");
+        navigate("notificant");
+    }
+
+    async function getMyNotifier() {
+        try {
+            const record: Record = await client.callZome({
+                cap_secret: null,
+                role_name: 'whosin',
+                zome_name: 'notifications',
+                fn_name: 'get_my_notifier',
+                payload: null,
+            });
+            console.log("my notifier", record)
+            return record
+        } catch (e) {
+            console.log(e)
+        }
+    
     }
 </script>
 
@@ -84,6 +108,12 @@
                 });
             }}
         >Mark all as read</button>
+        {#if notifier}
+            <!-- button to edit contact/notifier -->
+            <button
+            class="mark-all-as-read-button"
+             on:click={() => {notifierPopup()}}>Change notifier</button>
+        {/if}
     </h1>
     <ul id="notifications">
     {#each local_notifications as n}

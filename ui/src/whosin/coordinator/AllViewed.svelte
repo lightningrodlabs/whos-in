@@ -18,9 +18,7 @@ onMount(async () => {
 });
 
 async function fetchVieweds() {
-  console.log('1')
   try {
-    console.log('2')
     const records = await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
@@ -28,8 +26,6 @@ async function fetchVieweds() {
       fn_name: 'get_all_viewed',
       payload: null,
     });
-    console.log('3')
-    console.log("all viewed records: ", records)
     setViewed(records.map(r => 
       encodeHashToBase64(r.viewed_hash)
     ));

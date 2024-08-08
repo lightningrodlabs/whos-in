@@ -91,7 +91,7 @@
                         {
                             "timestamp": record[0].coordrole.signed_action.hashed.content.timestamp,
                             "type": "coordination-activation",
-                            "description": "The "  + Object.keys(formatted_coordination.coordination_type)[0].toLocaleLowerCase() + " " + formatted_coordination.title + " has reached minimum participation",
+                            "description": "The "  + formatted_coordination.coordination_type.toLocaleLowerCase() + " " + formatted_coordination.title + " has reached minimum participation",
                             "hash": coordination_hash,
                             "seen": seen,
                         }

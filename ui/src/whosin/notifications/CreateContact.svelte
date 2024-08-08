@@ -94,6 +94,7 @@ async function createContact() {
   }
 
   try {
+    console.log(contactEntry)
     const record: Record = await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
@@ -106,6 +107,24 @@ async function createContact() {
     console.log(e)
     errorSnackbar.labelText = `Error creating the contact: ${e}`;
     errorSnackbar.labelText = `Error creating the contact: ${e.data.data}`;
+    errorSnackbar.show();
+  }
+
+  try {
+    const myNotifer = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'notifications',
+      fn_name: 'get_my_notifier',
+      payload: null,
+    });
+
+    if (myNotifer) {
+      dispatch('my-notifier', { myNotifier: myNotifer });
+    }
+  } catch (e) {
+    console.log(e)
+    errorSnackbar.labelText = `Error getting my notifier: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
@@ -141,10 +160,10 @@ const handleRegionInput = (event) => {
 
 const handlePhoneInput = (event) => {
   let input = event.target.value.replace(/\D/g, '');
-  if (input.length > 3 && input.length <= 6)
-      input = `(${input.slice(0, 3)}) ${input.slice(3)}`;
-  else if (input.length > 6)
-      input = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
+  // if (input.length > 3 && input.length <= 6)
+  //     input = `(${input.slice(0, 3)}) ${input.slice(3)}`;
+  // else if (input.length > 6)
+  //     input = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
   phoneNumber = input;
   textNumber = regionCode + phoneNumber;
 };
@@ -186,7 +205,7 @@ const handleWhatsappPhoneInput = (event) => {
   <div>Loading notifiers...</div>
 {:else if allNotifiers && allNotifiers.length}
   <div>
-    <select bind:value={notifier}>
+    <select class="notifier-select" bind:value={notifier}>
       {#each allNotifiers as n}
         <option value={n.agent}>{n.tag}</option>
       {/each}
@@ -194,16 +213,16 @@ const handleWhatsappPhoneInput = (event) => {
   <br>
   
   <div style="margin-bottom: 16px">
-    <div style="margin-bottom: 16px; display: block"><label>Text Number</label></div>
+    <div style="margin-bottom: 16px; display: block"><label>Phone Number</label></div>
     <mwc-textfield style="width:80px; display:inline-block" label="region" type="tel" inputmode="numeric" value={regionCode} on:input={handleRegionInput}></mwc-textfield>
     <mwc-textfield style="width:240px; display:inline-block" label="number" type="tel" inputmode="numeric" value={phoneNumber} on:input={handlePhoneInput}></mwc-textfield>
   </div>
 
-  <div style="margin-bottom: 16px">
+  <!-- <div style="margin-bottom: 16px">
     <div style="margin-bottom: 16px; display: block"><label>Whatsapp Number</label></div>
     <mwc-textfield style="width:80px; display:inline-block" label="region" type="tel" inputmode="numeric" value={whatsappRegionCode} on:input={handleWhatsappRegionInput}></mwc-textfield>
     <mwc-textfield style="width:240px; display:inline-block" label="number" type="tel" inputmode="numeric" value={whatsappPhoneNumber} on:input={handleWhatsappPhoneInput}></mwc-textfield>
-  </div>
+  </div> -->
 
   <!-- <div style="margin-bottom: 16px">
     <mwc-textarea label="Whatsapp Number" value={ whatsappNumber } on:input={e => { whatsappNumber = e.target.value;} } ></mwc-textarea>          
@@ -228,3 +247,15 @@ const handleWhatsappPhoneInput = (event) => {
 {/if}
 </div>
 </div>
+
+<style>
+  .notifier-select {
+    /* width: 100%; */
+    height: 40px;
+    margin-bottom: 16px;
+    border: none;
+    border-radius: 4px;
+    padding: 8px;
+    background-color: #D5DAE540;
+  }
+</style>

@@ -48,6 +48,7 @@ pub struct NotificationTip {
   pub extra_context: String, //Any extra data that needs to be passed to the custom_handle_notification_tip function. For example, a hash of an entry.
   pub message_id: String, //A unique identifier of the message to send. For instance, a string containing a timestamp and message content. This is used to automtatically prevent duplicate messages. If left blank, there will be no prevention of duplicate notifications.
   pub destination: String, //Used for debugging. The name of the function that the data is being sent to.
+  pub delay_until: Option<Timestamp>, //The time to delay the notification until. If left blank, the notification will be sent immediately.
 }
 
 // #[hdk_extern]
@@ -69,6 +70,7 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
     extra_context: coordination_hash.to_string(),
     message_id: String::from(""),
     destination: String::from("handle_notification_tip"),
+    delay_until: None,
   };
 
   let mut participants: Vec<AgentPubKey> = vec![];
@@ -181,14 +183,24 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
         
         if activated {
           status = String::from("send");
-          message = format!("Action activated: \"{}\"", coordination.title);
+          // if no message
+          if data.message == "" {
+            message = format!("Coordination activated: \"{}\"", coordination.title);
+          } else {
+            message = data.message.clone();
+          }
         } else {
           retry_count += 1;
           status = String::from("retry");
           message = String::from("");
         }
 
-        let message_id = format!("{} {}", data.message, data.extra_context);
+        let delay_until_str = match &data.delay_until {
+          Some(delay) => delay.to_string(),
+          None => String::from("default_value"), // Replace "default_value" with an appropriate default
+        };
+      
+        let message_id = format!("{} {} {}", data.message, data.extra_context, delay_until_str);
 
         output = NotificationTip {
           retry_count: retry_count,
@@ -199,6 +211,7 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
           extra_context: coordination_hash.to_string(),
           message_id: message_id,
           destination: String::from("handle_notification_tip"),
+          delay_until: data.delay_until,
         };
       
         emit_signal(output.clone())?;

@@ -1,5 +1,4 @@
 <script lang="ts">
-// import Logo from "../../assets/logo.png";
 import Logo from "../../assets/whosin.svg";
 import FaPlusCircle from 'svelte-icons/fa/FaPlusCircle.svelte';
 import FaBell from 'svelte-icons/fa/FaBell.svelte';
@@ -43,11 +42,11 @@ navigate("all-coordinations", {});
   <nav class="navbar">
     <div class="container-fluid converge-header">
       <div>
-        {#if !isWeContext()}
+        <!-- {#if !isWeContext()}
         <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>
           <img class="logo-image" src={Logo} alt="whos-in logo"/>
         </a>
-        {:else}
+        {:else} -->
         <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>  
           <h1 id="whosin-title" style="display: flex; align-items: center;">
             <img id="minilogo" src={Logo} alt="whos-in logo"/>
@@ -57,7 +56,7 @@ navigate("all-coordinations", {});
           </h1>
         <!-- <small id="subtitle">for Moss</small> -->
         </a>
-        {/if}
+        <!-- {/if} -->
       </div>
     <div>
 
@@ -90,7 +89,7 @@ navigate("all-coordinations", {});
     <li class="notifications-li">
       <div class="notifications" on:click={goToNotifications}>
         {#if currentView == "notifications"}
-          <span style="color:#1952bb"><FaBell /></span>
+        <span style="color:#1952bb"><FaBell /></span>
         {:else}
           <span><FaBell /></span>
         {/if}

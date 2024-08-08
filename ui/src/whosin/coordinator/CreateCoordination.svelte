@@ -12,6 +12,7 @@
   import AttachmentsDialog from '../../AttachmentsDialog.svelte';
   import { isWeContext } from '@lightningrodlabs/we-applet';
   import { countViewed, addToViewed } from '../../store.js';
+  import type { WALUrl } from '../../util';
   import '@vaadin/date-time-picker/theme/material/vaadin-date-time-picker.js';
   import SvgIcon from '../../SvgIcon.svelte';
   let client: AppClient = (getContext(clientContext) as any).getClient();
@@ -20,7 +21,7 @@
   
   
   let attachmentsDialog : AttachmentsDialog
-  let attachments = []
+  let attachments: Array<WALUrl> = [];
   let title: string | undefined;
   let description: string | undefined = '';
   let startsDate: number | undefined;
@@ -43,7 +44,7 @@
   let errorSnackbar: Snackbar;
   
   $: title, description, startsDate, endsDate, signupDeadline, reminderDate, coordRoles, roleTitle, roleDescription, minimum, maximum, attachments;
-  $: isCoordinationValid = title !== undefined && description !== undefined && coordRoles.length > 0 && (agreementType != "event" || (startsDate !== undefined && endsDate != undefined)) //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
+  $: isCoordinationValid = title !== undefined && description !== undefined && coordRoles.length > 0 && (agreementType != "event" || (startsDate != undefined && endsDate != undefined)) //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
   $: isCoordRoleValid = roleTitle != undefined && roleDescription != undefined && minimum != undefined && maximum != undefined && minimum <= maximum && minimum >= 0;
   
   async function createCoordination() {
@@ -57,12 +58,7 @@
       signup_deadline: signupDeadline,
       // reminder_date: reminderDate!,
       coordroles: coordRoles!,
-      attachments: attachments.map(a => {
-        return {
-          hrl: JSON.stringify(a.hrl),
-          context: a.context
-        }
-      }),
+      attachments: attachments
     };
     
     try {
@@ -191,8 +187,8 @@
           Deadline to signup
           <input type="datetime-local" id="signup-deadline" name="signup-deadline" 
             on:input={e => {
-              signupDeadline = new Date(e.target.value).valueOf() * 1000;}
-            } required>
+              signupDeadline = new Date(e.target.value).valueOf() * 1000;
+            }} required>
           <!-- <vaadin-date-time-picker label="Signup Deadline"  on:change={e => { signupDeadline = new Date(e.target.value).valueOf() * 1000;} } required></vaadin-date-time-picker>           -->
         </div>
 
@@ -250,12 +246,14 @@
         <div id="created-roles">
           {#each coordRoles as role}
           <div class="role-outer">
-            <strong>{role.title}</strong>
-            <br>
-            <div>{role.description}</div>
-            <br>
-            <div>Min: {role.minimum} Max: {role.maximum}</div>
-            <br>
+            <div>
+              <strong>{role.title}</strong>
+              <br>
+              <div>{role.description}</div>
+              <br>
+              <div>Min: {role.minimum} Max: {role.maximum}</div>
+              <br>
+            </div>
             <button class="delete" on:click={() => remove_role(role)}>Remove</button>
             <!-- <button class="delete" on:click={async () => {
               remove_role(role)
@@ -268,6 +266,9 @@
           </div>
         </div>
 
+      <h2
+        style="margin-top: 16px;"
+      >Add Role</h2>
       <div class="role">
         <input placeholder="Role Title" style="width: 78%" id="role-title-field"
           bind:value={roleTitle}
@@ -302,7 +303,7 @@
       </div>
 
       <br>
-      <p class="notice">Warning: After proposing a {agreementType}, it belongs to everyone and cannot be edited or deleted.</p>
+      <p class="notice">Warning: After proposing an {agreementType}, it belongs to everyone and cannot be edited or deleted.</p>
       <mwc-button 
         raised
         label="Propose {agreementType}"
@@ -316,6 +317,27 @@
   <!-- <button on:click={() => {addToNotifiers()}}>.</button> -->
 
   <style>
+    .role-outer {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 8px;
+      max-width: 400px;
+    }
+
+    .delete {
+      border: 0;
+      padding: 4px 6px;
+      border-radius: 6px;
+      margin-top: 2px;
+      width: fit-content;
+      height: fit-content;
+      margin-left: 6px;
+    }
+
     .choose-type {
       display: flex;
       flex-direction: row;

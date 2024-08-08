@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, setContext } from 'svelte';
-  import type { ActionHash, AgentPubKey, AppClient, AppSignalCb } from '@holochain/client';
+  import type { ActionHash, AgentPubKey, AppClient, AppSignalCb, AppWebsocketConnectionOptions } from '@holochain/client';
   import { AppWebsocket, AdminWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
@@ -31,8 +31,8 @@
   import AllViewed from './whosin/coordinator/AllViewed.svelte';
   import { fade } from 'svelte/transition'
   
-  const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'converge'
-  const roleName = 'converge'
+  const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'whosin'
+  const roleName = 'whosin'
   const appPort = import.meta.env.VITE_APP_PORT ? import.meta.env.VITE_APP_PORT : 8888
   const adminPort = import.meta.env.VITE_ADMIN_PORT
   const url = `ws://localhost:${appPort}`;
@@ -116,27 +116,34 @@
         console.warn("Could not initialize applet hot-reloading. This is only expected to work in a We context in dev mode.")
       }
     }
+    let tokenResp;
     if (!isWeContext()) {
-      console.log("adminPort is", adminPort)
+      console.log("adminPort is", adminPort);
       if (adminPort) {
-        const url = `ws://localhost:${adminPort}`
-        console.log("connecting to admin port at:", url)
-        const adminWebsocket = await AdminWebsocket.connect({url: new URL(url)})
-        const x = await adminWebsocket.listApps({})
-        console.log("apps", x)
-        const cellIds = await adminWebsocket.listCellIds()
-        console.log("CELL IDS",cellIds)
-        await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+        const url = `ws://localhost:${adminPort}`;
+        console.log("connecting to admin port at:", url);
+        const adminWebsocket = await AdminWebsocket.connect({
+          url: new URL(url)
+        });
+        console.log("issuing token");
+        tokenResp = await adminWebsocket.issueAppAuthenticationToken({
+          installed_app_id: appId,
+        });
+        console.log("token", tokenResp);
+        const x = await adminWebsocket.listApps({});
+        console.log("apps", x);
+        const cellIds = await adminWebsocket.listCellIds();
+        console.log("CELL IDS", cellIds);
+        await adminWebsocket.authorizeSigningCredentials(cellIds[0]);
       }
-      console.log("appPort and Id is", appPort, appId)
-      client = await AppWebsocket.connect(appId,{url: new URL(url)})
+      console.log("appPort and Id is", appPort, appId);
+      const params: AppWebsocketConnectionOptions = { url: new URL(url) };
+      console.log("params", params);
+      if (tokenResp) params.token = tokenResp.token;
+      console.log("connecting to app port at:", params.url);
+      client = await AppWebsocket.connect(params);
+      console.log("client", client);
       profilesClient = new ProfilesClient(client, appId);
-    
-      // client = await AppWebsocket.connect('', 'dcan');
-      // profilesStore = new ProfilesStore(new ProfilesClient(client, 'converge'), {
-      //   avatarMode: "avatar-optional",
-      //   minNicknameLength: 3,
-      // });
     }
     else {
       // const weClient = await WeaveClient.connect();
@@ -303,7 +310,7 @@
 {#if profilesStore}
   <profiles-context store="{profilesStore}">
     <profile-prompt>
-      {#if weClient.renderInfo.view.type != "asset"}
+      {#if !isWeContext() || (isWeContext() && weClient.renderInfo.view.type != "asset")}
 
       <NotificationsHandler></NotificationsHandler>
       <main style="width: 100vw;">
@@ -312,7 +319,7 @@
             <Header></Header>
           {/if}
 
-          {#if !loading && !notifier && allNotifiers?.length > 1 && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
+          {#if !loading && !notifier && allNotifiers?.length > 0 && !(["notifier", "notificant", "home", "create-coordination"].includes(String(currentView)))}
             <p class="notice" style="margin: auto; border-radius: 0 0 4px 4px">Want to receive texts or emails when coordinations reach minimum participation?
               <button on:click={() => navigate('notificant')}>Click here</button>
               <!-- {#if String(currentView) != "notifications"}
@@ -358,7 +365,13 @@
             </span>
           {:else if currentView == "notificant"}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
-              <CreateContact></CreateContact>
+              <CreateContact 
+              on:my-notifier={()=>{
+                // navigate("all-coordinations")
+                // reload page
+                location.reload()
+              }}
+              ></CreateContact>
             </span>
           {:else}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
@@ -373,7 +386,8 @@
             <span>Submit feedback</span>
           </a>
           :)
-        {#if !isWeContext && dna && !loading && currentView != "instructions" && currentView != "" && (!weClient || weClient.renderInfo.view.type != "attachable")}
+        {#if !isWeContext() && dna && !loading && currentView != "instructions" && currentView != ""}
+        <br>
         <small>
           <img class="holochain-logo" src={Holochain} alt="holochain logo"/>
           Private Holochain network: {dna}
@@ -395,7 +409,7 @@
       </main>
       {:else}
       <div class="attachment-container" style="display: flex; flex-direction: column">
-      <CoordinationDetail coordinationHash={currentHash}></CoordinationDetail>
+        <CoordinationDetail coordinationHash={currentHash}></CoordinationDetail>
       </div>
       {/if}
     </profile-prompt>

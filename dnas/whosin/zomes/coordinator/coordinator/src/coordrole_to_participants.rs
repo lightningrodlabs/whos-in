@@ -38,6 +38,7 @@ pub struct NotificationTip {
   pub extra_context: String,
   pub message_id: String,
   pub destination: String,
+  pub delay_until: Option<Timestamp>,
 }
 
 #[hdk_extern]
@@ -144,6 +145,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         extra_context: String::from(relevant_hash.clone().unwrap().to_string()),
         message_id: String::from(""),
         destination: String::from("send_notification_tip"),
+        delay_until: None,
     };
 
     debug!("Sending notification tip");
@@ -163,6 +165,59 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             debug!("Successfully called the zome function")
         }
     // }
+
+
+
+    // ==================If there is an end date, send a notification to the coordinator======================
+    // get coordination
+    let maybe_coordination = get(
+        ActionHash::try_from(coordination_hash.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap(),
+        GetOptions::default(),
+    )?;
+
+    let coordination: Coordination = maybe_coordination
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest("Could not retrieve coordination".into(),)
+            ),
+        )?
+        .entry()
+        .to_app_option()
+        .map_err(|err| wasm_error!(err))?
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest("Could not retrieve coordination".into(),)
+            ),
+        )?;
+
+    if let Some(starts_date) = coordination.starts_date {
+        let tip: NotificationTip = NotificationTip {
+            retry_count: 0,
+            status: String::from(""),
+            message: format!("Starting now: {}", coordination.title),
+            notificants: vec![],
+            contacts: vec![],
+            extra_context: String::from(relevant_hash.clone().unwrap().to_string()),
+            message_id: String::from(""),
+            destination: String::from("send_notification_tip"),
+            delay_until: Some(starts_date),
+        };
+        debug!("Sending notification tip");
+        emit_signal(tip.clone())?;
+        if let Err(e) = call(
+            CallTargetCell::Local, // Must be one of the roles specified in the happ manifest
+            ZomeName::from(String::from("notifications")), // Name of the zome to call
+            FunctionName(String::from("send_notification_tip")), // Name of the zome function to call
+            None, // Capability secret, if necessary
+            tip, // Input for the zome function
+        ) {
+            // Handle the error here
+            debug!("Error calling the notification function: {:?}", e);
+        } else {
+            debug!("Successfully called the zome function")
+        }
+    }
+
     Ok(())
 }
 #[hdk_extern]
