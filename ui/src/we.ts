@@ -24,6 +24,8 @@ export const appletServices: AppletServices = {
       'Coordination': {
         label: "Deliberation",
         icon_src: MINILOGO,
+        width: 'large',
+        height: 'large',
       }
     },
     // Types of UI widgets/blocks that this Applet supports

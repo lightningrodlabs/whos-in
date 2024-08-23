@@ -40,6 +40,7 @@
   const dispatch = createEventDispatcher();
 
   let client: AppClient | undefined;
+  let applets;
   let loading = true;
   let store = undefined;
   let currentView: String;
@@ -148,12 +149,13 @@
     else {
       // const weClient = await WeaveClient.connect();
       weClient = await WeaveClient.connect(appletServices);
+
       // store set
       setWeaveClient(weClient)
       // weClient = await WeaveClient.connect();
-
-      switch (weClient.renderInfo.type) {
-        case "applet-view":
+      
+      // switch (weClient.renderInfo.type) {
+      //   case "applet-view":
           switch (weClient.renderInfo.view.type) {
             case "main":
               // here comes your rendering logic for the main view
@@ -200,28 +202,39 @@
             default:
               throw new Error("Unsupported applet-view type");
           }
-          break;
-        case "cross-applet-view":
-          switch (this.weClient.renderInfo.view.type) {
-            case "main":
-              // here comes your rendering logic for the cross-applet main view
-              //break;
-            case "block":
-              //
-              //break;
-            default:
-              throw new Error("Unknown cross-applet-view render type.")
-          }
-          break;
-        default:
-          throw new Error("Unknown render view type");
+      //     break;
+      //   case "cross-applet-view":
+      //     currentView = "dashboard"
+      //     switch (this.weClient.renderInfo.view.type) {
+      //       case "main":
+      //         // here comes your rendering logic for the cross-applet main view
+      //         //break;
+      //       case "block":
+      //         //
+      //         //break;
+      //       default:
+      //         throw new Error("Unknown cross-applet-view render type.")
+      //     }
+      //     break;
+      //   default:
+      //     throw new Error("Unknown render view type");
 
-      }
+      // }
       
       //@ts-ignore
-      client = weClient.renderInfo.appletClient;
+      console.log("we client", weClient.renderInfo)
+
+      if (weClient.renderInfo.type == "applet-view") {
+        client = weClient.renderInfo.appletClient;
+        profilesClient = weClient.renderInfo.profilesClient;
+      } else {
+        applets = Array.from(weClient.renderInfo.applets.entries());
+        const firstApplet = applets[0];
+        console.log("we client 2", firstApplet)
+        client = firstApplet[1].appletClient;
+        profilesClient = firstApplet[1].profilesClient;
+      }
       //@ts-ignore
-      profilesClient = weClient.renderInfo.profilesClient;
     }
     profilesStore = new ProfilesStore(profilesClient);
     connected = true
@@ -274,6 +287,7 @@
 
   setContext(clientContext, {
     getClient: () => client,
+    getApplets: () => applets,
   });
 
   setContext(profilesStoreContext, {

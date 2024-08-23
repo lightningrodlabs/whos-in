@@ -278,7 +278,7 @@ nav logo {
   margin: 0 12px;
 }
 
-.notifications, .dashboard, .bulletin {
+.notifications, .dashboard, .calendar, .bulletin {
   width: 24px;
   height: 26px;
   color: #d6ddeb;
@@ -289,7 +289,7 @@ nav logo {
   border-radius: 6px;
 }
 
-.notifications:hover, .dashboard:hover, .bulletin:hover {
+.notifications:hover, .dashboard:hover, .calendar:hover, .bulletin:hover {
   background-color: #b5bed4;
 }
 

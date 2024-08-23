@@ -164,7 +164,7 @@
       </div>
                 
       <div style="margin-bottom: 16px; text-align: left;">
-        <h3 style="text-transform: capitalize;">{agreementType} Description</h3>
+        <h3 style="text-transform: capitalize;">{agreementType} Description (optional)</h3>
         <textarea class="description-input" placeholder="Type Here"  on:input={e => { description = e.target.value;} } />
       </div>
 
@@ -184,7 +184,7 @@
     
       <div class="dates">
         <div style="margin-bottom: 16px; text-align: left;">
-          Deadline to signup
+          Deadline to signup (optional)
           <input type="datetime-local" id="signup-deadline" name="signup-deadline" 
             on:input={e => {
               signupDeadline = new Date(e.target.value).valueOf() * 1000;
@@ -201,7 +201,12 @@
             <span style="text-transform: capitalize">
               {agreementType}
             </span> starts
-            <input type="datetime-local" id="start-date" name="start-date" on:input={e => { startsDate = new Date(e.target.value).valueOf() * 1000;} } required>
+            <input type="datetime-local" id="start-date" name="start-date" on:input={e => { 
+              startsDate = new Date(e.target.value).valueOf() * 1000;
+              // console.log("endsDate", endsDate)
+              // endsDate ? null : endsDate = new Date(startsDate + 3600).valueOf() * 1000;
+              // console.log("endsDate", endsDate)
+            } } required>
             <!-- <vaadin-date-time-picker label="Starts"  on:change={e => { startsDate = new Date(e.target.value).valueOf() * 1000;} } required></vaadin-date-time-picker>           -->
           </div>
 

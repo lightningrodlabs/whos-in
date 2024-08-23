@@ -12,9 +12,11 @@ import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAct
 import { onMount, setContext, getContext } from 'svelte';
 import { decode } from '@msgpack/msgpack';
 import Avatar from "./Avatar.svelte";
+import SvgIcon from '../../SvgIcon.svelte';
 import { isWeContext } from "@lightningrodlabs/we-applet";
 
 let client: AppClient = (getContext(clientContext) as any).getClient();
+let applets: Array<any> = (getContext(clientContext) as any).getApplets();
 let currentView;
 
 view.subscribe(value => {
@@ -35,6 +37,10 @@ navigate("dashboard", {});
 
 async function goToBulletin() {
 navigate("all-coordinations", {});
+}
+
+async function goToCalendar() {
+navigate("calendar", {});
 }
 </script>
 
@@ -86,6 +92,18 @@ navigate("all-coordinations", {});
       {/if}
     </li>
 
+    <li class="calendar" on:click={goToCalendar}>
+      {#if currentView == "calendar"}
+      <div class="dashboard-icon" style="color:#1952bb">
+        <SvgIcon icon="faCalendar" color=#1952bb />
+      </div>
+      {:else}
+      <div class="dashboard-icon">
+        <SvgIcon icon="faCalendar" color=#d6ddeb />
+      </div>
+      {/if}
+    </li>
+
     <li class="notifications-li">
       <div class="notifications" on:click={goToNotifications}>
         {#if currentView == "notifications"}
@@ -99,6 +117,7 @@ navigate("all-coordinations", {});
       </div>
     </li>
   
+    {#if !applets}
     <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
 
     <li class="middle-of-header-right"> 
@@ -111,6 +130,7 @@ navigate("all-coordinations", {});
         <span id="new-action">New coordination</span>
       </div>
     </li>
+    {/if}
 
 
     <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>

@@ -7,8 +7,12 @@ import type { CoordinatorSignal, Coordination } from './types';
 import CoordinationListItem from './CoordinationListItem.svelte';
 import SvgIcon from '../../SvgIcon.svelte';
 import FaBullhorn from 'svelte-icons/fa/FaBullhorn.svelte';
+import { decodeHashFromBase64 } from '@holochain/client';
+import { allCoordinations } from '../../crud/dataStore';
+import { refetchCoordinations, refetchSponsors } from '../../crud/refetch';
 
 let client: AppClient = (getContext(clientContext) as any).getClient();
+let applets: Array<any> = (getContext(clientContext) as any).getApplets();
 
 let hashes: Array<any> | undefined;
 let allSponsors = {};
@@ -17,10 +21,23 @@ let loading = true;
 let filterType = 'All';
 let error: any = undefined;
 
+allCoordinations.subscribe(value => {
+  hashes = value;
+});
+
 $: hashes, loading, error, allSponsors;
 
 onMount(async () => {
-  await fetchCoordinations();
+  // await fetchCoordinations();
+  if (applets) {
+    applets.forEach(applet => {
+      refetchCoordinations(applet[1].appletClient);
+    });
+  } else {
+    await refetchCoordinations(client);
+  }
+  console.log("applets", applets)
+  loading = false;
 });
 
 async function getSponsors(coordinationHash) {
@@ -148,9 +165,10 @@ async function fetchCoordinations() {
     </div>
       
     {#each hashes as hash}
-    {#if allSponsors[hash] && allSponsors[hash].length && (!allSpamReporters[hash] || !allSpamReporters[hash].length)}
-      <CoordinationListItem {filterType} coordinationHash={hash}></CoordinationListItem>
-    {/if}
+    <!-- {#if allSponsors[hash] && allSponsors[hash].length && (!allSpamReporters[hash] || !allSpamReporters[hash].length)} -->
+    <!-- {#if allSponsors[hash] && allSponsors[hash].length } -->
+      <CoordinationListItem {filterType} coordinationHash={decodeHashFromBase64(hash)}></CoordinationListItem>
+    <!-- {/if} -->
   {/each}
   {/if}
 </div>
