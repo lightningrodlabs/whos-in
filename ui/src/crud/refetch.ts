@@ -4,6 +4,7 @@ import { addSomeCoordinations, addSomeSponsors } from "./dataStore";
 
 
 export async function refetchCoordinations(client) {
+  console.log("refetching coordinations", client);
   try {
     const records = await client.callZome({
       cap_secret: null,
@@ -16,7 +17,10 @@ export async function refetchCoordinations(client) {
     let hashes = records.map(
       r => {
         let coordinationHash = encodeHashToBase64(r.signed_action.hashed.hash)
-        return coordinationHash;
+        return {
+          "coordinationHash": coordinationHash,
+          "client": client
+        };
 
       }
     );

@@ -10,10 +10,13 @@ export function setAllCoordinations(coordinations) {
   allCoordinations.set(coordinations)
 }
 
-export function addSomeCoordinations(coordinations) {
+export function addSomeCoordinations(coordHashAndClients) {
   // add any hashes that are not already in allCoordinations
   const currentCoordinations = get(allCoordinations);
-  const newCoordinations = coordinations.filter(hash => !currentCoordinations.includes(hash));
+  const newCoordinations = coordHashAndClients.filter(coordHashAndClient => {
+    // !currentCoordinations.includes(hash)
+    return !currentCoordinations.some(coord => coord.coordinationHash === coordHashAndClient.coordinationHash)
+  });
   setAllCoordinations([...currentCoordinations, ...newCoordinations]);
   console.log("allCoordinations", get(allCoordinations));
 }

@@ -14,7 +14,7 @@ import { refetchCoordinations, refetchSponsors } from '../../crud/refetch';
 let client: AppClient = (getContext(clientContext) as any).getClient();
 let applets: Array<any> = (getContext(clientContext) as any).getApplets();
 
-let hashes: Array<any> | undefined;
+let coordinationsHashData: Array<any> | undefined;
 let allSponsors = {};
 let allSpamReporters = {};
 let loading = true;
@@ -22,10 +22,10 @@ let filterType = 'All';
 let error: any = undefined;
 
 allCoordinations.subscribe(value => {
-  hashes = value;
+  coordinationsHashData = value;
 });
 
-$: hashes, loading, error, allSponsors;
+$: coordinationsHashData, loading, error, allSponsors;
 
 onMount(async () => {
   // await fetchCoordinations();
@@ -105,7 +105,7 @@ async function fetchCoordinations() {
       fn_name: 'get_all_coordinations',
       payload: null,
     });
-    hashes = records.map(
+    coordinationsHashData = records.map(
       r => {
         let coordinationHash: ActionHash = r.signed_action.hashed.hash
         getSponsors(coordinationHash);
@@ -117,7 +117,7 @@ async function fetchCoordinations() {
 
       }
     );
-    hashes = hashes.reverse();
+    coordinationsHashData = coordinationsHashData.reverse();
   } catch (e) {
     error = e;
   }
@@ -132,7 +132,7 @@ async function fetchCoordinations() {
 </div>
 {:else if error}
 <span>Error fetching the coordinations: {error}.</span>
-{:else if hashes.length === 0}
+{:else if coordinationsHashData.length === 0}
 <div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
   <label>Public Coordinations</label>
   <span>No coordinations yet.</span>
@@ -140,7 +140,7 @@ async function fetchCoordinations() {
 {:else}
 <div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
   <label>Public Coordinations</label>
-  {#if hashes.length > 0}
+  {#if coordinationsHashData.length > 0}
 
     <!-- toggle filters for All, Events, Projects and Agreements -->
     <div style="display: flex; flex-direction: row; margin-bottom: 16px;">
@@ -164,10 +164,10 @@ async function fetchCoordinations() {
       </div>
     </div>
       
-    {#each hashes as hash}
+    {#each coordinationsHashData as cHashData}
     <!-- {#if allSponsors[hash] && allSponsors[hash].length && (!allSpamReporters[hash] || !allSpamReporters[hash].length)} -->
     <!-- {#if allSponsors[hash] && allSponsors[hash].length } -->
-      <CoordinationListItem {filterType} coordinationHash={decodeHashFromBase64(hash)}></CoordinationListItem>
+      <CoordinationListItem {filterType} {cHashData}></CoordinationListItem>
     <!-- {/if} -->
   {/each}
   {/if}

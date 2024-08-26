@@ -10,11 +10,24 @@
     import '@material/mwc-snackbar';
     import '@material/mwc-icon-button';
     import SvgIcon from '../../SvgIcon.svelte';
-    import { view, viewHash, navigate } from '../../store.js';
+    import { view, viewHash, navigate, weClientStored } from '../../store.js';
+    import { decodeHashFromBase64 } from '@holochain/client';
+    import { WeaveClient } from '@lightningrodlabs/we-applet';
+    import { appletHashFromAppId } from '../../util';
+    import { getAppletInfoAndGroupsProfiles } from '@lightningrodlabs/we-elements';
+
+    let weClient: WeaveClient;
+    weClientStored.subscribe(value => {
+      if (value) {
+        weClient = value;
+      }
+    });
 
     const dispatch = createEventDispatcher();
     
-    export let coordinationHash: ActionHash;
+    // export let coordinationHash: ActionHash;
+    export let cHashData: any;
+    $: coordinationHash = cHashData ? decodeHashFromBase64(cHashData.coordinationHash) : undefined;
     export let filterType: string;
     
     let client: AppClient = (getContext(clientContext) as any).getClient();
@@ -32,6 +45,8 @@
     let stringEndDate
     let stringExpiresDate
     let coordination_type;
+    let firstGroupInfo;
+    $: firstGroupInfo;
     const coordination_type_icons = {
       "Event": "faCalendar",
       "Project": "faTask",
@@ -47,7 +62,11 @@
       
     $: error, loading, record, coordination;
     
-    onMount(() => {
+    onMount(async () => {
+      let appletHash = appletHashFromAppId(client.installedAppId);
+      let res = await getAppletInfoAndGroupsProfiles(weClient, appletHash);
+      firstGroupInfo = Array.from(Object.values(res.groupProfiles)[0].entries())[0][1]
+      console.log("groupInfo0", firstGroupInfo)
       fetchCoordination();
       fetchRoles();
     });
@@ -139,7 +158,7 @@
       <mwc-circular-progress indeterminate></mwc-circular-progress>
     </div>
     {:else if error}
-    <span>Error fetching the coordination: {error.data.data}</span>
+    <span>Error fetching the coordination: {error}</span>
     {:else if coordination_type == filterType || filterType == "All"}
     <div on:mousedown={goToFullview} class="dashboard-item" style="margin-bottom: 8px;">
       <div style="display: flex; flex-direction: row; margin-bottom: 2px">
@@ -147,6 +166,8 @@
           
           <div style="display: flex;">
             <div style="margin: auto; margin-right: 8px;">
+              <!-- firstGropuInfo.icon_src render -->
+              <img src={ firstGroupInfo ? firstGroupInfo.icon_src : "" } title={firstGroupInfo.name} style="width: 20px; height: 20px; border-radius: 50%; margin-left: 10px; margin-bottom: -4px;"/>
               { coordination.title }
             </div>
           </div>
@@ -160,24 +181,24 @@
             </div>
             <!-- active, happening today, expired, gathering participation -->
             {#if coordination.ends_date && coordination.ends_date < (new Date().getTime() * 1000)}
-              <div style="background: #ff0000; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+              <div style="background: #ff0000; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Expired
               </div>
             {:else if totalUnderMin >= totalMin && coordination.starts_date && coordination.starts_date < (new Date().getTime() * 1000)}
-              <div style="background: #cd1dff; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+              <div style="background: #cd1dff; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Happening today
               </div>
 
             {:else if totalMin > 0 && totalUnderMin < totalMin && coordination.signup_deadline && coordination.signup_deadline < (new Date().getTime() * 1000)}
-              <div style="background: gray; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+              <div style="background: gray; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Did not reach minimum participation
               </div>
             {:else if totalMin > 0 && totalUnderMin < totalMin}
-              <div style="background: rgb(255, 196, 17); color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+              <div style="background: rgb(255, 196, 17); color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Gathering participation
               </div>
             {:else if totalUnderMin >= totalMin}
-              <div style="background: #57ca01; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px; margin: 7px;">
+              <div style="background: #57ca01; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
                 Active
               </div>
             {/if}

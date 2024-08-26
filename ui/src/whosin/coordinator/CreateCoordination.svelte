@@ -226,7 +226,7 @@
           </div>
         {:else if agreementType == "project"}
         <div style="margin-bottom: 16px; text-align: left;">
-          Deadline to complete
+          Deadline to complete (optional)
           <input type="datetime-local" id="end-date" name="end-date"
             on:input={e => { 
               let newEndsDate = new Date(e.target.value).valueOf() * 1000;

@@ -7,6 +7,7 @@
   import CoordinationListItem from './CoordinationListItem.svelte';
   import FaList from 'svelte-icons/fa/FaList.svelte';
   import SvgIcon from '../../SvgIcon.svelte';
+  import { allCoordinations } from '../../crud/dataStore';
 
   // import { notifications, notifications_update } from '../../store.js';
   
@@ -21,8 +22,13 @@
   let error: any = undefined;
   let filterType = 'All';
   let shown = [];
+  let coordinationsHashData: Array<any> | undefined;
+
+  allCoordinations.subscribe(value => {
+    coordinationsHashData = value;
+  });
   
-  $: coordinations, loading, error, shown;
+  $: coordinations, loading, error, shown, coordinationsHashData;
   
   onMount(async () => {
       fetchCoordinations();
@@ -76,8 +82,9 @@
     </div>
   </div>
 
-  {#each coordinations.reverse() as hash}
-    <CoordinationListItem {filterType} coordinationHash={hash}></CoordinationListItem>
+  <!-- {#each coordinations.reverse() as hash} -->
+  {#each coordinationsHashData as cHashData}
+    <CoordinationListItem {filterType} {cHashData}></CoordinationListItem>
   {/each}
   {:else}
     No Commitments

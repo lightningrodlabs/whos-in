@@ -30,6 +30,9 @@
   import SvgIcon from './SvgIcon.svelte';
   import AllViewed from './whosin/coordinator/AllViewed.svelte';
   import { fade } from 'svelte/transition'
+  import { refetchCoordinations } from './crud/refetch.js';
+  import app from './main.js';
+  import Calendar from './whosin/coordinator/Calendar.svelte';
   
   const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'whosin'
   const roleName = 'whosin'
@@ -182,6 +185,9 @@
                     case "coordinator_integrity":
                       switch (weClient.renderInfo.view.recordInfo.entryType) {
                         case "coordination":
+                          // TODO: don't need to fetch all, just need to populate the store to keep track of 
+                            // the correct client for the coordination
+                          await refetchCoordinations(weClient.renderInfo.appletClient)
                           currentView = "coordination"
                           currentHash = weClient.renderInfo.view.wal.hrl[1]
                           // console.log("weClient.renderInfo.view", weClient.renderInfo.view)
@@ -320,12 +326,11 @@
 
 </script>
 
-{#if client}
-{#if profilesStore}
+{#if client || applets != undefined}
+{#if profilesStore || applets != undefined}
   <profiles-context store="{profilesStore}">
     <profile-prompt>
       {#if !isWeContext() || (isWeContext() && weClient.renderInfo.view.type != "asset")}
-
       <NotificationsHandler></NotificationsHandler>
       <main style="width: 100vw;">
 
@@ -376,6 +381,10 @@
           {:else if currentView == "notifier"}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
               <CreateTwilioCredentials></CreateTwilioCredentials>
+            </span>
+          {:else if currentView == "calendar"}
+            <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
+              <Calendar></Calendar>
             </span>
           {:else if currentView == "notificant"}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>

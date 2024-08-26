@@ -12,7 +12,6 @@
     "@holochain-open-dev/profiles": "^0.400.0-dev.1",
     "@holochain-open-dev/stores": "^0.400.0-dev.1",
     "@holochain-open-dev/utils": "^0.400.0-dev.0",
-    "@holochain-syn/core": "^0.400.0-dev.0",
     "@holochain/client": "^0.18.0-dev.0",
     "@lightningrodlabs/we-applet": "^0.17.1",
     "@lightningrodlabs/we-elements": "^0.6.1",
@@ -27,7 +26,9 @@
     "@material/mwc-textarea": "^0.27.0",
     "@material/mwc-textfield": "^0.27.0",
     "@msgpack/msgpack": "^2.7.2",
-    "@vaadin/date-time-picker": "^23.2.8"
+    "@vaadin/date-time-picker": "^23.2.8",
+    "@event-calendar/core": "3.4.0",
+    "@event-calendar/time-grid": "3.4.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",

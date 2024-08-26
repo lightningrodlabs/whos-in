@@ -16,13 +16,22 @@
   import Avatar from './Avatar.svelte';
   import { getMyDna } from '../../util';
   import { countViewed, addToViewed, add_notification, weClientStored } from '../../store.js';
-    import Loading from '../Loading.svelte';
+  import Loading from '../Loading.svelte';
+  import { allCoordinations } from '../../crud/dataStore';
+  import { encodeHashToBase64 } from '@holochain/client';
+
+  let cHashAndClients;
+  allCoordinations.subscribe(value => {
+    cHashAndClients = value;
+    console.log(cHashAndClients)
+  })
 
   const dispatch = createEventDispatcher();
   
   export let coordinationHash: ActionHash;
-  
-  let client: AppClient = (getContext(clientContext) as any).getClient();
+  let hashB64 = encodeHashToBase64(coordinationHash)
+  $: client = cHashAndClients.find(chc => chc.coordinationHash == hashB64)?.client;
+  // let client: AppClient = (getContext(clientContext) as any).getClient();
   
   let loading = true;
   let error: any = undefined;
@@ -66,14 +75,17 @@
   // onMount(() => fetchRoles());
   
   onMount(async () => {
-    dnaHash = await getMyDna("whosin", client)
-    await fetchCoordination()
-    // .then(() => {
-    await fetchRoles()
-    // })
-    addToViewed(coordinationHash, client)
-
-    getSponsors()
+    console.log(coordinationHash)
+    if (client) {
+      dnaHash = await getMyDna("whosin", client)
+      await fetchCoordination()
+      // .then(() => {
+      await fetchRoles()
+      // })
+      addToViewed(coordinationHash, client)
+      
+      getSponsors()
+    }
   });
 
 

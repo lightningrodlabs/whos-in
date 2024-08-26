@@ -11,6 +11,19 @@ export function onVisible(element, callback) {
     }).observe(element);
 }
 
+export type AppletHash = EntryHash;
+// export function appletHashFromAppId(appId: string): AppletHash {
+//   if (!appId.startsWith('applet#')) {
+//     throw new Error('Invalid appId format');
+//   }
+//   const base64Hash = appId.slice(7); // Remove 'applet#' prefix
+//   return decodeHashFromBase64(base64Hash);
+// }
+
+export function appletHashFromAppId(installedAppId: string): AppletHash {
+  return decodeHashFromBase64(installedAppId.slice(7).replace(/[a-z]\$/g, (match) => match[0].toUpperCase()));
+}
+
 export function hrlWithContextToB64(hrl: HrlWithContext): HrlB64WithContext {
   return {
     hrl: [encodeHashToBase64(hrl.hrl[0]), encodeHashToBase64(hrl.hrl[1])],
