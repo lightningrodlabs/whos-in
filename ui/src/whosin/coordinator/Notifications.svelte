@@ -7,6 +7,7 @@
     import { WeaveClient, isWeContext, initializeHotReload, type WAL, type Hrl } from '@lightningrodlabs/we-applet';  
     import { notifications, add_notification } from '../../store.js';
     import { appletServices } from '../../we';
+    import { getMyDna } from '../../util';
     
     let client: AppClient = (getContext(clientContext) as any).getClient();
     // export let client: AppClient;
@@ -109,6 +110,9 @@
                     if (!alread_in) {
                         add_notification(new_notification)
 
+                        const dnaHash = await getMyDna("whosin", client);
+                        const coordinationWal: WAL = { hrl: [dnaHash, coordination_hash], context: "" }
+
                         if (new_notification.seen == 0) {
                             weClient.notifyFrame([{
                                 title: "Coordination Activated",
@@ -116,7 +120,8 @@
                                 notification_type: "change",
                                 icon_src: undefined,
                                 urgency: "high",
-                                timestamp: Date.now()
+                                timestamp: Date.now(),
+                                aboutWal: coordinationWal
                             }])
                         }
                     }

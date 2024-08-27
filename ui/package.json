@@ -28,7 +28,12 @@
     "@msgpack/msgpack": "^2.7.2",
     "@vaadin/date-time-picker": "^23.2.8",
     "@event-calendar/core": "3.4.0",
-    "@event-calendar/time-grid": "3.4.0"
+    "@event-calendar/day-grid": "3.4.0",
+    "@event-calendar/list": "3.4.0",
+    "@event-calendar/resource-timeline": "3.4.0",
+    "@event-calendar/resource-time-grid": "3.4.0",
+    "@event-calendar/time-grid": "3.4.0",
+    "@event-calendar/interaction": "3.4.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",

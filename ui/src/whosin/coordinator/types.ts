@@ -63,6 +63,14 @@ export interface Coordination {
   coordroles: Array<Coordrole>;
 
   attachments?: HrlB64WithContext[];
+
+
+  // added by the client
+  totalParticipants: number | null;
+
+  totalMin: number | null;
+
+  totalUnderMin: number | null;
 }
 
 

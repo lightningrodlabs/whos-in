@@ -7,16 +7,18 @@
   import CoordinationListItem from './CoordinationListItem.svelte';
   import FaList from 'svelte-icons/fa/FaList.svelte';
   import SvgIcon from '../../SvgIcon.svelte';
-  import { allCoordinations } from '../../crud/dataStore';
+  import { allCoordinations, myCoordinations } from '../../crud/dataStore';
+  import { refetchCoordinationsWithDetails, refetchMyCoordinations } from '../../crud/refetch';
 
   // import { notifications, notifications_update } from '../../store.js';
   
   // export let author: AgentPubKey; // = (getContext(clientContext) as any).getClient();
   
   let client: AppClient = (getContext(clientContext) as any).getClient();
+  let applets: Array<any> = (getContext(clientContext) as any).getApplets();
   
   // let coordinations: Array<ActionHash> | [];
-    let coordinations;
+  let coordinations;
   // let coordination_details = [];
   let loading = true;
   let error: any = undefined;
@@ -24,41 +26,50 @@
   let shown = [];
   let coordinationsHashData: Array<any> | undefined;
 
-  allCoordinations.subscribe(value => {
+  myCoordinations.subscribe(value => {
     coordinationsHashData = value;
   });
   
   $: coordinations, loading, error, shown, coordinationsHashData;
   
   onMount(async () => {
-      fetchCoordinations();
+    await refetchMyCoordinations(client);
+    // await fetchCoordinations();
+    // if (applets) {
+    //   applets.forEach(applet => {
+    //     refetchCoordinationsWithDetails(applet[1].appletClient);
+    //   });
+    // } else {
+    //   await refetchCoordinationsWithDetails(client);
+    // }
+    console.log("applets", applets)
   });
 
-  async function fetchCoordinations() {
-      try {
-          const records = await client
-          .callZome({
-              cap_secret: null,
-              role_name: 'whosin',
-              zome_name: 'coordinator',
-              fn_name: 'get_my_coordination_hashes',
-              payload: null,
-          });
+  // async function fetchCoordinations() {
+  //     try {
+  //         const records = await client
+  //         .callZome({
+  //             cap_secret: null,
+  //             role_name: 'whosin',
+  //             zome_name: 'coordinator',
+  //             fn_name: 'get_my_coordination_hashes',
+  //             payload: null,
+  //         });
 
-          coordinations = records.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
+  //         coordinations = records.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
 
-      } catch (e) {
-          error = e;
-      }
-      loading = false;
-  }
+  //     } catch (e) {
+  //         error = e;
+  //     }
+  //     loading = false;
+  // }
   
 
 </script>
 
 <div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
   <label>My Coordinations</label>
-  {#if coordinations && coordinations.length}
+  {#if coordinationsHashData && coordinationsHashData.length}
 
   <!-- toggle filters for All, Events, Projects and Agreements -->
   <div style="display: flex; flex-direction: row; margin-bottom: 16px;">

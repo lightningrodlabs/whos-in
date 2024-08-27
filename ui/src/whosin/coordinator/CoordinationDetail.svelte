@@ -18,6 +18,7 @@
   import { countViewed, addToViewed, add_notification, weClientStored } from '../../store.js';
   import Loading from '../Loading.svelte';
   import { allCoordinations } from '../../crud/dataStore';
+  import { refetchCoordinations } from '../../crud/refetch';
   import { encodeHashToBase64 } from '@holochain/client';
 
   let cHashAndClients;

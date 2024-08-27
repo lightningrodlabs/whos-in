@@ -64,3 +64,37 @@ export const getMyDna = async (role:string, client: AppClient) : Promise<DnaHash
   ].cell_id[0];
   return dnaHash
 } 
+
+export const getCoordinationLabel = (coordination: any) : any => {
+    const currentTime = new Date().getTime() * 1000;
+    console.log(coordination)
+
+    if (coordination.ends_date && coordination.ends_date < currentTime) {
+        return {
+            title: 'Expired',
+            color: '#ff0000'
+        };
+    } else if (coordination.totalUnderMin >= coordination.totalMin && coordination.starts_date && coordination.starts_date < currentTime) {
+        return {
+            title: 'Happening today',
+            color: '#cd1dff'
+        };
+    } else if (coordination.totalMin > 0 && coordination.totalUnderMin < coordination.totalMin && coordination.signup_deadline && coordination.signup_deadline < currentTime) {
+        return {
+            title: 'Did not reach minimum participation',
+            color: 'gray'
+        };
+    } else if (coordination.totalMin > 0 && coordination.totalUnderMin < coordination.totalMin) {
+        return {
+            title: 'Gathering participation',
+            color: 'rgb(255, 196, 17)'
+        };
+    } else if (coordination.totalUnderMin >= coordination.totalMin) {
+        return {
+            title: 'Active',
+            color: '#57ca01'
+        };
+    }
+
+    return null;
+}

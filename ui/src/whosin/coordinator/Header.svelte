@@ -5,7 +5,7 @@ import FaBell from 'svelte-icons/fa/FaBell.svelte';
 import FaBullhorn from 'svelte-icons/fa/FaBullhorn.svelte';
 import FaList from 'svelte-icons/fa/FaList.svelte';
 import FaHome from 'svelte-icons/fa/FaHome.svelte';
-import { navigate, view } from '../../store.js';
+import { navigate, view, weClientStored } from '../../store.js';
 import Notifications from './Notifications.svelte';
 import { clientContext } from '../../contexts';
 import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction } from '@holochain/client';
@@ -17,6 +17,10 @@ import { isWeContext } from "@lightningrodlabs/we-applet";
 
 let client: AppClient = (getContext(clientContext) as any).getClient();
 let applets: Array<any> = (getContext(clientContext) as any).getApplets();
+let weClient;
+weClientStored.subscribe(value => {
+  weClient = value;
+});
 let currentView;
 
 view.subscribe(value => {
@@ -127,16 +131,15 @@ navigate("calendar", {});
         </div>
         <!-- <i class="fas fa-plus white-circle-plus"></i> -->
         <!-- <img class="nav-image" src="/assets/add_circle_black_24dp-b42cee553b2665d6f62bd5d9ffc02837cf3c5a3084fc6a5674f5edf83776f565.svg" alt="Add circle black 24dp" border="0"> -->
-        <span id="new-action">New coordination</span>
+        <span id="new-action">Create</span>
       </div>
     </li>
-    {/if}
-
 
     <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
     <li class="notifications-li">
       <Avatar showNickname={true} agentPubKey={client.myPubKey}  size={24} namePosition="row"></Avatar>
     </li>
+    {/if}
     <!-- if no agent linked to my agent as notifier -->
     <!-- {#if !notifier}
       <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>

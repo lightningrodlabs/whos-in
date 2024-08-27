@@ -13,8 +13,10 @@
     import { view, viewHash, navigate, weClientStored } from '../../store.js';
     import { decodeHashFromBase64 } from '@holochain/client';
     import { WeaveClient } from '@lightningrodlabs/we-applet';
-    import { appletHashFromAppId } from '../../util';
+    import { appletHashFromAppId, getCoordinationLabel } from '../../util';
     import { getAppletInfoAndGroupsProfiles } from '@lightningrodlabs/we-elements';
+    import { refetchCoordinationDetails } from '../../crud/refetch';
+    import { allCoordinationsDetails } from '../../crud/dataStore';
 
     let weClient: WeaveClient;
     weClientStored.subscribe(value => {
@@ -27,7 +29,7 @@
     
     // export let coordinationHash: ActionHash;
     export let cHashData: any;
-    $: coordinationHash = cHashData ? decodeHashFromBase64(cHashData.coordinationHash) : undefined;
+   let coordinationHash = cHashData ? decodeHashFromBase64(cHashData.coordinationHash) : undefined;
     export let filterType: string;
     
     let client: AppClient = (getContext(clientContext) as any).getClient();
@@ -36,7 +38,6 @@
     let error: any = undefined;
     
     let record;//: Record | undefined;
-    let coordination: Coordination | undefined;
     let coordRoles; //: Coordrole[] | undefined;
     let totalMin = 0;
     let totalUnderMin = 0;
@@ -58,6 +59,35 @@
       "Agreement": "#5301ae"
     }
 
+    let coordination: Coordination | undefined;
+    allCoordinationsDetails.subscribe(value => {
+      coordination = value[cHashData.coordinationHash];
+      console.log("coordinationDetails", coordination)
+
+      if (coordination) {
+        let options: Intl.DateTimeFormatOptions = { 
+          weekday: 'long',
+          year: 'numeric', 
+          month: 'long',
+          day: 'numeric', 
+          hour: 'numeric', 
+          minute: 'numeric', 
+          hour12: true 
+        };
+        coordination_type = coordination.coordination_type
+        stringStartDate = new Date(coordination.starts_date / 1000).toLocaleDateString(undefined, options);
+        // if year is current year, don't show year
+        stringStartDate = stringStartDate.replace(" " + new Date().getFullYear() + " ", " ");
+        stringEndDate = new Date(coordination.ends_date / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
+        stringExpiresDate = new Date(coordination.signup_deadline / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");    
+        console.log("stringStartDate", coordination)
+        totalParticipants = coordination.totalParticipants;
+        totalMin = coordination.totalMin;
+        totalUnderMin = coordination.totalUnderMin;
+        loading = false;
+      }
+    })
+
     let errorSnackbar: Snackbar;
       
     $: error, loading, record, coordination;
@@ -67,87 +97,88 @@
       let res = await getAppletInfoAndGroupsProfiles(weClient, appletHash);
       firstGroupInfo = Array.from(Object.values(res.groupProfiles)[0].entries())[0][1]
       console.log("groupInfo0", firstGroupInfo)
-      fetchCoordination();
-      fetchRoles();
+      refetchCoordinationDetails(client, coordinationHash);
+      // fetchCoordination();
+      // fetchRoles();
     });
     
     async function goToFullview() {
       navigate("coordination", coordinationHash);
     }
 
-    async function fetchCoordination() {
-      loading = true;
-      error = undefined;
-      record = undefined;
-      coordination = undefined;
+    // async function fetchCoordination() {
+    //   loading = true;
+    //   error = undefined;
+    //   record = undefined;
+    //   coordination = undefined;
       
-      try {
-        record = await client.callZome({
-          cap_secret: null,
-          role_name: 'whosin',
-          zome_name: 'coordinator',
-          fn_name: 'get_coordination',
-          payload: coordinationHash,
-        });
-        if (record) {
-          let options: Intl.DateTimeFormatOptions = { 
-            weekday: 'long',
-            year: 'numeric', 
-            month: 'long',
-            day: 'numeric', 
-            hour: 'numeric', 
-            minute: 'numeric', 
-            hour12: true 
-          };
-          coordination = decode((record.entry as any).Present.entry) as Coordination;
-          coordination_type = coordination.coordination_type
-          stringStartDate = new Date(coordination.starts_date / 1000).toLocaleDateString(undefined, options);
-          // if year is current year, don't show year
-          stringStartDate = stringStartDate.replace(" " + new Date().getFullYear() + " ", " ");
-          stringEndDate = new Date(coordination.ends_date / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
-          stringExpiresDate = new Date(coordination.signup_deadline / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
-        }
-      } catch (e) {
-        error = e;
-      }
+    //   try {
+    //     record = await client.callZome({
+    //       cap_secret: null,
+    //       role_name: 'whosin',
+    //       zome_name: 'coordinator',
+    //       fn_name: 'get_coordination',
+    //       payload: coordinationHash,
+    //     });
+    //     if (record) {
+    //       let options: Intl.DateTimeFormatOptions = { 
+    //         weekday: 'long',
+    //         year: 'numeric', 
+    //         month: 'long',
+    //         day: 'numeric', 
+    //         hour: 'numeric', 
+    //         minute: 'numeric', 
+    //         hour12: true 
+    //       };
+    //       coordination = decode((record.entry as any).Present.entry) as Coordination;
+    //       coordination_type = coordination.coordination_type
+    //       stringStartDate = new Date(coordination.starts_date / 1000).toLocaleDateString(undefined, options);
+    //       // if year is current year, don't show year
+    //       stringStartDate = stringStartDate.replace(" " + new Date().getFullYear() + " ", " ");
+    //       stringEndDate = new Date(coordination.ends_date / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
+    //       stringExpiresDate = new Date(coordination.signup_deadline / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
+    //     }
+    //   } catch (e) {
+    //     error = e;
+    //   }
     
-      loading = false;
-    }
+    //   loading = false;
+    // }
 
 
-    async function fetchRoles() {
-      loading = true;
-      error = undefined;
-      record = undefined;
-      coordRoles = undefined;
+    // async function fetchRoles() {
+    //   loading = true;
+    //   error = undefined;
+    //   record = undefined;
+    //   coordRoles = undefined;
       
-      try {
-        record = await client.callZome({
-          cap_secret: null,
-          role_name: 'whosin',
-          zome_name: 'coordinator',
-          fn_name: 'get_coordroles_for_coordination',
-          payload: coordinationHash,
-        });
-        if (record) {
-          record.forEach(r => {
-            let min = decode(r.coordrole.entry.Present.entry)["minimum"];
-            let underMin = Math.min(r.participants, min);
-            totalParticipants += r.participants;
-            totalMin += min;
-            totalUnderMin += underMin;
-            totalMin = totalMin;
-            totalUnderMin = totalUnderMin;
-          })
-        } else {
-          console.log("?")
-        }
-      } catch (e) {
-        error = e;
-      }
+    //   try {
+    //     record = await client.callZome({
+    //       cap_secret: null,
+    //       role_name: 'whosin',
+    //       zome_name: 'coordinator',
+    //       fn_name: 'get_coordroles_for_coordination',
+    //       payload: coordinationHash,
+    //     });
+    //     if (record) {
+    //       record.forEach(r => {
+    //         let min = decode(r.coordrole.entry.Present.entry)["minimum"];
+    //         let underMin = Math.min(r.participants, min);
+    //         totalParticipants += r.participants;
+    //         totalMin += min;
+    //         totalUnderMin += underMin;
+    //         totalMin = totalMin;
+    //         totalUnderMin = totalUnderMin;
+    //       })
+    //     } else {
+    //       console.log("?")
+    //     }
+    //   } catch (e) {
+    //     error = e;
+    //   }
 
-      loading = false;
-    }
+    //   loading = false;
+    // }
     </script>
     
     <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -167,7 +198,9 @@
           <div style="display: flex;">
             <div style="margin: auto; margin-right: 8px;">
               <!-- firstGropuInfo.icon_src render -->
-              <img src={ firstGroupInfo ? firstGroupInfo.icon_src : "" } title={firstGroupInfo.name} style="width: 20px; height: 20px; border-radius: 50%; margin-left: 10px; margin-bottom: -4px;"/>
+              {#if weClient.renderInfo.applets && firstGroupInfo}
+              <img src={ firstGroupInfo ? firstGroupInfo.icon_src : "" } title={firstGroupInfo.name} style="width: 20px; height: 20px; border-radius: 50%; margin-bottom: -4px;"/>
+              {/if}
               { coordination.title }
             </div>
           </div>
@@ -180,26 +213,10 @@
               </div>
             </div>
             <!-- active, happening today, expired, gathering participation -->
-            {#if coordination.ends_date && coordination.ends_date < (new Date().getTime() * 1000)}
-              <div style="background: #ff0000; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
-                Expired
-              </div>
-            {:else if totalUnderMin >= totalMin && coordination.starts_date && coordination.starts_date < (new Date().getTime() * 1000)}
-              <div style="background: #cd1dff; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
-                Happening today
-              </div>
-
-            {:else if totalMin > 0 && totalUnderMin < totalMin && coordination.signup_deadline && coordination.signup_deadline < (new Date().getTime() * 1000)}
-              <div style="background: gray; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
-                Did not reach minimum participation
-              </div>
-            {:else if totalMin > 0 && totalUnderMin < totalMin}
-              <div style="background: rgb(255, 196, 17); color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
-                Gathering participation
-              </div>
-            {:else if totalUnderMin >= totalMin}
-              <div style="background: #57ca01; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
-                Active
+            {#if coordination}
+              {@const label = getCoordinationLabel(coordination)}
+              <div style="background: {label.color}; color: #fff; padding: 3px 5px 0; border-radius: 5px; margin-right: 10px; margin: 7px;">
+                {label.title}
               </div>
             {/if}
           </div>

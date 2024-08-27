@@ -9,7 +9,7 @@ import SvgIcon from '../../SvgIcon.svelte';
 import FaBullhorn from 'svelte-icons/fa/FaBullhorn.svelte';
 import { decodeHashFromBase64 } from '@holochain/client';
 import { allCoordinations } from '../../crud/dataStore';
-import { refetchCoordinations, refetchSponsors } from '../../crud/refetch';
+import { refetchCoordinations, refetchCoordinationsWithDetails, refetchSponsors } from '../../crud/refetch';
 
 let client: AppClient = (getContext(clientContext) as any).getClient();
 let applets: Array<any> = (getContext(clientContext) as any).getApplets();
@@ -23,6 +23,7 @@ let error: any = undefined;
 
 allCoordinations.subscribe(value => {
   coordinationsHashData = value;
+  loading = false;
 });
 
 $: coordinationsHashData, loading, error, allSponsors;
@@ -31,13 +32,12 @@ onMount(async () => {
   // await fetchCoordinations();
   if (applets) {
     applets.forEach(applet => {
-      refetchCoordinations(applet[1].appletClient);
+      refetchCoordinationsWithDetails(applet[1].appletClient);
     });
   } else {
-    await refetchCoordinations(client);
+    await refetchCoordinationsWithDetails(client);
   }
   console.log("applets", applets)
-  loading = false;
 });
 
 async function getSponsors(coordinationHash) {
@@ -96,33 +96,33 @@ async function getSpamReporters(coordinationHash) {
 }
 
 
-async function fetchCoordinations() {
-  try {
-    const records = await client.callZome({
-      cap_secret: null,
-      role_name: 'whosin',
-      zome_name: 'coordinator',
-      fn_name: 'get_all_coordinations',
-      payload: null,
-    });
-    coordinationsHashData = records.map(
-      r => {
-        let coordinationHash: ActionHash = r.signed_action.hashed.hash
-        getSponsors(coordinationHash);
-        getSpamReporters(coordinationHash);
-        // allSponsors[coordinationHash.toString()] = sponsors;
-        return coordinationHash;
-        // return {coordinationHash: coordinationHash, sponsors: sponsors}
-        // return {coordination: coordination, sponsors: 0}
+// async function fetchCoordinations() {
+//   try {
+//     const records = await client.callZome({
+//       cap_secret: null,
+//       role_name: 'whosin',
+//       zome_name: 'coordinator',
+//       fn_name: 'get_all_coordinations',
+//       payload: null,
+//     });
+//     coordinationsHashData = records.map(
+//       r => {
+//         let coordinationHash: ActionHash = r.signed_action.hashed.hash
+//         getSponsors(coordinationHash);
+//         getSpamReporters(coordinationHash);
+//         // allSponsors[coordinationHash.toString()] = sponsors;
+//         return coordinationHash;
+//         // return {coordinationHash: coordinationHash, sponsors: sponsors}
+//         // return {coordination: coordination, sponsors: 0}
 
-      }
-    );
-    coordinationsHashData = coordinationsHashData.reverse();
-  } catch (e) {
-    error = e;
-  }
-  loading = false;
-}
+//       }
+//     );
+//     coordinationsHashData = coordinationsHashData.reverse();
+//   } catch (e) {
+//     error = e;
+//   }
+//   loading = false;
+// }
 
 </script>
 
