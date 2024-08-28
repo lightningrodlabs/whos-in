@@ -13,10 +13,19 @@
   import { isWeContext } from '@lightningrodlabs/we-applet';
   import { countViewed, addToViewed } from '../../store.js';
   import type { WALUrl } from '../../util';
+  import { getMyDna } from '../../util';
   import '@vaadin/date-time-picker/theme/material/vaadin-date-time-picker.js';
   import SvgIcon from '../../SvgIcon.svelte';
+  import type { WAL } from '@lightningrodlabs/we-applet';
+  import { onMount } from 'svelte';
+  import { weClientStored } from '../../store.js';
   let client: AppClient = (getContext(clientContext) as any).getClient();
   
+  let weClient: any;
+  weClientStored.subscribe(value => {
+    weClient = value;
+  });
+
   const dispatch = createEventDispatcher();
   
   
@@ -42,6 +51,7 @@
   }
   
   let errorSnackbar: Snackbar;
+  let dnaHash;
   
   $: title, description, startsDate, endsDate, signupDeadline, reminderDate, coordRoles, roleTitle, roleDescription, minimum, maximum, attachments;
   $: isCoordinationValid = title !== undefined && description !== undefined && coordRoles.length > 0 && (agreementType != "event" || (startsDate != undefined && endsDate != undefined)) //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
@@ -78,6 +88,9 @@
         coordinationHash: record.signed_action.hashed.hash 
       });
   
+      const wal: WAL = { hrl: [dnaHash, record.signed_action.hashed.hash], context: "" }
+      console.log(weClient, weClient.renderInfo)
+      weClient.renderInfo.view.resolve(wal)
       navigate("coordination", record.signed_action.hashed.hash);
   
     } catch (e) {
@@ -129,6 +142,10 @@
     coordRoles.splice(index, 1)
     coordRoles = coordRoles
   }
+
+  onMount(async () => {
+    dnaHash = await getMyDna("whosin", client);
+  });
   
   </script>
   

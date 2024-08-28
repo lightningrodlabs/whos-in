@@ -80,20 +80,11 @@
       client = clientBackup;
     }
     if (client) {
-      console.log("client exists")
       dnaHash = await getMyDna("whosin", client)
-      console.log(1)
       await fetchCoordination()
-      console.log(2)
-      // .then(() => {
       await fetchRoles()
-      console.log(3)
-      // })
       addToViewed(coordinationHash, client)
-      console.log(4)
-      
       getSponsors()
-      console.log(5)
     }
   });
 

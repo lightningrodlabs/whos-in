@@ -2,7 +2,7 @@ import { decode } from "@msgpack/msgpack";
 import { encodeHashToBase64 } from "@holochain/client";
 import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations } from "./dataStore";
 import type { Coordination } from '../whosin/coordinator/types';
-import { weClientStored } from "../store";
+import { notifications, weClientStored } from "../store";
 import type { WAL } from "@lightningrodlabs/we-applet";
 import { getMyDna } from "../util";
 
@@ -129,18 +129,16 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
             totalUnderMin = totalUnderMin;
                         
             r.participants_details.forEach(async (participant) => {
-              if (starts_date) {
-                newNotifications.push({
-                  title: "Coordination joined",
-                  body: "A participant has joined a coordination",
-                  notification_type: "change",
-                  icon_src: undefined,
-                  urgency: "low",
-                  timestamp: starts_date / 1000,
-                  aboutWal: coordinationWal,
-                  fromAgent: participant,
-                })
-              }
+              newNotifications.push({
+                title: "Coordination joined",
+                body: "A participant has joined a coordination",
+                notification_type: "change",
+                icon_src: undefined,
+                urgency: "low",
+                timestamp: participant.link_created / 1000,
+                aboutWal: coordinationWal,
+                fromAgent: participant.agent_pub_key,
+              })
             });
           })
         } else {

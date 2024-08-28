@@ -119,7 +119,7 @@
                                 notification_type: "change",
                                 icon_src: undefined,
                                 urgency: "high",
-                                timestamp: coordination.signed_action.hashed.content.timestamp,
+                                timestamp: coordination.signed_action.hashed.content.timestamp / 1000,
                                 aboutWal: coordinationWal,
                                 fromAgent: client.myPubKey,
                             }])

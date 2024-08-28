@@ -26,10 +26,16 @@ pub fn add_coordrole_for_coordination(
     Ok(())
 }
 #[derive(Serialize, Deserialize, Debug)]
+struct AgentInfo {
+    agent_pub_key: AgentPubKey,
+    link_created: Timestamp,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CoordrolesOutput {
     coordrole: Record,
     participants: usize,
-    participants_details: Vec<AgentPubKey>,
+    participants_details: Vec<AgentInfo>,
     committed: bool,
 }
 #[hdk_extern]
@@ -69,16 +75,29 @@ pub fn get_coordroles_for_coordination(
                 None,
             )
         )?;
-        let agents: Vec<AgentPubKey> = user_links
+        // let agents: Vec<AgentPubKey> = user_links
+        //     .into_iter()
+        //     .map(|link| AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()))
+        //     .collect();
+
+        let agents: Vec<AgentInfo> = user_links
             .into_iter()
-            .map(|link| AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap()))
+            .map(|link| {
+                let agentPubKey = AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap());
+                let timestamp = link.timestamp;
+                AgentInfo {
+                    agent_pub_key: agentPubKey,
+                    link_created: timestamp,
+                }
+            })
             .collect();
+
         // let participants_details = vec![];
         let my_agent_pub_key = agent_info()?.agent_latest_pubkey;
-        let committed: bool = agents.contains(&my_agent_pub_key);
+        let committed: bool = agents.iter().any(|agent| agent.agent_pub_key == my_agent_pub_key);
         let r_with_users = CoordrolesOutput {
             coordrole: r,
-            participants: agents.clone().len(),
+            participants: agents.len(),
             participants_details: agents,
             committed: committed,
         };

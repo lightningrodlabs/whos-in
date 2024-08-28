@@ -148,10 +148,11 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         delay_until: None,
     };
 
-    debug!("Sending notification tip");
-    emit_signal(tip.clone())?;
-
-    // if links_length > maximum as usize - 2 {
+    
+    // TODO: this is a temporary solution, and may cause issues
+    if links_length > maximum as usize - 2 {
+        debug!("Sending notification tip");
+        emit_signal(tip.clone())?;
         if let Err(e) = call(
             CallTargetCell::Local, // Must be one of the roles specified in the happ manifest
             ZomeName::from(String::from("notifications")), // Name of the zome to call
@@ -164,7 +165,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         } else {
             debug!("Successfully called the zome function")
         }
-    // }
+    }
 
 
 
