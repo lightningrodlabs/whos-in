@@ -67,7 +67,6 @@ export const getMyDna = async (role:string, client: AppClient) : Promise<DnaHash
 
 export const getCoordinationLabel = (coordination: any) : any => {
     const currentTime = new Date().getTime() * 1000;
-    console.log(coordination)
 
     if (coordination.ends_date && coordination.ends_date < currentTime) {
         return {

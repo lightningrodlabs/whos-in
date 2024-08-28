@@ -37,7 +37,6 @@ onMount(async () => {
   } else {
     await refetchCoordinationsWithDetails(client);
   }
-  console.log("applets", applets)
 });
 
 async function getSponsors(coordinationHash) {

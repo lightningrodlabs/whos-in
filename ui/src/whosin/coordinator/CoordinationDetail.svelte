@@ -24,7 +24,6 @@
   let cHashAndClients;
   allCoordinations.subscribe(value => {
     cHashAndClients = value;
-    console.log(cHashAndClients)
   })
 
   const dispatch = createEventDispatcher();
@@ -32,7 +31,7 @@
   export let coordinationHash: ActionHash;
   let hashB64 = encodeHashToBase64(coordinationHash)
   $: client = cHashAndClients.find(chc => chc.coordinationHash == hashB64)?.client;
-  // let client: AppClient = (getContext(clientContext) as any).getClient();
+  let clientBackup: AppClient = (getContext(clientContext) as any).getClient();
   
   let loading = true;
   let error: any = undefined;
@@ -40,6 +39,7 @@
   let attachments = [];
   // let record: Record | undefined;
   let coordination: Coordination | undefined;
+  let coordinationRecord;
   let coordRoles; //: Coordrole[] | undefined;
   let sponsors;
   let committingInProcess = {};
@@ -76,16 +76,24 @@
   // onMount(() => fetchRoles());
   
   onMount(async () => {
-    console.log(coordinationHash)
+    if (!client) {
+      client = clientBackup;
+    }
     if (client) {
+      console.log("client exists")
       dnaHash = await getMyDna("whosin", client)
+      console.log(1)
       await fetchCoordination()
+      console.log(2)
       // .then(() => {
       await fetchRoles()
+      console.log(3)
       // })
       addToViewed(coordinationHash, client)
+      console.log(4)
       
       getSponsors()
+      console.log(5)
     }
   });
 
@@ -110,6 +118,7 @@
         payload: coordinationHash,
       });
       if (record) {
+        coordinationRecord = record;
         coordination = decode((record.entry as any).Present.entry) as Coordination;
         attachments = coordination.attachments?.map((attachment) => {
           return attachment
@@ -260,10 +269,6 @@
       }
     }
   }
-
-  async function fetchCoordrole(coordroleCoded) {
-    return decode((coordroleCoded.entry).Present.entry)
-  }
   
   async function commitMe(coordRoleHash, coordroleTimestamp) {
     // console.log(coordRoleHash)
@@ -286,9 +291,8 @@
       // navigate("all-coordinations", {})
       // coordRole.committed = true;
       if (totalUnderMin >= totalMin) {
-        console.log("------------", coordination.coordination_type)
         add_notification({
-          "timestamp": coordroleTimestamp,
+          "timestamp": coordinationRecord.signed_action.hashed.content.timestamp,
           "type": "coordination-activation",
           "description": "The " + coordination.coordination_type.toLocaleLowerCase() + " " + coordination.title + " has reached minimum participation",
           "hash": coordinationHash,

@@ -27,22 +27,23 @@
   let coordinationsHashData: Array<any> | undefined;
 
   myCoordinations.subscribe(value => {
-    coordinationsHashData = value;
+    // filter out duplicate v.coordinationHash from the array
+    coordinationsHashData = value.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
   });
   
   $: coordinations, loading, error, shown, coordinationsHashData;
   
   onMount(async () => {
-    await refetchMyCoordinations(client);
     // await fetchCoordinations();
-    // if (applets) {
-    //   applets.forEach(applet => {
-    //     refetchCoordinationsWithDetails(applet[1].appletClient);
-    //   });
-    // } else {
-    //   await refetchCoordinationsWithDetails(client);
-    // }
-    console.log("applets", applets)
+    if (applets) {
+      applets.forEach(applet => {
+        refetchMyCoordinations(applet[1].appletClient);
+        // refetchCoordinationsWithDetails(applet[1].appletClient);
+      });
+    } else {
+      await refetchMyCoordinations(client);
+      // await refetchCoordinationsWithDetails(client);
+    }
   });
 
   // async function fetchCoordinations() {

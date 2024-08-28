@@ -89,7 +89,6 @@
           fn_name: 'list_notifiers',
           payload: null,
         });
-        console.log("all notifiers", record2)
         allNotifiers = record2;
 
         const record = await client
@@ -228,7 +227,6 @@
       // }
       
       //@ts-ignore
-      console.log("we client", weClient.renderInfo)
 
       if (weClient.renderInfo.type == "applet-view") {
         client = weClient.renderInfo.appletClient;

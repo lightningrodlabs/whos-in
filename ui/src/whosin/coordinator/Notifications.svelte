@@ -90,14 +90,13 @@
                     
                     let new_notification = 
                         {
-                            "timestamp": record[0].coordrole.signed_action.hashed.content.timestamp,
+                            "timestamp": coordination.signed_action.hashed.content.timestamp,
                             "type": "coordination-activation",
                             "description": "The "  + formatted_coordination.coordination_type.toLocaleLowerCase() + " " + formatted_coordination.title + " has reached minimum participation",
                             "hash": coordination_hash,
                             "seen": seen,
                         }
 
-                    // console.log("----------------------------------", new_notification, local_notifications)
                     // if new_notification not in coordination_details yet, add
                     let alread_in = false;
                     local_notifications.forEach(notification => {
@@ -113,17 +112,18 @@
                         const dnaHash = await getMyDna("whosin", client);
                         const coordinationWal: WAL = { hrl: [dnaHash, coordination_hash], context: "" }
 
-                        if (new_notification.seen == 0) {
+                        // if (new_notification.seen == 0) {
                             weClient.notifyFrame([{
                                 title: "Coordination Activated",
                                 body: new_notification.description,
                                 notification_type: "change",
                                 icon_src: undefined,
                                 urgency: "high",
-                                timestamp: Date.now(),
-                                aboutWal: coordinationWal
+                                timestamp: coordination.signed_action.hashed.content.timestamp,
+                                aboutWal: coordinationWal,
+                                fromAgent: client.myPubKey,
                             }])
-                        }
+                        // }
                     }
                             
                     // return seenBool

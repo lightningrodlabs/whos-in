@@ -8,12 +8,13 @@
     import List from '@event-calendar/list';
     import { allCoordinations, allCoordinationsDetails, myCoordinations } from '../../crud/dataStore';
     import { refetchCoordinationsWithDetails, refetchMyCoordinations } from '../../crud/refetch';
-    import { weClientStored } from '../../store';
+    import { weClientStored, navigate } from '../../store';
     import { onMount, getContext } from 'svelte';
     import { clientContext } from '../../contexts';
     import type { AppClient } from '@holochain/client';
     import { getCoordinationLabel } from '../../util';
     import { get } from 'svelte/store';
+    import { decodeHashFromBase64 } from '@holochain/client';
 
     let myCoordinationsHashes;
     myCoordinations.subscribe(value => {
@@ -31,6 +32,9 @@
     let options = {
         view: "dayGridMonth",
         events: [],
+        eventClick: function(info) {
+           navigate("coordination", decodeHashFromBase64(info.event.id));
+        },
         customButtons: {
             listButton: {
                 text: 'list',
@@ -89,7 +93,6 @@
         .filter(key => value[key].starts_date && value[key].title)
         .map(key => {
             const event = value[key];
-            console.log("EVENT LABEL", myCoordinationsHashes, key, myCoordinationsHashes.includes(key))
             return {
                 id: key,
                 title: event.title,
@@ -97,18 +100,16 @@
                 start: new Date(event.starts_date / 1000).toISOString(),
                 end: event.ends_date ? new Date(event.ends_date / 1000).toISOString() : null,
                 editable: false,
-                display: myCoordinationsHashes.some(item => item.coordinationHash === key) ? 'auto' : 'ghost',
+                display: myCoordinationsHashes.some(item => item.coordinationHash === key) ? 'auto' : 'ghost',  
                 backgroundColor: getCoordinationLabel(event).color,
             };
         });
-        console.log("eventList", eventList);
         options.events = eventList;
     });
 
     onMount(async () => {
         if (weClient.renderInfo.applets) {
             weClient.renderInfo.applets.forEach(applet => {
-                console.log("applet client", applet);
                 refetchCoordinationsWithDetails(applet.appletClient);
                 refetchMyCoordinations(applet.appletClient);
             });

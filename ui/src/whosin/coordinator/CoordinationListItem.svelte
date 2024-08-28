@@ -29,7 +29,7 @@
     
     // export let coordinationHash: ActionHash;
     export let cHashData: any;
-   let coordinationHash = cHashData ? decodeHashFromBase64(cHashData.coordinationHash) : undefined;
+    let coordinationHash = cHashData ? decodeHashFromBase64(cHashData.coordinationHash) : undefined;
     export let filterType: string;
     
     let client: AppClient = (getContext(clientContext) as any).getClient();
@@ -62,7 +62,6 @@
     let coordination: Coordination | undefined;
     allCoordinationsDetails.subscribe(value => {
       coordination = value[cHashData.coordinationHash];
-      console.log("coordinationDetails", coordination)
 
       if (coordination) {
         let options: Intl.DateTimeFormatOptions = { 
@@ -80,7 +79,6 @@
         stringStartDate = stringStartDate.replace(" " + new Date().getFullYear() + " ", " ");
         stringEndDate = new Date(coordination.ends_date / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");
         stringExpiresDate = new Date(coordination.signup_deadline / 1000).toLocaleDateString(undefined, options).replace(" " + new Date().getFullYear() + " ", " ");    
-        console.log("stringStartDate", coordination)
         totalParticipants = coordination.totalParticipants;
         totalMin = coordination.totalMin;
         totalUnderMin = coordination.totalUnderMin;
@@ -96,7 +94,6 @@
       let appletHash = appletHashFromAppId(client.installedAppId);
       let res = await getAppletInfoAndGroupsProfiles(weClient, appletHash);
       firstGroupInfo = Array.from(Object.values(res.groupProfiles)[0].entries())[0][1]
-      console.log("groupInfo0", firstGroupInfo)
       refetchCoordinationDetails(client, coordinationHash);
       // fetchCoordination();
       // fetchRoles();

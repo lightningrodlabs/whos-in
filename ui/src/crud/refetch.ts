@@ -2,9 +2,16 @@ import { decode } from "@msgpack/msgpack";
 import { encodeHashToBase64 } from "@holochain/client";
 import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations } from "./dataStore";
 import type { Coordination } from '../whosin/coordinator/types';
+import { weClientStored } from "../store";
+import type { WAL } from "@lightningrodlabs/we-applet";
+import { getMyDna } from "../util";
+
+let weClient;
+weClientStored.subscribe(value => {
+  weClient = value;
+});
 
 export async function refetchCoordinations(client) {
-  console.log("refetching coordinations", client);
   try {
     const records = await client.callZome({
       cap_secret: null,
@@ -13,7 +20,6 @@ export async function refetchCoordinations(client) {
       fn_name: 'get_all_coordinations',
       payload: null,
     });
-    console.log("records", records);
     let hashes = records.map(
       r => {
         let coordinationHash = encodeHashToBase64(r.signed_action.hashed.hash)
@@ -41,7 +47,6 @@ export async function refetchMyCoordinations(client) {
           fn_name: 'get_my_coordination_hashes',
           payload: null,
       });
-      console.log("records", records);
       let hashes = records.map(
         r => {
           let coordinationHash = encodeHashToBase64(r)
@@ -85,8 +90,11 @@ export async function refetchSponsors(client, coordinationHash) {
 }
 
 export async function refetchCoordinationDetails(client, coordinationHash) {  
-  console.log("refetching coordination details", client, coordinationHash);
   try {
+    let dnaHash = await getMyDna("whosin", client);
+    const coordinationWal: WAL = { hrl: [dnaHash, coordinationHash], context: "" }
+    let newNotifications = [];
+
     let record = await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
@@ -95,6 +103,7 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
       payload: coordinationHash,
     });
     if (record) {
+      let coordination = decode((record.entry as any).Present.entry) as Coordination;
       let coordRoles = undefined;
       let totalParticipants = 0;
       let totalMin = 0;
@@ -110,6 +119,7 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
         });
         if (record2) {
           record2.forEach(r => {
+            let starts_date = coordination["starts_date"];
             let min = decode(r.coordrole.entry.Present.entry)["minimum"];
             let underMin = Math.min(r.participants, min);
             totalParticipants += r.participants;
@@ -117,19 +127,35 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
             totalUnderMin += underMin;
             totalMin = totalMin;
             totalUnderMin = totalUnderMin;
+                        
+            r.participants_details.forEach(async (participant) => {
+              if (starts_date) {
+                newNotifications.push({
+                  title: "Coordination joined",
+                  body: "A participant has joined a coordination",
+                  notification_type: "change",
+                  icon_src: undefined,
+                  urgency: "low",
+                  timestamp: starts_date / 1000,
+                  aboutWal: coordinationWal,
+                  fromAgent: participant,
+                })
+              }
+            });
           })
         } else {
-          console.log("?")
+          console.log("No coordroles found for coordination");
         }
+
+        coordination.totalParticipants = totalParticipants;
+        coordination.totalMin = totalMin;
+        coordination.totalUnderMin = totalUnderMin;
+        addCoordinationDetails(coordinationHash, coordination);
+        weClient.notifyFrame(newNotifications);
       } catch (e) {
         console.error(e);
       }
 
-      let coordination = decode((record.entry as any).Present.entry) as Coordination;
-      coordination.totalParticipants = totalParticipants;
-      coordination.totalMin = totalMin;
-      coordination.totalUnderMin = totalUnderMin;
-      addCoordinationDetails(coordinationHash, coordination);
     }
   } catch (e) {
     console.error(e);

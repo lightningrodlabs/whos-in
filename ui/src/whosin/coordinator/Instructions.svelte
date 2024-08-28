@@ -1,5 +1,9 @@
-<script>
+<script lang="ts">
     import { navigate } from '../../store.js';
+    import { clientContext } from '../../contexts';
+    import { onMount, setContext, getContext } from 'svelte';
+
+    let applets: Array<any> = (getContext(clientContext) as any).getApplets();
 
     async function goToCreate() {
       navigate("create-coordination", {});
@@ -15,21 +19,40 @@
 <div class="content">
     <div style="margin-left:auto;margin-right:auto;width:600px;">
         <h1>Welcome to <strong>Who's In?</strong></h1>
-        <h3>Coordinate with strangers or friends.</h3>
         <!-- <h3>Work together with less risk.</h3> -->
     
     <!-- <h3>Plan get-togethers, events or actions of any kind.</h3> -->
+    {#if applets}
+        <h3 style="
+            color: white;
+            background: rgb(25 82 187 / 33%);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            text-align: center;
+        ">You're viewing a multiple-group version of this tool</h3>
+        <ul>
+            <li>You will see coordinations from all groups</li>
+            <li>Creating new coordinations is disabled</li>
+            <li>Viewing coordinations and joining roles is possible</li>
+        </ul>
+    {:else}
+        <h3>Coordinate with strangers or friends.</h3>
+        <h2>How it works</h2>
+        <ol>
+          <li>Think of an event, project or agreement</li>
+          <li>Explain all necessary roles</li>
+          <li>Invite people to fill those roles</li>
+          <li>Don't act unless all roles are filled</li>
+        </ol>
+    {/if}
     
-    
-    <h2>How it works</h2>
-    <ol>
-      <li>Think of an event, project or agreement</li>
-      <li>Explain all necessary roles</li>
-      <li>Invite people to fill those roles</li>
-      <li>Don't act unless all roles are filled</li>
-    </ol>
 
-    <p>Get started and <button class="gotoButton" on:click={() => gotToAllCoordinations()}>View public coordinations</button> or <button class="gotoButton" on:click={() => goToCreate()}>create a new coordination</button>.</p>
+    <p>Get started and <button class="gotoButton" on:click={() => gotToAllCoordinations()}>View public coordinations</button> 
+    {#if !applets}
+        or <button class="gotoButton" on:click={() => goToCreate()}>create a new coordination</button>
+    {/if}
+    </p>
     </div>
 </div>
 </div>
