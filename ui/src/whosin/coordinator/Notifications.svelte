@@ -112,7 +112,7 @@
                         const dnaHash = await getMyDna("whosin", client);
                         const coordinationWal: WAL = { hrl: [dnaHash, coordination_hash], context: "" }
 
-                        // if (new_notification.seen == 0) {
+                        if (new_notification.seen == 0) {
                             weClient.notifyFrame([{
                                 title: "Coordination Activated",
                                 body: new_notification.description,
@@ -123,7 +123,7 @@
                                 aboutWal: coordinationWal,
                                 fromAgent: client.myPubKey,
                             }])
-                        // }
+                        }
                     }
                             
                     // return seenBool

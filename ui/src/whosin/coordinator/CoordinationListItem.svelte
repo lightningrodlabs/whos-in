@@ -17,6 +17,8 @@
     import { getAppletInfoAndGroupsProfiles } from '@lightningrodlabs/we-elements';
     import { refetchCoordinationDetails } from '../../crud/refetch';
     import { allCoordinationsDetails } from '../../crud/dataStore';
+    import { allCoordinations } from '../../crud/dataStore';
+    import { encodeHashToBase64 } from '@holochain/client';
 
     let weClient: WeaveClient;
     weClientStored.subscribe(value => {
@@ -32,7 +34,13 @@
     let coordinationHash = cHashData ? decodeHashFromBase64(cHashData.coordinationHash) : undefined;
     export let filterType: string;
     
-    let client: AppClient = (getContext(clientContext) as any).getClient();
+    let cHashAndClients;
+    allCoordinations.subscribe(value => {
+      cHashAndClients = value;
+    })
+    let hashB64 = encodeHashToBase64(coordinationHash)
+    $: client = cHashAndClients.find(chc => chc.coordinationHash == hashB64)?.client;
+    let clientBackup: AppClient = (getContext(clientContext) as any).getClient();
     
     let loading = true;
     let error: any = undefined;
@@ -91,6 +99,9 @@
     $: error, loading, record, coordination;
     
     onMount(async () => {
+      if (!client) {
+        client = clientBackup;
+      }
       let appletHash = appletHashFromAppId(client.installedAppId);
       let res = await getAppletInfoAndGroupsProfiles(weClient, appletHash);
       firstGroupInfo = Array.from(Object.values(res.groupProfiles)[0].entries())[0][1]

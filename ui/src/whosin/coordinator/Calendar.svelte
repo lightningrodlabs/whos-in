@@ -26,7 +26,7 @@
         weClient = value;
     });
 
-    let client: AppClient = (getContext(clientContext) as any).getClient();
+    let backupClient: AppClient = (getContext(clientContext) as any).getClient();
 
     let plugins = [TimeGrid, ResourceTimeline, ResourceTimeGrid, Interaction, List, DayGrid];
     let options = {
@@ -114,8 +114,8 @@
                 refetchMyCoordinations(applet.appletClient);
             });
         } else {
-            await refetchCoordinationsWithDetails(client);
-            await refetchMyCoordinations(client);
+            await refetchCoordinationsWithDetails(backupClient);
+            await refetchMyCoordinations(backupClient);
         }
     });
 </script>

@@ -90,7 +90,11 @@
   
       const wal: WAL = { hrl: [dnaHash, record.signed_action.hashed.hash], context: "" }
       console.log(weClient, weClient.renderInfo)
-      weClient.renderInfo.view.resolve(wal)
+      try {
+        weClient.renderInfo.view.resolve(wal)
+      } catch (e) {
+        console.log("Created coordination")
+      }
       navigate("coordination", record.signed_action.hashed.hash);
   
     } catch (e) {

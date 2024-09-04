@@ -5,7 +5,8 @@
     "start": "vite --clearScreen false --port $UI_PORT",
     "build": "npm run check; vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "package": "npm run build && cd dist && bestzip ../dist.zip *"
+    "package": "npm run build && cd dist && bestzip ../dist.zip *",
+    "just-zip": "cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain-open-dev/elements": "^0.400.0-dev.0",
@@ -33,7 +34,8 @@
     "@event-calendar/resource-timeline": "3.4.0",
     "@event-calendar/resource-time-grid": "3.4.0",
     "@event-calendar/time-grid": "3.4.0",
-    "@event-calendar/interaction": "3.4.0"
+    "@event-calendar/interaction": "3.4.0",
+    "vite-plugin-static-copy": "0.17.1"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",
