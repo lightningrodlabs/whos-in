@@ -490,8 +490,7 @@
                 <div class="role-item" style="display: flex; flex-direction: row; color: #a5a5a5; margin: 4px; padding: 7px; font-weight: 600; font-size: 12px;">
                   {decode(role.coordrole.entry.Present.entry)["minimum"] > 0 ? (Math.round(role.participants/decode(role.coordrole.entry.Present.entry)["minimum"] * 100)) : 100}%
                 </div>
-
-
+                
                 <!-- <div class="role-item" style="margin-top: 8px; display: flex; flex-direction: row;">
                     <div style="display: flex; width: max-content; margin: 0 4px;">
                       {role.participants} committed
@@ -532,7 +531,7 @@
 
                 {#each role.participants_details.slice(0, 5) as participant}
                   <div class="role-item" style="margin-left: -13px">
-                    <Avatar showNickname={false} agentPubKey={participant}  size={24} namePosition="row"></Avatar>
+                    <Avatar showNickname={false} agentPubKey={participant.agent_pub_key} size={24} namePosition="row"></Avatar>
                   </div>
                 {/each}
                 {#if role.participants_details.length > 5}

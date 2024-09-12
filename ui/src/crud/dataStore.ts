@@ -16,6 +16,15 @@ export function setAllMyCoordinations(coordinations) {
   myCoordinations.set(coordinations)
 }
 
+export function addSomeMyCoordinations(coordinations) {
+  const currentCoordinations = get(myCoordinations);
+  const newCoordinations = coordinations.filter(coordHashAndClient => {
+    // !currentCoordinations.includes(hash)
+    return !currentCoordinations.some(coord => coord.coordinationHash === coordHashAndClient.coordinationHash)
+  });
+  setAllMyCoordinations([...currentCoordinations, ...newCoordinations]);
+}
+
 export function addSomeCoordinations(coordHashAndClients) {
   // add any hashes that are not already in allCoordinations
   const currentCoordinations = get(allCoordinations);

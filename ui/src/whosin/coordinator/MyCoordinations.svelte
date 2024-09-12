@@ -37,7 +37,7 @@
     // await fetchCoordinations();
     if (applets) {
       applets.forEach(applet => {
-        refetchMyCoordinations(applet[1].appletClient);
+        refetchMyCoordinations(applet[1].appletClient, false);
         // refetchCoordinationsWithDetails(applet[1].appletClient);
       });
     } else {

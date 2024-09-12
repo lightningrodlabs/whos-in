@@ -1,6 +1,6 @@
 import { decode } from "@msgpack/msgpack";
 import { encodeHashToBase64 } from "@holochain/client";
-import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations } from "./dataStore";
+import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations, addSomeMyCoordinations } from "./dataStore";
 import type { Coordination } from '../whosin/coordinator/types';
 import { notifications, weClientStored } from "../store";
 import type { WAL } from "@lightningrodlabs/we-applet";
@@ -37,7 +37,7 @@ export async function refetchCoordinations(client) {
   }
 }
 
-export async function refetchMyCoordinations(client) {
+export async function refetchMyCoordinations(client, reset = true) {
     try {
       const records = await client
       .callZome({
@@ -57,7 +57,11 @@ export async function refetchMyCoordinations(client) {
         }
       );
       hashes = hashes.reverse();
-      setAllMyCoordinations(hashes);
+      if (reset) {
+        setAllMyCoordinations(hashes);
+      } else {
+        addSomeMyCoordinations(hashes);
+      }
     }
     catch (e) {
       console.error(e);
