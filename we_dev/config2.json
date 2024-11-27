@@ -54,7 +54,7 @@
     "applets": [
       {
         "name": "Whosin Hot Reload",
-        "subtitle": "Collaborate with friends or strangers",
+        "subtitle": "Collaborate with coworkers, friends or strangers",
         "description": "Let's do it!",
         "icon": {
           "type": "filesystem",

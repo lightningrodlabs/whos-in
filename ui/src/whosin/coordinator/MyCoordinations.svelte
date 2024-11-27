@@ -8,7 +8,7 @@
   import FaList from 'svelte-icons/fa/FaList.svelte';
   import SvgIcon from '../../SvgIcon.svelte';
   import { allCoordinations, myCoordinations } from '../../crud/dataStore';
-  import { refetchCoordinationsWithDetails, refetchMyCoordinations } from '../../crud/refetch';
+  import { refetchCoordinationDetails, refetchCoordinationsWithDetails, refetchMyCoordinations } from '../../crud/refetch';
 
   // import { notifications, notifications_update } from '../../store.js';
   
@@ -35,6 +35,16 @@
   
   onMount(async () => {
     // await fetchCoordinations();
+    // wait for applets to exist
+    // await new Promise((resolve) => {
+    //   const interval = setInterval(() => {
+    //     if (applets) {
+    //       clearInterval(interval);
+    //       resolve(null);
+    //     }
+    //   }, 100);
+    // });
+    console.log("applets", applets)
     if (applets) {
       applets.forEach(applet => {
         refetchMyCoordinations(applet[1].appletClient, false);
@@ -96,6 +106,7 @@
 
   <!-- {#each coordinations.reverse() as hash} -->
   {#each coordinationsHashData as cHashData}
+    <!-- {JSON.stringify(cHashData.client.client.url)} -->
     <CoordinationListItem {filterType} {cHashData}></CoordinationListItem>
   {/each}
   {:else}

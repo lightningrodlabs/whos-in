@@ -17,7 +17,7 @@
     import { getAppletInfoAndGroupsProfiles } from '@lightningrodlabs/we-elements';
     import { refetchCoordinationDetails } from '../../crud/refetch';
     import { allCoordinationsDetails } from '../../crud/dataStore';
-    import { allCoordinations } from '../../crud/dataStore';
+    import { allCoordinations, myCoordinations } from '../../crud/dataStore';
     import { encodeHashToBase64 } from '@holochain/client';
 
     let weClient: WeaveClient;
@@ -35,9 +35,17 @@
     export let filterType: string;
     
     let cHashAndClients;
-    allCoordinations.subscribe(value => {
-      cHashAndClients = value;
+    myCoordinations.subscribe(value => {
+      if (value?.length > 0) {
+        cHashAndClients = value;
+      }
     })
+    allCoordinations.subscribe(value => {
+      if (value?.length > 0) {
+        cHashAndClients = value;
+      }
+    })
+
     let hashB64 = encodeHashToBase64(coordinationHash)
     $: client = cHashAndClients.find(chc => chc.coordinationHash == hashB64)?.client;
     let clientBackup: AppClient = (getContext(clientContext) as any).getClient();

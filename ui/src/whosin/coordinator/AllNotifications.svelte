@@ -17,7 +17,6 @@
     onMount(async () => {
         try {
             notifier = await getMyNotifier();
-            console.log("notifier", notifier)
         } catch (e) {
             console.log("no notifiers")
         }
@@ -83,7 +82,7 @@
             console.log("my notifier", record)
             return record
         } catch (e) {
-            console.log(e)
+            console.log("no notifier set for agent")
         }
     
     }

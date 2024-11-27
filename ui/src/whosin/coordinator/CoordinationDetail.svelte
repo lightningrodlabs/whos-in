@@ -17,13 +17,20 @@
   import { getMyDna } from '../../util';
   import { countViewed, addToViewed, add_notification, weClientStored } from '../../store.js';
   import Loading from '../Loading.svelte';
-  import { allCoordinations } from '../../crud/dataStore';
+  import { allCoordinations, myCoordinations } from '../../crud/dataStore';
   import { refetchCoordinations } from '../../crud/refetch';
   import { encodeHashToBase64 } from '@holochain/client';
 
   let cHashAndClients;
+  myCoordinations.subscribe(value => {
+    if (value?.length > 0) {
+      cHashAndClients = value;
+    }
+  })
   allCoordinations.subscribe(value => {
-    cHashAndClients = value;
+    if (value?.length > 0) {
+      cHashAndClients = value;
+    }
   })
 
   const dispatch = createEventDispatcher();

@@ -37,7 +37,7 @@
             <li>Viewing coordinations and joining roles is possible</li>
         </ul>
     {:else}
-        <h3>Coordinate with strangers or friends.</h3>
+        <h3>Coordinate with coworkers, friends or strangers.</h3>
         <h2>How it works</h2>
         <ol>
           <li>Think of an event, project or agreement</li>
