@@ -75,11 +75,19 @@ navigate("calendar", {});
     <li class="bulletin" on:click={goToBulletin}>
       {#if currentView == "all-coordinations"}
       <div class="bulletin-icon" style="color:#1952bb">
-        <FaBullhorn />
+        <!-- <FaBullhorn />  -->
+        <SvgIcon icon="faBullhorn" color=#1952bb />
+        <span>
+          Public
+        </span>
       </div>
       {:else}
       <div class="bulletin-icon">
-        <FaBullhorn />
+        <!-- <FaBullhorn />  -->
+        <SvgIcon icon="faBullhorn" color=#d6ddeb />
+        <span>
+          Public
+        </span>
       </div>
       {/if}
     </li>
@@ -87,11 +95,17 @@ navigate("calendar", {});
     <li class="dashboard" on:click={goToDashboard}>
       {#if currentView == "dashboard"}
       <div class="dashboard-icon" style="color:#1952bb">
-        <FaList />
+        <SvgIcon icon="faList" color=#1952bb />
+        <span>
+          Joined
+        </span>
       </div>
       {:else}
       <div class="dashboard-icon">
-        <FaList />
+        <SvgIcon icon="faList" color=#d6ddeb />
+        <span>
+          Joined
+        </span>
       </div>
       {/if}
     </li>
@@ -99,11 +113,17 @@ navigate("calendar", {});
     <li class="calendar" on:click={goToCalendar}>
       {#if currentView == "calendar"}
       <div class="dashboard-icon" style="color:#1952bb">
-        <SvgIcon icon="faCalendar" color=#1952bb />
+        <SvgIcon icon="faCalendar" size=18 color=#1952bb /> 
+        <span>
+          Calendar
+        </span>
       </div>
       {:else}
       <div class="dashboard-icon">
-        <SvgIcon icon="faCalendar" color=#d6ddeb />
+        <SvgIcon icon="faCalendar" size=18 color=#d6ddeb />
+        <span>
+          Calendar
+        </span>
       </div>
       {/if}
     </li>
@@ -111,9 +131,9 @@ navigate("calendar", {});
     <li class="notifications-li">
       <div class="notifications" on:click={goToNotifications}>
         {#if currentView == "notifications"}
-        <span style="color:#1952bb"><FaBell /></span>
+          <SvgIcon icon="faBell" color=#1952bb />
         {:else}
-          <span><FaBell /></span>
+          <SvgIcon icon="faBell" color=#d6ddeb />
         {/if}
         <span class="notifications-count">
           <Notifications client={client}></Notifications>
@@ -214,5 +234,15 @@ navigate("calendar", {});
 
   #logo {
     cursor: pointer;
+  }
+
+  .navbar-nav > li > div {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .navbar-nav > li > div > span {
+    margin-left: 4px;
   }
 </style>

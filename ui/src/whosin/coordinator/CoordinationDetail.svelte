@@ -37,7 +37,7 @@
   
   export let coordinationHash: ActionHash;
   let hashB64 = encodeHashToBase64(coordinationHash)
-  $: client = cHashAndClients.find(chc => chc.coordinationHash == hashB64)?.client;
+  $: client = cHashAndClients ? cHashAndClients.find(chc => chc.coordinationHash == hashB64)?.client : null;
   let clientBackup: AppClient = (getContext(clientContext) as any).getClient();
   
   let loading = true;
@@ -83,6 +83,8 @@
   // onMount(() => fetchRoles());
   
   onMount(async () => {
+    console.log("CHASH AND CLIENTS", cHashAndClients)
+
     if (!client) {
       client = clientBackup;
     }
