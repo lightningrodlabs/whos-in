@@ -38,12 +38,12 @@ export default defineConfig({
           registeringAgent: 1,
           joiningAgents: [2],
         },
-        // {
-        //   name: 'Converge',
-        //   instanceName: 'Converge',
-        //   registeringAgent: 1,
-        //   joiningAgents: [2],
-        // },
+        {
+          name: 'Converge',
+          instanceName: 'Converge',
+          registeringAgent: 1,
+          joiningAgents: [2],
+        },
         // {
         //   name: 'talking-stickies',
         //   instanceName: 'talking-stickies',
@@ -78,7 +78,7 @@ export default defineConfig({
         },
         source: {
           type: "https",
-          url: "https://github.com/lightningrodlabs/converge/releases/download/0.0.6/converge.webhapp"
+          url: "https://github.com/lightningrodlabs/converge/releases/download/weave-rc/converge-0.1.2.webhapp"
         },
       },
       {

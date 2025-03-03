@@ -15,7 +15,7 @@
   import { clientContext, profilesStoreContext } from './contexts';
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import Header from './whosin/coordinator/Header.svelte';
-  import CreateCoordination from './whosin/coordinator/CreateCoordination.svelte';
+  import CreateCoordination from './whosin/coordinator/Creation/CreateCoordination.svelte';
   import AllCoordinations from './whosin/coordinator/AllCoordinations.svelte';
   import CoordinationDetail from './whosin/coordinator/CoordinationDetail.svelte';
   import AllNotifications from './whosin/coordinator/AllNotifications.svelte';
@@ -33,6 +33,8 @@
   import { refetchCoordinations } from './crud/refetch.js';
   import app from './main.js';
   import Calendar from './whosin/coordinator/Calendar.svelte';
+  import { averageColor, backgroundImage, getBackgroundImage, setAverageColor } from './crud/localStorage.js';
+  import { FastAverageColor } from 'fast-average-color';
   
   const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'whosin'
   const roleName = 'whosin'
@@ -46,7 +48,7 @@
   let applets;
   let loading = true;
   let store = undefined;
-  let currentView: String;
+  let currentView: string = "calendar";
   let currentHash: Uint8Array;
   let notifier: AgentPubKey | undefined;
   let allNotifiers: Array<AgentPubKey> | undefined;
@@ -55,6 +57,36 @@
   let connected = false
   let weClient: WeaveClient
   $: client, loading, store, notifier, dna;
+
+  // $: document.body.style.background = "black";
+  backgroundImage.subscribe(value => {
+    if (!value || value == "none") {
+      document.body.style.background = "#e6ecf8";
+      setAverageColor({
+        isDark: false,
+      });
+      return;
+    };
+    document.body.style.background = `url(${value}) no-repeat center center fixed`;
+    document.body.style.backgroundSize = 'cover';
+    // document.body.style.backdropFilter = 'brightness(30%)';
+    const fac = new FastAverageColor();
+    fac.getColorAsync(value)
+        .then(color => {
+            // container.style.backgroundColor = color.rgba;
+            // container.style.color = color.isDark ? '#fff' : '#000';
+            setAverageColor(color);
+            console.log('Average color', color);
+        })
+        .catch(e => {
+            console.log(e);
+        });
+  });
+
+  averageColor.subscribe(value => {
+    if (!value) return;
+    document.body.classList.toggle("dark-mode", value?.isDark);
+  });
 
   async function checkIfNew() {
       try {
@@ -110,6 +142,8 @@
 
 
   async function initialize() : Promise<void> {
+    getBackgroundImage();
+
     console.log(import.meta.env)
     let profilesClient
     if ((import.meta as any).env.DEV) {
@@ -247,6 +281,7 @@
   onMount(async () => {
     await initialize()
     await checkForNotifier()
+    // document.body.style.background = "black";
     // client.on(
     //   'signal', 
     //   (signal) => {
@@ -353,14 +388,14 @@
           <div class="white-container" style="display: flex; flex-direction: column; margin-top: 30px;" in:fade={{duration: 200}} out:fade={{duration: 100}}>
           <CoordinationDetail coordinationHash={currentHash}></CoordinationDetail>
           </div>
-          {:else if currentView == "create-coordination-mini"}
+          {:else if ["create-coordination-mini"].includes(currentView)}
             <div style="padding: 10px;">
               <CreateCoordination></CreateCoordination>
             </div>
-          {:else if currentView == "create-coordination"}
+          {:else if ["create-event", "create-agreement", "create-project"].includes(currentView)}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
               <div class="white-container" style="display: flex; flex-direction: column; margin-top: 30px;">
-                <CreateCoordination></CreateCoordination>
+                <CreateCoordination agreementType={currentView.replace("create-", "")}></CreateCoordination>
               </div>
             </span>
           <!-- HI -->
@@ -396,12 +431,12 @@
             </span>
           {:else}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
-              <Instructions></Instructions>
+              <!-- <Instructions></Instructions> -->
+              <Calendar></Calendar>
             </span>
           {/if}
 
-        <footer style="margin: 10px;">
-          <!-- feedback button -->
+        <!-- <footer style="margin: 10px;">
           <SvgIcon icon=faBug size="24" color="#000000" />
           <a href="https://docs.google.com/forms/d/e/1FAIpQLSdzwS5D1HP3Eq6JV2lSD2cTXZoVTJJR2b7vEuAKgk9izVFRIw/viewform" target="_blank" class="feedback-button">
             <span>Submit feedback</span>
@@ -414,7 +449,7 @@
           Private Holochain network: {dna}
         </small>
         {/if}
-        </footer>
+        </footer> -->
         <!-- </profile-prompt> -->
         <!-- </profiles-context> -->
         {#if false && dna && !loading && currentView != "instructions" && currentView != ""}

@@ -97,8 +97,9 @@
   <!-- <div>
     <h3>Search Linkables:</h3> 
   </div>  -->
-  <button style="margin-top:5px;margin-right: 5px; width: fit-content;" on:click={()=>addAttachment()} >
-    <SvgIcon icon=link size=16/>
+  <button class="optional-button" style="margin-right: 5px; width: fit-content;" on:click={()=>addAttachment()} >
+    <!-- <SvgIcon icon=link size=16/> -->
+     + attachments
   </button>
   
   <!-- <button on:click={() => {dialog.show(); bind.refresh()}}>

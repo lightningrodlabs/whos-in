@@ -35,7 +35,9 @@
     "@event-calendar/resource-time-grid": "3.4.0",
     "@event-calendar/time-grid": "3.4.0",
     "@event-calendar/interaction": "3.4.0",
-    "vite-plugin-static-copy": "0.17.1"
+    "vite-plugin-static-copy": "0.17.1",
+    "pluralize": "^8.0.0",
+    "fast-average-color": "^9.4.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",

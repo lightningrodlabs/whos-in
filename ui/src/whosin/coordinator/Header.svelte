@@ -14,6 +14,18 @@ import { decode } from '@msgpack/msgpack';
 import Avatar from "./Avatar.svelte";
 import SvgIcon from '../../SvgIcon.svelte';
 import { isWeContext } from "@lightningrodlabs/we-applet";
+import AllNotifications from "./AllNotifications.svelte";
+import SettingsModal from "./SettingsModal.svelte";
+import { averageColor } from "../../crud/localStorage";
+
+let headerColor = "#1952bb";
+averageColor.subscribe(value => {
+  headerColor = value?.rgba
+  console.log("headerColor", headerColor);
+  if (!headerColor) {
+    headerColor = "#fff";
+  }
+});
 
 let client: AppClient = (getContext(clientContext) as any).getClient();
 let applets: Array<any> = (getContext(clientContext) as any).getApplets();
@@ -22,6 +34,7 @@ weClientStored.subscribe(value => {
   weClient = value;
 });
 let currentView;
+let showSettingsModal = false;
 
 view.subscribe(value => {
 currentView = value;
@@ -49,7 +62,10 @@ navigate("calendar", {});
 </script>
 
 <header>
-  <nav class="navbar">
+  <nav 
+    class="navbar"
+    style="background: {headerColor};"
+  >
     <div class="container-fluid converge-header">
       <div>
         <!-- {#if !isWeContext()}
@@ -66,6 +82,7 @@ navigate("calendar", {});
           </h1>
         <!-- <small id="subtitle">for Moss</small> -->
         </a>
+        
         <!-- {/if} -->
       </div>
     <div>
@@ -78,7 +95,7 @@ navigate("calendar", {});
         <!-- <FaBullhorn />  -->
         <SvgIcon icon="faBullhorn" color=#1952bb />
         <span>
-          Public
+          Bulletin
         </span>
       </div>
       {:else}
@@ -86,13 +103,13 @@ navigate("calendar", {});
         <!-- <FaBullhorn />  -->
         <SvgIcon icon="faBullhorn" color=#d6ddeb />
         <span>
-          Public
+          Bulletin
         </span>
       </div>
       {/if}
     </li>
 
-    <li class="dashboard" on:click={goToDashboard}>
+    <!-- <li class="dashboard" on:click={goToDashboard}>
       {#if currentView == "dashboard"}
       <div class="dashboard-icon" style="color:#1952bb">
         <SvgIcon icon="faList" color=#1952bb />
@@ -108,7 +125,7 @@ navigate("calendar", {});
         </span>
       </div>
       {/if}
-    </li>
+    </li> -->
 
     <li class="calendar" on:click={goToCalendar}>
       {#if currentView == "calendar"}
@@ -129,35 +146,63 @@ navigate("calendar", {});
     </li>
 
     <li class="notifications-li">
-      <div class="notifications" on:click={goToNotifications}>
-        {#if currentView == "notifications"}
-          <SvgIcon icon="faBell" color=#1952bb />
-        {:else}
-          <SvgIcon icon="faBell" color=#d6ddeb />
-        {/if}
-        <span class="notifications-count">
-          <Notifications client={client}></Notifications>
-        </span>
+      <div class="dropdown">
+        <div class="notifications" on:click={goToNotifications} on:mouseover={() => document.getElementById('notifications-dropdown').style.display = 'block'} on:mouseleave={() => document.getElementById('notifications-dropdown').style.display = 'none'}>
+          {#if currentView == "notifications"}
+            <SvgIcon icon="faBell" color=#1952bb /> Notifications
+          {:else}
+            <SvgIcon icon="faBell" color=#d6ddeb /> Notifications
+          {/if}
+          <span class="notifications-count">
+            <Notifications client={client}></Notifications>
+          </span>
+        </div>
+        <div id="notifications-dropdown" class="dropdown-content" on:mouseover={() => document.getElementById('notifications-dropdown').style.display = 'block'} on:mouseleave={() => document.getElementById('notifications-dropdown').style.display = 'none'}>
+          <!-- Add your notification items here -->
+           <AllNotifications client={client}></AllNotifications>
+          <!-- <div>No new notifications</div> -->
+           <!-- go to all notificaitons button -->
+          <div on:click={goToNotifications}>See all notifications</div>
+        </div>
       </div>
     </li>
   
     {#if !applets}
     <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
 
-    <li class="middle-of-header-right"> 
-      <div class="new-action-button"  on:click={goToCreate}>
-        <div class="icon">
-          <FaPlusCircle />
+    <li class="middle-of-header-right">
+      <div class="dropdown">
+        <div class="new-action-button" on:mouseover={() => document.getElementById('dropdown-content').style.display = 'block'} on:mouseleave={() => document.getElementById('dropdown-content').style.display = 'none'}>
+          <div class="icon">
+            <FaPlusCircle />
+          </div>
+          <span id="new-action">Create</span>
         </div>
-        <!-- <i class="fas fa-plus white-circle-plus"></i> -->
-        <!-- <img class="nav-image" src="/assets/add_circle_black_24dp-b42cee553b2665d6f62bd5d9ffc02837cf3c5a3084fc6a5674f5edf83776f565.svg" alt="Add circle black 24dp" border="0"> -->
-        <span id="new-action">Create</span>
+        <div id="dropdown-content" class="dropdown-content" on:mouseover={() => document.getElementById('dropdown-content').style.display = 'block'} on:mouseleave={() => document.getElementById('dropdown-content').style.display = 'none'}>
+          <div on:click={() => navigate("create-event")}>Event</div>
+          <div on:click={() => navigate("create-agreement")}>Agreement</div>
+          <!-- <div on:click={() => navigate("create-project")}>Project</div> -->
+        </div>
       </div>
     </li>
 
     <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
     <li class="notifications-li">
-      <Avatar showNickname={true} agentPubKey={client.myPubKey}  size={24} namePosition="row"></Avatar>
+      <div class="dropdown"></div>
+      <div class="avatar">
+      <Avatar showNickname={true} agentPubKey={client.myPubKey} size={24} namePosition="row"></Avatar>
+      </div>
+    </li>
+
+    <li class="settings-li">
+      <div class="settings" on:click={() => {showSettingsModal = !showSettingsModal}}>
+      <SvgIcon icon="faCog" size={24} color="#d6ddeb" />
+      </div>
+      {#if showSettingsModal}
+      <div id="settings-dropdown" class="dropdown-content">
+        <SettingsModal client={client}></SettingsModal>
+      </div>
+      {/if}
     </li>
     {/if}
     <!-- if no agent linked to my agent as notifier -->
@@ -244,5 +289,48 @@ navigate("calendar", {});
 
   .navbar-nav > li > div > span {
     margin-left: 4px;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    top: 100%; /* Position the dropdown below the button */
+    right: 0; /* Align the dropdown to the right */
+  }
+
+  .dropdown-content div {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+
+  .dropdown-content div:hover {
+    background-color: #f1f1f1;
+  }
+
+  #notifications-dropdown {
+    width: 300px;
+  }
+  
+  .notifications-li {
+    margin-right: 10px;
+  }
+
+  :global(body.dark-mode) #whosin-title {
+    color: white;
+  }
+
+  :global(body.dark-mode) .new-action-button {
+    background: #859dca;
   }
 </style>

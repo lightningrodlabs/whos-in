@@ -15,6 +15,7 @@ body {
 
 main {
   padding: 0 !important;
+  height: 100vh;
 }
 
 .invisible {
@@ -33,7 +34,8 @@ main {
   padding: 14px 18px;
   border-radius: 12px;
   transition: all 0s ease;
-  width: calc(50% - 44px);
+  width: 100%;
+  /* width: calc(50% - 44px); */
 }
 
 /* role-outer has full width in mobile*/
@@ -278,20 +280,20 @@ nav logo {
   margin: 0 12px;
 }
 
-.notifications, .dashboard, .calendar, .bulletin {
+.notifications, .dashboard, .calendar, .bulletin, .notifications {
   /* width: 24px; */
   height: 26px;
   color: #d6ddeb;
   /* margin: 0 10px; */
   /* margin-right: 10px; */
   cursor: pointer;
-  padding: 5px;
+  padding: 5px 5px 0 5px;
   border-radius: 6px;
 }
 
-.notifications {
+/* .notifications {
   width: 24px;
-}
+} */
 
 .notifications:hover, .dashboard:hover, .calendar:hover, .bulletin:hover {
   background-color: #b5bed4;
@@ -336,8 +338,9 @@ update-profile {
 
 #notifications-count {
   position: relative;
-  top: -14px;
-  left: -10px;
+  top: -24px;
+  left: 110px;
+  /* left: -10px; */
   font-size: 11px;
   font-weight: bold;
   color: white;
@@ -497,14 +500,15 @@ vaadin-date-time-picker {
 #created-roles {
   text-align: left;
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
+  background-color: #c0c0c019;
+  border: 1px solid rgb(224, 224, 224);
+  padding: 1em;
 }
 
 .created-role {
   margin-top: 20px;
-  <style>
-    
-  </style>
   transition: all 0.2s ease-in-out;
 }
 
