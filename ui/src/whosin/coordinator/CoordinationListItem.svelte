@@ -214,7 +214,7 @@
           <div style="display: flex;">
             <div style="margin: auto; margin-right: 8px;">
               <!-- firstGropuInfo.icon_src render -->
-              {#if weClient.renderInfo.applets && firstGroupInfo}
+              {#if weClient?.renderInfo.applets && firstGroupInfo}
               <img src={ firstGroupInfo ? firstGroupInfo.icon_src : "" } title={firstGroupInfo.name} style="width: 20px; height: 20px; border-radius: 50%; margin-bottom: -4px;"/>
               {/if}
               { coordination.title }

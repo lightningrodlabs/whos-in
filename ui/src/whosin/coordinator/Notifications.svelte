@@ -113,7 +113,7 @@
                         const coordinationWal: WAL = { hrl: [dnaHash, coordination_hash], context: "" }
 
                         if (new_notification.seen == 0) {
-                            weClient.notifyFrame([{
+                            weClient?.notifyFrame([{
                                 title: "Coordination Activated",
                                 body: new_notification.description,
                                 notification_type: "change",

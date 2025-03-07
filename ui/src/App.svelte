@@ -33,9 +33,11 @@
   import { refetchCoordinations } from './crud/refetch.js';
   import app from './main.js';
   import Calendar from './whosin/coordinator/Calendar.svelte';
-  import { averageColor, backgroundImage, getBackgroundImage, setAverageColor } from './crud/localStorage.js';
+  import { averageColor, backgroundImage, loadState, setAverageColor, setColorPalette } from './crud/localStorage.js';
   import { FastAverageColor } from 'fast-average-color';
-  
+  import Sync from './Sync.svelte';
+  import { Vibrant } from "node-vibrant/browser";
+
   const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'whosin'
   const roleName = 'whosin'
   const appPort = import.meta.env.VITE_APP_PORT ? import.meta.env.VITE_APP_PORT : 8888
@@ -58,6 +60,8 @@
   let weClient: WeaveClient
   $: client, loading, store, notifier, dna;
 
+  let colors = undefined;
+
   // $: document.body.style.background = "black";
   backgroundImage.subscribe(value => {
     if (!value || value == "none") {
@@ -72,15 +76,30 @@
     // document.body.style.backdropFilter = 'brightness(30%)';
     const fac = new FastAverageColor();
     fac.getColorAsync(value)
-        .then(color => {
-            // container.style.backgroundColor = color.rgba;
-            // container.style.color = color.isDark ? '#fff' : '#000';
-            setAverageColor(color);
-            console.log('Average color', color);
-        })
-        .catch(e => {
-            console.log(e);
-        });
+      .then(color => {
+          // container.style.backgroundColor = color.rgba;
+          // container.style.color = color.isDark ? '#fff' : '#000';
+          setAverageColor(color);
+          console.log('Average color', color);
+      })
+      .catch(e => {
+          console.log(e);
+      });
+
+    Vibrant.from(value)
+      .getPalette()
+      .then((palette) => {
+        colors = palette;
+        setColorPalette(palette);
+        document.documentElement.style.setProperty("--vibrant", 'rgb(' + palette.Vibrant.rgb.join(",") + ')');
+        document.documentElement.style.setProperty("--muted", 'rgb(' + palette.Muted.rgb.join(",") + ')');
+        document.documentElement.style.setProperty("--dark-muted", 'rgb(' + palette.DarkMuted.rgb.join(",") + ')');
+        document.documentElement.style.setProperty("--light-vibrant", 'rgb(' + palette.LightVibrant.rgb.join(",") + ')');
+        document.documentElement.style.setProperty("--dark-vibrant", 'rgb(' + palette.DarkVibrant.rgb.join(",") + ')');
+        document.documentElement.style.setProperty("--light-muted", 'rgb(' + palette.LightMuted.rgb.join(",") + ')');
+        document.documentElement.style.setProperty("--light-muted-transparent", 'rgba(' + palette.LightMuted.rgb.join(",") + ',0.5)');
+        console.log("palette", palette, 'rgb(' + palette.Vibrant.rgb.join(",") + ')');
+      })
   });
 
   averageColor.subscribe(value => {
@@ -142,7 +161,7 @@
 
 
   async function initialize() : Promise<void> {
-    getBackgroundImage();
+    loadState();
 
     console.log(import.meta.env)
     let profilesClient
@@ -190,52 +209,52 @@
       setWeaveClient(weClient)
       // weClient = await WeaveClient.connect();
       
-      // switch (weClient.renderInfo.type) {
+      // switch (weClient?.renderInfo.type) {
       //   case "applet-view":
-          switch (weClient.renderInfo.view.type) {
+          switch (weClient?.renderInfo.view.type) {
             case "main":
               // here comes your rendering logic for the main view
               break;
             case "block":
-              switch(weClient.renderInfo.view.block) {
+              switch(weClient?.renderInfo.view.block) {
                 case "active_boards":
                   currentView = "dashboard"
                   break;
                 default:
-                  throw new Error("Unknown applet-view block type:"+weClient.renderInfo.view.block);
+                  throw new Error("Unknown applet-view block type:"+weClient?.renderInfo.view.block);
               }
               break;
             case "creatable":
-              switch (weClient.renderInfo.view.name) {
+              switch (weClient?.renderInfo.view.name) {
                 case "Coordination":
                 currentView = "create-coordination-mini"
               }
               break;
             case "asset":
-              switch (weClient.renderInfo.view.recordInfo.roleName) {
+              switch (weClient?.renderInfo.view.recordInfo.roleName) {
                 case "whosin":
-                  switch (weClient.renderInfo.view.recordInfo.integrityZomeName) {
+                  switch (weClient?.renderInfo.view.recordInfo.integrityZomeName) {
                     case "coordinator_integrity":
-                      switch (weClient.renderInfo.view.recordInfo.entryType) {
+                      switch (weClient?.renderInfo.view.recordInfo.entryType) {
                         case "coordination":
                           // TODO: don't need to fetch all, just need to populate the store to keep track of 
                             // the correct client for the coordination
-                          await refetchCoordinations(weClient.renderInfo.appletClient)
+                          await refetchCoordinations(weClient?.renderInfo.appletClient)
                           currentView = "coordination"
-                          currentHash = weClient.renderInfo.view.wal.hrl[1]
-                          // console.log("weClient.renderInfo.view", weClient.renderInfo.view)
-                          // hrlWithContext = weClient.renderInfo.view.hrlWithContext
+                          currentHash = weClient?.renderInfo.view.wal.hrl[1]
+                          // console.log("weClient?.renderInfo.view", weClient?.renderInfo.view)
+                          // hrlWithContext = weClient?.renderInfo.view.hrlWithContext
                           break;
                         default:
-                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.recordInfo.entryType);
+                          throw new Error("Unknown entry type:"+weClient?.renderInfo.view.recordInfo.entryType);
                       }
                       break;
                     default:
-                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.recordInfo.integrityZomeName);
+                      throw new Error("Unknown integrity zome:"+weClient?.renderInfo.view.recordInfo.integrityZomeName);
                   }
                   break;
                 default:
-                  throw new Error("Unknown role name:"+weClient.renderInfo.view.recordInfo.roleName);
+                  throw new Error("Unknown role name:"+weClient?.renderInfo.view.recordInfo.roleName);
               }
               break;
             default:
@@ -244,7 +263,7 @@
       //     break;
       //   case "cross-applet-view":
       //     currentView = "dashboard"
-      //     switch (this.weClient.renderInfo.view.type) {
+      //     switch (this.weClient?.renderInfo.view.type) {
       //       case "main":
       //         // here comes your rendering logic for the cross-applet main view
       //         //break;
@@ -262,11 +281,11 @@
       
       //@ts-ignore
 
-      if (weClient.renderInfo.type == "applet-view") {
-        client = weClient.renderInfo.appletClient;
-        profilesClient = weClient.renderInfo.profilesClient;
+      if (weClient?.renderInfo.type == "applet-view") {
+        client = weClient?.renderInfo.appletClient;
+        profilesClient = weClient?.renderInfo.profilesClient;
       } else {
-        applets = Array.from(weClient.renderInfo.applets.entries());
+        applets = Array.from(weClient?.renderInfo.applets.entries());
         const firstApplet = applets[0];
         console.log("we client 2", firstApplet)
         client = firstApplet[1].appletClient;
@@ -281,7 +300,10 @@
   onMount(async () => {
     await initialize()
     await checkForNotifier()
-    // document.body.style.background = "black";
+    if (typeof document !== 'undefined') {
+      // document.documentElement.style.setProperty("--dynamic-primary", "#6200ee");
+      // document.body.style.background = "black";
+    }
     // client.on(
     //   'signal', 
     //   (signal) => {
@@ -359,14 +381,21 @@
 
 </script>
 
+<!-- <div id="colorPalette" style="margin-top: 100px; position: fixed; top: 2000; left: 0; z-index: 1000; display: flex; flex-direction: column; padding: 10px; height: 100px; width: 100px;">
+  {#if colors}
+    {#each Object.keys(colors) as key}
+      <div style='background-color: rgb({colors[key].rgb.join(',')})'>{key}: ({colors[key].rgb.join(',')})</div>
+    {/each}
+  {/if}
+</div> -->
+
 {#if client || applets != undefined}
 {#if profilesStore || applets != undefined}
   <profiles-context store="{profilesStore}">
     <profile-prompt>
-      {#if !isWeContext() || (isWeContext() && weClient.renderInfo.view.type != "asset")}
+      {#if !isWeContext() || (isWeContext() && weClient?.renderInfo.view.type != "asset")}
       <NotificationsHandler></NotificationsHandler>
       <main style="width: 100vw;">
-
           {#if currentView != "create-coordination-mini"}
             <Header></Header>
           {/if}
@@ -470,6 +499,7 @@
       {/if}
     </profile-prompt>
   </profiles-context>
+  <Sync {client}/>
 {/if}
 
 <style>

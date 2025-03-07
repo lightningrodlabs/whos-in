@@ -28,7 +28,7 @@
       class:attachment-item={!allowDelete}
     >
     
-      {#await weClient.assetInfo(weaveUrlToWAL(wal))}
+      {#await weClient?.assetInfo(weaveUrlToWAL(wal))}
         <sl-button size="small" loading></sl-button>
       {:then data}
         {#if data}
@@ -37,7 +37,7 @@
             on:click={async (e)=>{
                 e.stopPropagation()
                 try {
-                  await weClient.openWal(weaveUrlToWAL(wal))
+                  await weClient?.openWal(weaveUrlToWAL(wal))
                 } catch(e) {
                   alert(`Error opening link: ${e}`)
                 }

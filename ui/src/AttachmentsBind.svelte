@@ -36,15 +36,15 @@
   
     export const refresh = async () => {
     //   console.log("refresh")
-    //   console.log(weClient.attachmentTypes)
-      attachmentTypes = Array.from(weClient.attachmentTypes.entries())
+    //   console.log(weClient?.attachmentTypes)
+      attachmentTypes = Array.from(weClient?.attachmentTypes.entries())
       console.log(attachmentTypes)
         allGroups = new HoloHashMap<EntryHash, Groups>
       appletInfos = new HoloHashMap
       for (const [hash, aType] of attachmentTypes) {
           let appletInfo = appletInfos.get(hash)
           if (!appletInfo) {
-              appletInfo = await weClient.appletInfo(hash)
+              appletInfo = await weClient?.appletInfo(hash)
               appletInfos.set(hash, appletInfo)
             //   if (appletInfo.appletName === "threads") {
             //     threadsInfos.set(hash, appletInfo)
@@ -52,9 +52,9 @@
             }
         //   console.log("88888",appletInfo)
           for (const groupHash of appletInfo.groupsIds) {
-              let groupTypes = weClient.attachmentTypes.get(groupHash)
+              let groupTypes = weClient?.attachmentTypes.get(groupHash)
               if (!groupTypes) {
-                  const profile = await weClient.groupProfile(groupHash)
+                  const profile = await weClient?.groupProfile(groupHash)
                   allGroups.set(groupHash, {
                       logo_src: profile.logo_src,
                       name: profile.name,
@@ -78,7 +78,7 @@
                   <img width="16" style="margin-right:4px" src="{group.logo_src}"/> <strong style="font-size:105%;margin-right:4px">{group.name}:</strong>
               </div>
               <div style="margin-left: 20px;display:flex; flex-wrap:wrap">
-                  {#each Array.from(weClient.attachmentTypes.entries()) as [appletHash, record]}
+                  {#each Array.from(weClient?.attachmentTypes.entries()) as [appletHash, record]}
                       {@const appletInfo = appletInfos.get(appletHash)}
                       {#if appletInfo.groupsIds.find(id=>hashEqual(id,groupHash))}
                           <div style="display:flex;align-items:center;margin-right:15px">

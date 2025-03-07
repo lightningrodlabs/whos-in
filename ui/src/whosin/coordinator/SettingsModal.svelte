@@ -1,7 +1,9 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
-    import { setBackgroundImage, getBackgroundImage, backgroundImage } from '../../crud/localStorage';
+    import { setBackgroundImage, loadState, backgroundImage } from '../../crud/localStorage';
+    import { onMount } from 'svelte';
 
+    export let showSettingsModal: boolean;
     let customImage: boolean = false;
     const dispatch = createEventDispatcher();
 
@@ -18,17 +20,17 @@
     // }
 
     function closeModal() {
-        dispatch('close');
+        showSettingsModal = false;
     }
 </script>
 
 <div class="modal">
     <div class="modal-header">
-        <h2>Settings</h2>
+        <h2>Theme</h2>
         <button on:click={closeModal}>X</button>
     </div>
     <div class="modal-body">
-        <strong>Background</strong>
+        <!-- <h3>Background</h3> -->
         <select
             value={$backgroundImage}
             on:change={(e) => {
@@ -45,6 +47,9 @@
             <option value="/src/assets/backgrounds/texture.jpg">Texture</option>
             <option value="/src/assets/backgrounds/birds.jpg">Birds</option>
             <option value="/src/assets/backgrounds/abstract.jpg">Abstract</option>
+            <option value="/src/assets/backgrounds/misty.jpg">Misty</option>
+            <option value="/src/assets/backgrounds/pond.jpg">Pond</option>
+            <option value="/src/assets/backgrounds/sheep.jpg">Sheep</option>
             <option value="custom">Custom URL</option>
         </select>
         <!-- if custom, reveal text input -->
@@ -56,6 +61,9 @@
         {/if}
         <!-- <input type="file" id="background-image" accept="image/*" on:change={handleImageChange} /> -->
     </div>
+</div>
+
+<div class="full-screen-background" on:click={closeModal}>
 </div>
 
 <style>
@@ -71,6 +79,11 @@
     } */
     .modal {
         padding: 10px;
+        position: relative;
+        z-index: 2;
+        background-color: transparent;
+        width: 100%;
+        cursor: auto;
     }
     .modal-header {
         display: flex;
@@ -78,11 +91,31 @@
         align-items: center;
     }
     .modal-body {
-        /* margin-top: 20px; */
+        margin-top: 10px;
     }
     h2 {
         font-size: 1.5rem;
         text-align: center;
         width: 100%;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .full-screen-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: auto;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        margin-top: 10px;
     }
 </style>

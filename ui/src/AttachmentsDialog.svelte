@@ -54,7 +54,7 @@
   }
 
   const addAttachment = async () => {
-    const wal = await weClient.userSelectWal()
+    const wal = await weClient?.userSelectWal()
     if (wal) {
       _addAttachment(wal)
     }

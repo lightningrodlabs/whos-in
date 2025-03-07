@@ -16,7 +16,8 @@ import SvgIcon from '../../SvgIcon.svelte';
 import { isWeContext } from "@lightningrodlabs/we-applet";
 import AllNotifications from "./AllNotifications.svelte";
 import SettingsModal from "./SettingsModal.svelte";
-import { averageColor } from "../../crud/localStorage";
+import { averageColor, loadState, colorPalette } from "../../crud/localStorage";
+import NotificationsMini from "./NotificationsMini.svelte";
 
 let headerColor = "#1952bb";
 averageColor.subscribe(value => {
@@ -59,12 +60,16 @@ navigate("all-coordinations", {});
 async function goToCalendar() {
 navigate("calendar", {});
 }
+
+onMount(() => {
+  loadState();
+});
 </script>
 
 <header>
   <nav 
     class="navbar"
-    style="background: {headerColor};"
+    style="background: {headerColor}"
   >
     <div class="container-fluid converge-header">
       <div>
@@ -91,9 +96,9 @@ navigate("calendar", {});
 
     <li class="bulletin" on:click={goToBulletin}>
       {#if currentView == "all-coordinations"}
-      <div class="bulletin-icon" style="color:#1952bb">
+      <div class="bulletin-icon selected-tab">
         <!-- <FaBullhorn />  -->
-        <SvgIcon icon="faBullhorn" color=#1952bb />
+        <SvgIcon icon="faBullhorn" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} />
         <span>
           Bulletin
         </span>
@@ -109,10 +114,10 @@ navigate("calendar", {});
       {/if}
     </li>
 
-    <!-- <li class="dashboard" on:click={goToDashboard}>
+    <li class="dashboard" on:click={goToDashboard}>
       {#if currentView == "dashboard"}
-      <div class="dashboard-icon" style="color:#1952bb">
-        <SvgIcon icon="faList" color=#1952bb />
+      <div class="dashboard-icon selected-tab">
+        <SvgIcon icon="faList" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} />
         <span>
           Joined
         </span>
@@ -125,12 +130,12 @@ navigate("calendar", {});
         </span>
       </div>
       {/if}
-    </li> -->
+    </li>
 
     <li class="calendar" on:click={goToCalendar}>
       {#if currentView == "calendar"}
-      <div class="dashboard-icon" style="color:#1952bb">
-        <SvgIcon icon="faCalendar" size=18 color=#1952bb /> 
+      <div class="dashboard-icon selected-tab">
+        <SvgIcon icon="faCalendar" size=18 color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} /> 
         <span>
           Calendar
         </span>
@@ -147,9 +152,9 @@ navigate("calendar", {});
 
     <li class="notifications-li">
       <div class="dropdown">
-        <div class="notifications" on:click={goToNotifications} on:mouseover={() => document.getElementById('notifications-dropdown').style.display = 'block'} on:mouseleave={() => document.getElementById('notifications-dropdown').style.display = 'none'}>
+        <div class="notifications" class:selected-tab={currentView=='notifications'} on:click={goToNotifications} on:mouseover={() => document.getElementById('notifications-dropdown').style.display = 'block'} on:mouseleave={() => document.getElementById('notifications-dropdown').style.display = 'none'}>
           {#if currentView == "notifications"}
-            <SvgIcon icon="faBell" color=#1952bb /> Notifications
+            <SvgIcon icon="faBell" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} /> Notifications
           {:else}
             <SvgIcon icon="faBell" color=#d6ddeb /> Notifications
           {/if}
@@ -159,7 +164,8 @@ navigate("calendar", {});
         </div>
         <div id="notifications-dropdown" class="dropdown-content" on:mouseover={() => document.getElementById('notifications-dropdown').style.display = 'block'} on:mouseleave={() => document.getElementById('notifications-dropdown').style.display = 'none'}>
           <!-- Add your notification items here -->
-           <AllNotifications client={client}></AllNotifications>
+           <!-- <AllNotifications client={client}></AllNotifications> -->
+            <NotificationsMini {client}></NotificationsMini>
           <!-- <div>No new notifications</div> -->
            <!-- go to all notificaitons button -->
           <div on:click={goToNotifications}>See all notifications</div>
@@ -187,20 +193,17 @@ navigate("calendar", {});
     </li>
 
     <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
-    <li class="notifications-li">
-      <div class="dropdown"></div>
-      <div class="avatar">
-      <Avatar showNickname={true} agentPubKey={client.myPubKey} size={24} namePosition="row"></Avatar>
+    <li class="notifications-li" style="margin-left: 10px;">
+      <!-- <div class="dropdown"></div> -->
+      <div class="avatar"
+        on:click={() => {showSettingsModal = !showSettingsModal}}
+      >
+        <Avatar showNickname={true} agentPubKey={client.myPubKey} size={24} namePosition="row"></Avatar>
       </div>
-    </li>
 
-    <li class="settings-li">
-      <div class="settings" on:click={() => {showSettingsModal = !showSettingsModal}}>
-      <SvgIcon icon="faCog" size={24} color="#d6ddeb" />
-      </div>
       {#if showSettingsModal}
       <div id="settings-dropdown" class="dropdown-content">
-        <SettingsModal client={client}></SettingsModal>
+        <SettingsModal bind:showSettingsModal></SettingsModal>
       </div>
       {/if}
     </li>
@@ -302,6 +305,7 @@ navigate("calendar", {});
     background-color: #f9f9f9;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border-radius: 5px;
     z-index: 1;
     top: 100%; /* Position the dropdown below the button */
     right: 0; /* Align the dropdown to the right */
@@ -326,11 +330,23 @@ navigate("calendar", {});
     margin-right: 10px;
   }
 
+  .avatar {
+    padding: 1em 0;
+  }
+
   :global(body.dark-mode) #whosin-title {
     color: white;
   }
 
-  :global(body.dark-mode) .new-action-button {
+  /* :global(body.dark-mode) .new-action-button {
     background: #859dca;
+  } */
+
+  .selected-tab {
+    color: var(--vibrant);
   }
+
+  /* .navbar {
+    background: var(--dark-vibrant);
+  } */
 </style>

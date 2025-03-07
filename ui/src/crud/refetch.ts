@@ -153,7 +153,7 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
         coordination.totalMin = totalMin;
         coordination.totalUnderMin = totalUnderMin;
         addCoordinationDetails(coordinationHash, coordination);
-        weClient.notifyFrame(newNotifications);
+        weClient?.notifyFrame(newNotifications);
       } catch (e) {
         console.error(e);
       }

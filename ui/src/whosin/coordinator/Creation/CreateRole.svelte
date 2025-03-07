@@ -51,54 +51,64 @@
     }
 </script>
 
-<div style="width: 70%">
+<div style="width: 100%">
         <div style="text-align: left;">
             <input class="title-input" placeholder="Role title" value={title || ""} on:input={e => { title = e.target.value; } } />
         </div>
 
-        <div class="optional-field">
+        <div class="optional-field-outer">
             {#if showDescription}
-                <textarea id="description" placeholder="Description" bind:value={description}></textarea>
-                <button type="button" on:click={() => showDescription = false}>Remove Description</button>
+                <button type="button" on:click={() => showDescription = false}>× description</button>
+                <div class="optional-field">
+                    <textarea id="description" placeholder="Description" bind:value={description}></textarea>
+                </div>
             {:else}
-                <button type="button" on:click={() => showDescription = true}>+ Description</button>
+                <button type="button" on:click={() => showDescription = true}>+ description</button>
             {/if}
         </div>
 
-        <div class="optional-field">
+        <div class="optional-field-outer">
             {#if showRequiredNumber}
-                <label for="requiredNumber">Required number of {title ? pluralize(title.toLowerCase()) : "joiners"}:</label>
-                <input type="number" id="requiredNumber" bind:value={requiredNumber} min="1" />
-                <button type="button" on:click={() => showRequiredNumber = false}>Remove requirement</button>
+                <button type="button" on:click={() => showRequiredNumber = false}>× requirement</button>
+                <div class="optional-field">
+                    <label for="requiredNumber">Required number of {title ? pluralize(title.toLowerCase()) : "joiners"}:</label>
+                    <input type="number" id="requiredNumber" bind:value={requiredNumber} min="1" />
+                </div>
             {:else}
-                <button type="button" on:click={() => showRequiredNumber = true}>+ Participation requirement</button>
+                <button type="button" on:click={() => showRequiredNumber = true}>+ requirement</button>
             {/if}
         </div>
 
-        <div class="optional-field">
+        <div class="optional-field-outer">
             {#if showLimitNumber}
-                <label for="limitNumber">Maximum number of {title ? pluralize(title.toLowerCase()) : "joiners"}:</label>
-                <input type="number" id="limitNumber" bind:value={limitNumber} min="1" />
-                <button type="button" on:click={() => showLimitNumber = false}>Remove limit</button>
+                <button type="button" on:click={() => showLimitNumber = false}>× participation limit</button>
+                <div class="optional-field">
+                    <label for="limitNumber">Maximum number of {title ? pluralize(title.toLowerCase()) : "joiners"}:</label>
+                    <input type="number" id="limitNumber" bind:value={limitNumber} min="1" />
+                </div>
             {:else}
-                <button type="button" on:click={() => showLimitNumber = true}>+ Participation limit</button>
+                <button type="button" on:click={() => showLimitNumber = true}>+ participation limit</button>
             {/if}
         </div>
 
-        <div class="optional-field">
+        <div class="optional-field-outer">
             {#if showInviteList}
-                <label for="inviteList">Invite Specific People:</label>
-                <!-- limit signups to invite list? checkbox -->
-                <input type="checkbox" id="limitToInviteList" />
-                <label for="limitToInviteList">Limit signups to invite list</label>
-                <select id="inviteList" multiple size="5" on:change={handleInviteChange}>
-                    {#each membersList as member}
-                        <option value={member.id}>{member.name}</option>
-                    {/each}
-                </select>
-                <button type="button" on:click={() => showInviteList = false}>Remove list</button>
+                <button type="button" on:click={() => showInviteList = false}>× invite list</button>
+                <div class="optional-field">
+                    <label for="inviteList">Invite Specific People:</label>
+                    <!-- limit signups to invite list? checkbox -->
+                    <div style="display: flex; flex-direction: row; font-size: 12px;" >
+                        <input type="checkbox" id="limitToInviteList" />
+                        <label for="limitToInviteList">Limit signups to invite list</label>
+                    </div>
+                    <select id="inviteList" multiple size="5" on:change={handleInviteChange}>
+                        {#each membersList as member}
+                            <option value={member.id}>{member.name}</option>
+                        {/each}
+                    </select>
+                </div>
             {:else}
-                <button type="button" on:click={() => showInviteList = true}>+ Invite list</button>
+                <button type="button" on:click={() => showInviteList = true}>+ invite list</button>
             {/if}
         </div>
 
@@ -106,6 +116,11 @@
 </div>
 
 <style>
+    .title-input {
+        background-color: #ffffff40;
+        border: 0;
+        outline: 0;
+    }
     div {
         /* margin-bottom: 1rem; */
     }
@@ -144,11 +159,23 @@
         background-color: #e9e9e9;
     }
 
-    .optional-field {
+    .optional-field-outer {
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
         gap: 1rem;
         flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .optional-field {
+        width: 100%;
+        margin-bottom: 16px; 
+        text-align: left;
+        padding: 8px;
+        margin: 0.2em 0;
+        border-radius: 4px;
+        background: #D5DAE540;
     }
 
     .optional-field label, .optional-field textarea, .optional-field input, .optional-field select {

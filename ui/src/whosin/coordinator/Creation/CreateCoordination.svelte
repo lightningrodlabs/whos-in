@@ -23,6 +23,8 @@
   export let agreementType: string = "event";
   import CreateRole from './CreateRole.svelte';
 
+  export let fromCalendar = false;
+
   let client: AppClient = (getContext(clientContext) as any).getClient();
   
   let weClient: any;
@@ -33,6 +35,9 @@
   const dispatch = createEventDispatcher();
   
   let showDescription = false;
+  let repeat = '';
+  let editingType = 'only me';
+  let postToBulletin = true;
   let attachmentsDialog : AttachmentsDialog
   let attachments: Array<WALUrl> = [];
   let title: string | undefined;
@@ -93,14 +98,21 @@
       });
   
       const wal: WAL = { hrl: [dnaHash, record.signed_action.hashed.hash], context: "" }
-      console.log(weClient, weClient.renderInfo)
+      console.log(weClient, weClient?.renderInfo)
       try {
-        weClient.renderInfo.view.resolve(wal)
+        weClient?.renderInfo.view.resolve(wal)
       } catch (e) {
         console.log("Created coordination")
       }
-      navigate("coordination", record.signed_action.hashed.hash);
-  
+
+      if (fromCalendar) {
+        dispatch('coordination-created', { 
+          coordinationHash: record.signed_action.hashed.hash 
+        });
+      } else {
+        navigate("coordination", record.signed_action.hashed.hash);
+      }
+      
     } catch (e) {
       errorSnackbar.labelText = `Error creating the coordination: ${e}`;
       errorSnackbar.show();
@@ -156,7 +168,7 @@
     titleField.focus();
     if (agreementType == "event") {
       // startsDate = new Date().valueOf() * 1000;
-      // endsDate = new Date().valueOf() * 1000 + 3600;
+      endsDate = new Date().valueOf() * 1000 + 3600;
       coordRoles.push({title: "Participant", description: "", minimum: 1, maximum: 100});
       coordRoles = coordRoles;
     } else if (agreementType == "project") {
@@ -202,59 +214,63 @@
       </div>
       
       <div class="optional-fields">
-        <div class="dates">
-          {#if agreementType == "event"}
-            <div style="margin-bottom: 16px; text-align: left; flex-grow: 1;">
-              <!-- datetime -->
-              <span style="text-transform: capitalize">
-                {agreementType}
-              </span> starts
-              <input type="datetime-local" id="start-date" name="start-date" 
-              value={secondsToDateInput(startsDate) || ""}
-              on:input={e => { 
-                startsDate = new Date(e.target.value).valueOf() * 1000;
-                // console.log("endsDate", endsDate)
-                // endsDate ? null : endsDate = new Date(startsDate + 3600).valueOf() * 1000;
-                // console.log("endsDate", endsDate)
-              } } required>
-
-              <span style="font-weight: 300; font-size: 14px;">
-                {!endsDate ? "(all-day event)" : ""}
-              </span>
-              <!-- {JSON.stringify(secondsToDateInput(startsDate))}hi -->
-      
-              <!-- <vaadin-date-time-picker label="Starts"  on:change={e => { startsDate = new Date(e.target.value).valueOf() * 1000;} } required></vaadin-date-time-picker>           -->
-            </div>
-
-            {#if !endsDate}
-              <br>
-              <div style="margin-bottom: 16px; text-align: left;">
-                <button class="optional-button" on:click={() => endsDate = new Date().valueOf() * 1000}>
-                + end date
-                </button>
-              </div>
-              {:else}
-              <div style="margin-bottom: 16px; text-align: left;">
+        {#if agreementType == "event"}
+          <div class="dates">
+            <div class="optional-field">
+              <!-- <div class="optional-field"> -->
+                <!-- datetime -->
                 <span style="text-transform: capitalize">
-                {agreementType}
-                </span> ends
-                <input type="datetime-local" id="end-date" name="end-date"
-                value={endsDate ? secondsToDateInput(endsDate) : ""}
+                  {agreementType}
+                </span> starts
+                <input type="datetime-local" id="start-date" name="start-date" 
+                value={secondsToDateInput(startsDate) || ""}
                 on:input={e => { 
-                  let newEndsDate = new Date(e.target.value).valueOf() * 1000;
-                  if (newEndsDate >= startsDate) {
-                  endsDate = newEndsDate;
-                  } else {
-                  e.target.value = null
-                  }
+                  startsDate = new Date(e.target.value).valueOf() * 1000;
+                  // console.log("endsDate", endsDate)
+                  // endsDate ? null : endsDate = new Date(startsDate + 3600).valueOf() * 1000;
+                  // console.log("endsDate", endsDate)
                 } } required>
-                <button class="optional-button" on:click={() => endsDate = undefined}>
-                Remove end date
-                </button>
-              </div>
+
+                <span style="font-weight: 300; font-size: 14px;">
+                  {!endsDate ? "(all-day event)" : ""}
+                </span>
+                <!-- {JSON.stringify(secondsToDateInput(startsDate))}hi -->
+        
+                <!-- <vaadin-date-time-picker label="Starts"  on:change={e => { startsDate = new Date(e.target.value).valueOf() * 1000;} } required></vaadin-date-time-picker>           -->
+              <!-- </div> -->
+              <!-- </div>
+
+              <div class="dates"> -->
+              {#if !endsDate}
+                <div style="margin-bottom: 16px; text-align: left;">
+                  <button class="optional-button" on:click={() => endsDate = new Date().valueOf() * 1000}>
+                    + event ends
+                  </button>
+                </div>
+              {:else}
+                    <!-- <button class="optional-button" on:click={() => endsDate = undefined}>
+                      × event ends
+                    </button> -->
+                    
+                  <!-- <div class="optional-field"> -->
+                    <span style="text-transform: capitalize">
+                    {agreementType}
+                    </span> ends
+                    <input type="datetime-local" id="end-date" name="end-date"
+                    value={endsDate ? secondsToDateInput(endsDate) : ""}
+                    on:input={e => { 
+                      let newEndsDate = new Date(e.target.value).valueOf() * 1000;
+                      // if (newEndsDate >= startsDate) {
+                      endsDate = newEndsDate;
+                      // } else {
+                      // e.target.value = null
+                      // }
+                    } } required>
+                  <!-- </div> -->
               {/if}
-                <!-- {JSON.stringify(secondsToDateInput(endsDate))}ho -->
-            <!-- </div> -->
+                  <!-- {JSON.stringify(secondsToDateInput(endsDate))}ho -->
+            </div>
+          </div>
           {:else if agreementType == "project"}
           <div style="margin-bottom: 16px; text-align: left;">
             Deadline to complete (optional)
@@ -275,7 +291,6 @@
             Reminder
             <input type="datetime-local" id="reminder-date" name="reminder-date" on:input={e => { reminderDate = new Date(e.target.value).valueOf() * 1000;} } required>
           </div> -->
-        </div>
 
         <div class="dates">
           {#if !signupDeadline}
@@ -285,32 +300,57 @@
               </button>
             </div>
           {:else}
-            <div style="margin-bottom: 16px; text-align: left;">
-              Deadline to signup
-              <input type="datetime-local" id="signup-deadline" name="signup-deadline" 
+            <div style="margin: 0px;">
+              <button class="optional-button" on:click={() => signupDeadline = undefined}>
+                × deadline
+              </button>
+              
+              <div class="optional-field">
+                Deadline to signup
+                <input type="datetime-local" id="signup-deadline" name="signup-deadline" 
                 value={signupDeadline ? new Date(signupDeadline).toISOString().slice(0, 16) : ""}
                 on:input={e => {
                   signupDeadline = new Date(e.target.value).valueOf() * 1000;
                 }} required>
-                <!-- remove? -->
-                <button class="optional-button" on:click={() => signupDeadline = undefined}>
-                  Remove deadline
-                </button>
+                  <!-- remove? -->
+              </div>
             </div>
           {/if}
         </div>
 
+        <div class="dates">
+          {#if !repeat}
+            <div style="margin-bottom: 16px; text-align: left;">
+              <button class="optional-button" on:click={() => repeat = true}>
+                + repeats
+              </button>
+            </div>
+          {:else}
+            <div style="margin: 0;">
+              <button class="optional-button" on:click={() => repeat = undefined}>
+                × repeats
+              </button>
+              <div class="optional-field">
+                Repeat
+                <select id="repeat" name="repeat" on:input={e => { repeat = e.target.value;} } required>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+            </div>
+          {/if}
+        </div>
 
         {#if !showDescription}
-        <!-- + description -->
-        <div style="margin-bottom: 16px; text-align: left;">
-          <button class="optional-button" on:click={() => showDescription = true}>+ description</button>
-        </div>
-        {:else}
           <div style="margin-bottom: 16px; text-align: left;">
-            <h3 style="text-transform: capitalize;">{agreementType} Description</h3>
-            <textarea class="description-input" placeholder="Type Here"  on:input={e => { description = e.target.value;} } />
-            <button class="optional-button" on:click={() => showDescription = false}>Remove description</button>
+            <button class="optional-button" on:click={() => showDescription = true}>+ description</button>
+          </div>
+        {:else}
+          <div style="margin: 0; text-align: left;">
+            <button class="optional-button" on:click={() => showDescription = false}>× description</button>
+            <textarea class="description-input" placeholder="Description"  on:input={e => { description = e.target.value;} } />
           </div>
         {/if}
 
@@ -326,10 +366,12 @@
         {/if}
       </div>
 
+
       <div style="display: flex; flex-direction: column">
-        <h2>Roles for this {agreementType}</h2>
-    
         <div id="created-roles">
+          <h2
+            style="margin-top: 0.2em;"
+          >Roles for this {agreementType}</h2>
           {#each coordRoles as role}
           <div class="role-outer">
             <CreateRole {role} />
@@ -345,7 +387,7 @@
               <br>
             </div> -->
             <!-- {#if coordRoles.length > 1} -->
-              <button class="delete" on:click={() => removeRole(role)}>Remove</button>
+              <button class="delete" on:click={() => removeRole(role)}>× remove</button>
             <!-- {/if} -->
           </div>
           {/each}
@@ -390,7 +432,7 @@
       </div> -->
 
       <!-- Editing type select dropdown with options only me, anyone, and no one -->
-      <div style="margin-bottom: 16px; text-align: left;">
+      <div style="margin-bottom: 16px; margin-top: 16px; text-align: left;">
         Who can edit this {agreementType}:
         <select id="editing-type" name="editing-type" on:input={e => { editingType = e.target.value;} } required>
           <option value="only me">Only me</option>
@@ -402,16 +444,16 @@
       <!-- post to bulletin? -->
       <div style="margin-bottom: 16px; text-align: left;">
         <input type="checkbox" id="post-to-bulletin" name="post-to-bulletin" checked={true} on:input={e => { postToBulletin = e.target.checked;} } required>
-        Post to bulletin
+        <label for="post-to-bulletin">Post to bulletin</label>
       </div>
 
       <!-- invite specific people -->
-      <div style="margin-bottom: 16px; text-align: left;">
+      <!-- <div style="margin-bottom: 16px; text-align: left;">
         Invite specific people
         <input />
-      </div>
+      </div> 
+      <br> -->
 
-      <br>
       <p class="notice">Warning: After proposing an {agreementType}, it belongs to everyone and cannot be edited or deleted.</p>
       <mwc-button 
         raised
@@ -463,6 +505,7 @@
       width: fit-content;
       height: fit-content;
       margin-left: 6px;
+      cursor: pointer;
     }
 
     .choose-type {
@@ -498,6 +541,7 @@
       padding: 8px 14px;
       background: #D5DAE540;
       border: 0;
+      outline: 0;
       border-radius: 4px;
     }
 
@@ -505,6 +549,8 @@
       width: calc(100% - 20px);
       height: 100px;
       padding: 14px;
+      margin-top: 0.2em;
+      margin-bottom: 1em;
       background: #D5DAE540;
       border: 0;
       border-radius: 4px;
@@ -540,5 +586,14 @@
 
     mwc-button {
       --mdc-theme-primary: #3360b3; /* Change this to your desired color */
+    }
+
+    .optional-field {
+      margin-bottom: 16px; 
+      text-align: left;
+      padding: 8px;
+      margin: 0.2em 0;
+      border-radius: 4px;
+      background: #D5DAE540;
     }
   </style>

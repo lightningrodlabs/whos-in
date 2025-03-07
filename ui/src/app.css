@@ -24,7 +24,8 @@ main {
 }
 
 .role-outer {
-  background-color: white;
+  background-color: #ffffff40;
+  /* background-color: white; */
   display: flex;
   flex-direction: column;
   margin: 6px 6px 6px 0px;
@@ -51,7 +52,9 @@ main {
 }
 
 .white-container {
-  background-color: white;
+  /* background-color: #ffffff; */
+  background-color: #ffffffba;
+  backdrop-filter: blur(20px);
   padding: 25px;
   min-height: 70vh;
   /* min-width: 68%; */
@@ -78,21 +81,34 @@ main {
   margin: 4px 4px 4px 0px;
   vertical-align: top;
   box-shadow: 0px 0px 6px #00000019;
-  border: 1px solid #efefef;
-  background-color: white;
+  /* border: 1px solid #efefef; */
+  /* background-color: #ffffffc5; */
+  background-color: var(--light-muted-transparent);
+  backdrop-filter: blur(10px);
+  color: rgb(0, 0, 0);
   padding: 14px 18px;
   border-radius: 12px;
   cursor: pointer;
 }
 
 .dashboard-item:hover {
-  box-shadow: 0px 0px 6px 4px #00000034;
-  /* background-color: #f5f8ff;
-  border: 1px solid #f5f8ff; */
+  /* box-shadow: 0px 0px 6px 2px #58585834; */
+  /* background-color: #ffffff; */
+  background-color: var(--light-muted);
+  /* border: 1px solid #f5f8ff; */
   /* padding: 18px 22px; */
   /* margin: 0px; */
   /* text-decoration: underline; */
 }
+
+body.dark-mode .dashboard-item {
+  /* background-color: rgba(196, 196, 196, 0.8); */
+  color: black;
+}
+
+/* body.dark-mode .dashboard-item:hover {
+  background-color: rgb(196, 196, 196);
+} */
 
 .action-title {
   /* font: normal normal bold 18px Helvetica Neue;
@@ -283,7 +299,7 @@ nav logo {
 .notifications, .dashboard, .calendar, .bulletin, .notifications {
   /* width: 24px; */
   height: 26px;
-  color: #d6ddeb;
+  color: #e4e9f3;
   /* margin: 0 10px; */
   /* margin-right: 10px; */
   cursor: pointer;
@@ -297,6 +313,7 @@ nav logo {
 
 .notifications:hover, .dashboard:hover, .calendar:hover, .bulletin:hover {
   background-color: #b5bed4;
+  color: #e6ebf3;
 }
 
 update-profile {
@@ -360,7 +377,8 @@ h1 {
 }
 
 .new-action-button {
-  background-color: #1952bb;
+  /* background-color: #1952bb; */
+  background-color: var(--vibrant);
   padding: 8px 10px 8px 10px !important;
   color: white !important;
   border-radius: 4px;
@@ -378,7 +396,8 @@ h1 {
 }
 
 .new-action-button:hover {
-  background-color: #3875e8;
+  /* background-color: #3875e8; */
+  background-color: var(--light-vibrant);
 }
 
 .new-action-button > * {

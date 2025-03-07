@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { encodeHashToBase64 } from '@holochain/client';
+import { setCurrentView } from './crud/localStorage';
 
 export const view = writable("home");
 export const viewHash = writable(new Uint8Array([]));
@@ -10,6 +11,7 @@ export const viewed = writable([]);
 export function navigate(location, hash) {
     view.update(v => location);
     viewHash.update(h => hash)
+    setCurrentView({view: location, hash: hash});
 }
 
 export function notifications_update(new_notifications) {
