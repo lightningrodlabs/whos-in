@@ -1,17 +1,15 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, createEventDispatcher } from 'svelte';
     import { writable } from 'svelte/store';
     import * as pluralize from 'pluralize';
-
+    
     export let role;
-
-    let title = 'Participant';
-    let description = '';
-    let requiredNumber = null;
-    let limitNumber = null;
-    let inviteList = [];
-    let membersList = [];
-    let selectedMembers = [];
+    
+    const dispatch = createEventDispatcher();
+    function updateRole(field, value) {
+        role[field] = value;
+        dispatch('update', role);
+    }
 
     let showDescription = false;
     let showRequiredNumber = false;
@@ -19,6 +17,19 @@
     let showInviteList = false;
     let showSelectedMembers = false;
     let editingTitle = false;
+
+    let title = '';
+    $: if (title) { updateRole('title', title); };
+    let description = '';
+    $: if (description) { updateRole('description', description); showDescription = true; };
+    let requiredNumber = null;
+    $: if (requiredNumber > 0) {  updateRole('minimum', requiredNumber); showRequiredNumber = true; };
+    let limitNumber = null;
+    $: if (limitNumber != null) {  updateRole('maximum', limitNumber); showLimitNumber = true };
+
+    let inviteList = [];
+    let membersList = [];
+    let selectedMembers = [];
 
     // Mock data for members list
     onMount(() => {
@@ -30,10 +41,12 @@
 
         title = role.title;
         description = role.description;
-        requiredNumber = role.requiredNumber;
-        limitNumber = role.limitNumber;
+        requiredNumber = role.minimum;
+        limitNumber = role.maximum;
         inviteList = role.inviteList;
         selectedMembers = role.selectedMembers;
+
+        console.log("requiredNumber", requiredNumber, showRequiredNumber);
     });
 
     function handleInviteChange(event) {
@@ -58,7 +71,7 @@
 
         <div class="optional-field-outer">
             {#if showDescription}
-                <button type="button" on:click={() => showDescription = false}>× description</button>
+                <button type="button" on:click={() => {showDescription = false; description = ""; }}>× description</button>
                 <div class="optional-field">
                     <textarea id="description" placeholder="Description" bind:value={description}></textarea>
                 </div>
@@ -69,34 +82,40 @@
 
         <div class="optional-field-outer">
             {#if showRequiredNumber}
-                <button type="button" on:click={() => showRequiredNumber = false}>× requirement</button>
-                <div class="optional-field">
-                    <label for="requiredNumber">Required number of {title ? pluralize(title.toLowerCase()) : "joiners"}:</label>
-                    <input type="number" id="requiredNumber" bind:value={requiredNumber} min="1" />
+                <div class="optional-field" style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" on:click={() => {
+                        showRequiredNumber = false
+                        requiredNumber = 0
+                        updateRole('minimum', requiredNumber)
+                    }}>× required {title ? pluralize(title.toLowerCase()) : "joiners"}: </button>
+                    <input min="0" type="number" id="requiredNumber" bind:value={requiredNumber} style="width: auto;" placeholder={`Minimum ${title ? pluralize(title.toLowerCase()) : "joiners"}`} />
                 </div>
             {:else}
-                <button type="button" on:click={() => showRequiredNumber = true}>+ requirement</button>
+                <button type="button" on:click={() => showRequiredNumber = true}>+ required {title ? pluralize(title.toLowerCase()) : "joiners"}</button>
             {/if}
         </div>
 
         <div class="optional-field-outer">
             {#if showLimitNumber}
-                <button type="button" on:click={() => showLimitNumber = false}>× participation limit</button>
-                <div class="optional-field">
-                    <label for="limitNumber">Maximum number of {title ? pluralize(title.toLowerCase()) : "joiners"}:</label>
+                <div class="optional-field" style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" on:click={() => {
+                    showLimitNumber = false
+                    limitNumber = null
+                    updateRole('maximum', limitNumber)
+                }}>× maximum {title ? pluralize(title.toLowerCase()) : "joiners"}: </button>
+                    <!-- <label for="limitNumber">Maximum number of {title ? pluralize(title.toLowerCase()) : "joiners"}:</label> -->
                     <input type="number" id="limitNumber" bind:value={limitNumber} min="1" />
                 </div>
             {:else}
-                <button type="button" on:click={() => showLimitNumber = true}>+ participation limit</button>
+                <button type="button" on:click={() => { showLimitNumber = true; limitNumber = 1; }}>+ maximum {title ? pluralize(title.toLowerCase()) : "joiners"}</button>
             {/if}
         </div>
 
-        <div class="optional-field-outer">
+        <!-- <div class="optional-field-outer">
             {#if showInviteList}
                 <button type="button" on:click={() => showInviteList = false}>× invite list</button>
                 <div class="optional-field">
                     <label for="inviteList">Invite Specific People:</label>
-                    <!-- limit signups to invite list? checkbox -->
                     <div style="display: flex; flex-direction: row; font-size: 12px;" >
                         <input type="checkbox" id="limitToInviteList" />
                         <label for="limitToInviteList">Limit signups to invite list</label>
@@ -110,7 +129,7 @@
             {:else}
                 <button type="button" on:click={() => showInviteList = true}>+ invite list</button>
             {/if}
-        </div>
+        </div> -->
 
         <!-- <button type="submit">Create Role</button> -->
 </div>
@@ -120,6 +139,7 @@
         background-color: #ffffff40;
         border: 0;
         outline: 0;
+        font-size: 17px;
     }
     div {
         /* margin-bottom: 1rem; */
@@ -134,11 +154,21 @@
         width: 100%;
         padding: 0.5rem;
         margin-bottom: 0.5rem;
+        height: 10px;
+    }
+
+    input[type="number"] {
+        width: 50px !important;
+        background: transparent;
+        border: 1px solid #939393;
+        padding: 0.3em 0 0.3em 0.3em;
+        margin: 0;
     }
 
     button {
         background: 0;
         border: 0;
+        font-size: 16px;
         /* padding: 0.5rem 1rem; */
     }
     
@@ -163,19 +193,26 @@
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: 1rem;
+        /* gap: 1rem; */
         flex-wrap: wrap;
         width: 100%;
     }
 
     .optional-field {
-        width: 100%;
+        /* width: 100%;
         margin-bottom: 16px; 
         text-align: left;
         padding: 8px;
         margin: 0.2em 0;
         border-radius: 4px;
-        background: #D5DAE540;
+        background: #D5DAE540; */
+
+        /* width: 100%; */
+        margin-bottom: 16px;
+        text-align: left;
+        padding: 0;
+        margin: 0;
+        border-radius: 4px;
     }
 
     .optional-field label, .optional-field textarea, .optional-field input, .optional-field select {

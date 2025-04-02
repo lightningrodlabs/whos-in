@@ -39,60 +39,60 @@ onMount(async () => {
   }
 });
 
-async function getSponsors(coordinationHash) {
-  error = undefined;
-  let record = undefined;
-  let sponsors = [];
+// async function getSponsors(coordinationHash) {
+//   error = undefined;
+//   let record = undefined;
+//   let sponsors = [];
 
-  try {
-    record = await client.callZome({
-      cap_secret: null,
-      role_name: 'whosin',
-      zome_name: 'coordinator',
-      fn_name: 'get_sponsors_for_coordination',
-      payload: coordinationHash,
-    });
-  } catch (e) {
-    error = e;
-  }
-  if (record) {
-    record.forEach(element => {
-      sponsors.push(element.join())
-    });
-  }
-  allSponsors[coordinationHash.toString()] = sponsors;
-  let temp = allSponsors;
-  allSponsors = {};
-  allSponsors = temp;
-}
+//   try {
+//     record = await client.callZome({
+//       cap_secret: null,
+//       role_name: 'whosin',
+//       zome_name: 'coordinator',
+//       fn_name: 'get_sponsors_for_coordination',
+//       payload: coordinationHash,
+//     });
+//   } catch (e) {
+//     error = e;
+//   }
+//   if (record) {
+//     record.forEach(element => {
+//       sponsors.push(element.join())
+//     });
+//   }
+//   allSponsors[coordinationHash.toString()] = sponsors;
+//   let temp = allSponsors;
+//   allSponsors = {};
+//   allSponsors = temp;
+// }
 
-async function getSpamReporters(coordinationHash) {
-  error = undefined;
-  let record = undefined;
-  let reporters = [];
+// async function getSpamReporters(coordinationHash) {
+//   error = undefined;
+//   let record = undefined;
+//   let reporters = [];
 
-  try {
-    record = await client.callZome({
-      cap_secret: null,
-      role_name: 'whosin',
-      zome_name: 'coordinator',
-      fn_name: 'get_spam_reporters_for_coordination',
-      payload: coordinationHash,
-    });
-  } catch (e) {
-    error = e;
-  }
-  // console.log(record)
-  if (record) {
-    record.forEach(element => {
-      reporters.push(element.join())
-    });
-  }
-  allSpamReporters[coordinationHash.toString()] = reporters;
-  let temp = allSpamReporters;
-  allSpamReporters = {};
-  allSpamReporters = temp;
-}
+//   try {
+//     record = await client.callZome({
+//       cap_secret: null,
+//       role_name: 'whosin',
+//       zome_name: 'coordinator',
+//       fn_name: 'get_spam_reporters_for_coordination',
+//       payload: coordinationHash,
+//     });
+//   } catch (e) {
+//     error = e;
+//   }
+//   // console.log(record)
+//   if (record) {
+//     record.forEach(element => {
+//       reporters.push(element.join())
+//     });
+//   }
+//   allSpamReporters[coordinationHash.toString()] = reporters;
+//   let temp = allSpamReporters;
+//   allSpamReporters = {};
+//   allSpamReporters = temp;
+// }
 
 
 // async function fetchCoordinations() {
@@ -132,12 +132,12 @@ async function getSpamReporters(coordinationHash) {
 {:else if error}
 <span>Error fetching the coordinations: {error}.</span>
 {:else if coordinationsHashData.length === 0}
-<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
+<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent; backdrop-filter: none;">
   <!-- <label>Public Coordinations</label> -->
-  <span>No events or agreements yet.</span>
+  <span class="contrastDarkMode">No events or agreements yet. Try suggesting some of your own!</span>
 </div>
 {:else}
-<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
+<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent; backdrop-filter: none;">
   <!-- <label>Public Coordinations</label> -->
   {#if coordinationsHashData.length > 0}
   <!-- toggle filters for All, Events, Projects and Agreements -->
@@ -162,7 +162,7 @@ async function getSpamReporters(coordinationHash) {
     </div>
 
     <!-- sort by recent, oldest -->
-    <div style="display: flex; flex-direction: row; margin-right: 8px;">
+    <!-- <div style="display: flex; flex-direction: row; margin-right: 8px;">
       <label class="filter-by-label">Sort by&nbsp;</label>
       <select class="filter-select" on:change={(e) => {
         console.log(e.target.value);
@@ -178,7 +178,7 @@ async function getSpamReporters(coordinationHash) {
         <option value="recent">Recent</option>
         <option value="oldest">Oldest</option>
       </select>
-    </div>
+    </div> -->
   </div>
   
   <!-- {#if allSponsors[hash] && allSponsors[hash].length && (!allSpamReporters[hash] || !allSpamReporters[hash].length)} -->
@@ -193,3 +193,12 @@ async function getSpamReporters(coordinationHash) {
   {/if}
 </div>
 {/if}
+
+<style lang="scss">
+.contrastDarkMode {
+  color: black;
+}
+:global(.dark-mode .contrastDarkMode) {
+  color: white;
+}
+</style>

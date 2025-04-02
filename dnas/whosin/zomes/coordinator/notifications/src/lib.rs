@@ -1,5 +1,6 @@
 extern crate hc_zome_notifications_coordinator;
 use hdk::prelude::{*};
+use tracing::field::debug;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CoordrolesOutput {
     coordrole: Record,
@@ -25,8 +26,9 @@ pub struct Coordination {
 pub struct Coordrole {
   pub title: String,
   pub description: String,
-  pub minimum: i32,
-  pub maximum: i32,
+  pub minimum: Option<i32>,
+  pub maximum: Option<i32>,
+  pub approved_participants: Option<Vec<ActionHash>>,
 }
 
 #[hdk_entry_helper]
@@ -76,7 +78,7 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
   let mut participants: Vec<AgentPubKey> = vec![];
   let mut activated: bool = false;
   let coordination: Coordination;
-
+  
   // START GET COMMITTERS FOR COORDINATION AND FIND ACTIVATION
   let zome_call_response = call_remote(
     agent_info().unwrap().agent_latest_pubkey.into(),
@@ -96,7 +98,7 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
         // let mut coordroles: Vec<Coordrole> = vec![];
 
         for item in record.iter() {
-          emit_signal(item.clone())?;
+          emit_signal(item)?;
           let coordrole: Coordrole = item
             .coordrole
             .entry()
@@ -109,7 +111,11 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
 
           // emit_signal(coordrole.clone())?;
 
-          if item.participants as i32 >= coordrole.minimum {
+          if let Some(minimum) = coordrole.minimum {
+            if item.participants as i32 >= minimum {
+              activated = true;
+            }
+          } else {
             activated = true;
           }
         }

@@ -98,13 +98,12 @@
     >Notifications
         <button
             class="mark-all-as-read-button"
-            on:click={() => {
-                local_notifications.forEach(n => {
-                    if (!n.seen) {
-                        console.log(n)
-                        seeNotification(n);
+            on:click={async () => {
+                for (let i = 0; i < local_notifications.length; i++) {
+                    if (!local_notifications[i].seen) {
+                        await seeNotification(local_notifications[i]);
                     }
-                });
+                }
             }}
         >Mark all as read</button>
         {#if notifier}

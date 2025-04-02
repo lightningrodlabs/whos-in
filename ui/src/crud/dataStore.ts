@@ -47,3 +47,16 @@ export function addCoordinationDetails(coordinationHash, details) {
   const newDetails = { [encodeHashToBase64(coordinationHash)]: details };
   allCoordinationsDetails.set({ ...currentDetails, ...newDetails });
 }
+
+export function removeCoordination(coordinationHash) {
+  const currentCoordinations = get(allCoordinations);
+  const newCoordinations = currentCoordinations.filter(coord => {
+    return coord.coordinationHash !== encodeHashToBase64(coordinationHash)
+  });
+  setAllCoordinations(newCoordinations);
+  const myCurrentCoordinations = get(myCoordinations);
+  const newMyCoordinations = myCurrentCoordinations.filter(coord => {
+    return coord.coordinationHash !== encodeHashToBase64(coordinationHash)
+  });
+  setAllMyCoordinations(newMyCoordinations);
+}

@@ -98,7 +98,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
         ActionHash::try_from(coordrole_hash.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap(),
         GetOptions::default(),
     )?;
-    let mut maximum = 0;
+    let mut maximum: Option<i32> = None;
     if let Some(record) = maybe_record {
         let coordrole: Coordrole = record
             .entry()
@@ -111,7 +111,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
             )?;
         maximum = coordrole.maximum;
     }
-    let max_reached = links_length >= maximum as usize;
+    let max_reached = maximum.map_or(false, |max| links_length >= max as usize);
     if !already_committed && !max_reached {
         create_link(
             coordrole_hash.clone(),
@@ -150,7 +150,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
 
     
     // TODO: this is a temporary solution, and may cause issues
-    if links_length > maximum as usize - 2 {
+    if max_reached {
         debug!("Sending notification tip");
         emit_signal(tip.clone())?;
         if let Err(e) = call(

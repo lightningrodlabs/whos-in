@@ -8,7 +8,7 @@
   import FaList from 'svelte-icons/fa/FaList.svelte';
   import SvgIcon from '../../SvgIcon.svelte';
   import { allCoordinations, myCoordinations } from '../../crud/dataStore';
-  import { refetchCoordinationDetails, refetchCoordinationsWithDetails, refetchMyCoordinations } from '../../crud/refetch';
+  import { refetchCoordinationDetails, refetchCoordinationsWithDetails, refetchMyCoordinations, refetchMyCoordinationsWithDetails } from '../../crud/refetch';
 
   // import { notifications, notifications_update } from '../../store.js';
   
@@ -47,11 +47,13 @@
     console.log("applets", applets)
     if (applets) {
       applets.forEach(applet => {
-        refetchMyCoordinations(applet[1].appletClient, false);
+        // refetchMyCoordinations(applet[1].appletClient, false);
         // refetchCoordinationsWithDetails(applet[1].appletClient);
+        refetchMyCoordinationsWithDetails(applet[1].appletClient, false)
       });
     } else {
-      await refetchMyCoordinations(client);
+      refetchMyCoordinationsWithDetails(client)
+      // await refetchMyCoordinations(client);
       // await refetchCoordinationsWithDetails(client);
     }
   });
@@ -78,7 +80,7 @@
 
 </script>
 
-<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent;">
+<div class="white-container" style="display: flex; flex-direction: column; background-color: transparent; backdrop-filter: none;">
   <label>My Coordinations</label>
   {#if coordinationsHashData && coordinationsHashData.length}
 
@@ -95,9 +97,9 @@
       <button class="filter-button" style="background: #357cff;" class:active={filterType == "Event"} on:click={() => filterType = 'Event'}>
         <SvgIcon color="#fff" size=10 icon="faCalendar" />
         Events</button>
-      <button class="filter-button" style="background: rgb(255, 149, 29);" class:active={filterType == "Project"} on:click={() => filterType = 'Project'}>
+      <!-- <button class="filter-button" style="background: rgb(255, 149, 29);" class:active={filterType == "Project"} on:click={() => filterType = 'Project'}>
         <SvgIcon color="#fff" size=12 icon="faTask" />
-        Projects</button>
+        Projects</button> -->
       <button class="filter-button" style="background: rgb(83, 1, 174);" class:active={filterType == "Agreement"} on:click={() => filterType = 'Agreement'}>
         <SvgIcon color="#fff" size=14 icon="faAgreement" />
         Agreements</button>

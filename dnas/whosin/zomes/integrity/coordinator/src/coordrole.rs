@@ -4,8 +4,8 @@ use hdi::prelude::*;
 pub struct Coordrole {
     pub title: String,
     pub description: String,
-    pub minimum: i32,
-    pub maximum: i32,
+    pub minimum: Option<i32>,
+    pub maximum: Option<i32>,
     pub approved_participants: Option<Vec<ActionHash>>,
 }
 pub fn validate_create_coordrole(

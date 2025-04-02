@@ -50,6 +50,7 @@
             <option value="/src/assets/backgrounds/misty.jpg">Misty</option>
             <option value="/src/assets/backgrounds/pond.jpg">Pond</option>
             <option value="/src/assets/backgrounds/sheep.jpg">Sheep</option>
+            <option value="/src/assets/backgrounds/black.png">Pure Black</option>
             <option value="custom">Custom URL</option>
         </select>
         <!-- if custom, reveal text input -->

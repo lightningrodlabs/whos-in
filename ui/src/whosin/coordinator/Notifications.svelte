@@ -27,19 +27,22 @@
     
     onMount(async () => {
         // let test = "";
-        weClient = await WeaveClient.connect(appletServices);
 
         if (typeof client != "undefined") {
             setInterval( () => {
+                console.log("fetching notifications");
                 fetchNotifications();
             }, 30000);
         }
         else {
             // alert(client)
             // console.log(client)
+            console.log("client is undefined")
         }
     
         await fetchNotifications();
+
+        weClient = await WeaveClient.connect(appletServices);
     });
 
     notifications.subscribe(value => {
@@ -137,6 +140,7 @@
     }
 
     async function fetchNotifications() {
+        console.log("fetching notifications")
         try {
             const records = await client
             .callZome({

@@ -20,9 +20,11 @@ import { averageColor, loadState, colorPalette } from "../../crud/localStorage";
 import NotificationsMini from "./NotificationsMini.svelte";
 
 let headerColor = "#1952bb";
+let darkMode = false;
 averageColor.subscribe(value => {
   headerColor = value?.rgba
-  console.log("headerColor", headerColor);
+  darkMode = value?.isDark;
+  console.log("headerColor", headerColor, value);
   if (!headerColor) {
     headerColor = "#fff";
   }
@@ -78,15 +80,17 @@ onMount(() => {
           <img class="logo-image" src={Logo} alt="whos-in logo"/>
         </a>
         {:else} -->
-        <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>  
-          <h1 id="whosin-title" style="display: flex; align-items: center;">
-            <img id="minilogo" src={Logo} alt="whos-in logo"/>
-            <span>
-              Who's In?
-            </span>
-          </h1>
-        <!-- <small id="subtitle">for Moss</small> -->
-        </a>
+          <a id="logo" class="navbar-brand" on:click={() => navigate("all-coordinations")}>  
+            <h1 id="whosin-title" style="display: flex; align-items: center;">
+              {#if !isWeContext()}
+                <img id="minilogo" src={Logo} alt="whos-in logo"/>
+              {/if}
+              <span>
+                Who's In?
+              </span>
+            </h1>
+          <!-- <small id="subtitle">for Moss</small> -->
+          </a>
         
         <!-- {/if} -->
       </div>
@@ -106,7 +110,7 @@ onMount(() => {
       {:else}
       <div class="bulletin-icon">
         <!-- <FaBullhorn />  -->
-        <SvgIcon icon="faBullhorn" color=#d6ddeb />
+        <SvgIcon icon="faBullhorn" color={darkMode ? "#d6ddeb" : "#404040"} />
         <span>
           Bulletin
         </span>
@@ -124,7 +128,7 @@ onMount(() => {
       </div>
       {:else}
       <div class="dashboard-icon">
-        <SvgIcon icon="faList" color=#d6ddeb />
+        <SvgIcon icon="faList" color={darkMode ? "#d6ddeb" : "#404040"} />
         <span>
           Joined
         </span>
@@ -142,7 +146,7 @@ onMount(() => {
       </div>
       {:else}
       <div class="dashboard-icon">
-        <SvgIcon icon="faCalendar" size=18 color=#d6ddeb />
+        <SvgIcon icon="faCalendar" size=18 color={darkMode ? "#d6ddeb" : "#404040"} />
         <span>
           Calendar
         </span>
@@ -156,7 +160,7 @@ onMount(() => {
           {#if currentView == "notifications"}
             <SvgIcon icon="faBell" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} /> Notifications
           {:else}
-            <SvgIcon icon="faBell" color=#d6ddeb /> Notifications
+            <SvgIcon icon="faBell" color={darkMode ? "#d6ddeb" : "#404040"} /> Notifications
           {/if}
           <span class="notifications-count">
             <Notifications client={client}></Notifications>
@@ -191,6 +195,7 @@ onMount(() => {
         </div>
       </div>
     </li>
+    {/if}
 
     <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
     <li class="notifications-li" style="margin-left: 10px;">
@@ -207,7 +212,6 @@ onMount(() => {
       </div>
       {/if}
     </li>
-    {/if}
     <!-- if no agent linked to my agent as notifier -->
     <!-- {#if !notifier}
       <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
@@ -302,7 +306,8 @@ onMount(() => {
   .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
+    background-color: #f9f9f9b2;
+    backdrop-filter: blur(10px);
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     border-radius: 5px;
@@ -316,10 +321,11 @@ onMount(() => {
     padding: 12px 16px;
     text-decoration: none;
     display: block;
+    border-radius: 5px;
   }
 
   .dropdown-content div:hover {
-    background-color: #f1f1f1;
+    background-color: #79797955;
   }
 
   #notifications-dropdown {
@@ -343,10 +349,18 @@ onMount(() => {
   } */
 
   .selected-tab {
-    color: var(--vibrant);
+    color: var(--vibrant) !important;
   }
 
   /* .navbar {
     background: var(--dark-vibrant);
   } */
+
+  :global(.nickname) {
+    color: rgb(64, 64, 64) !important;
+  }
+
+  :global(.dark-mode .nickname) {
+    color: white !important;
+  }
 </style>

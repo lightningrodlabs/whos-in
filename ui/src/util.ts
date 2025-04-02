@@ -71,12 +71,12 @@ export const getCoordinationLabel = (coordination: any) : any => {
     if (coordination.ends_date && coordination.ends_date < currentTime) {
         return {
             title: 'Expired',
-            color: 'rgba(255, 255, 255, 0.5)'//'#ff0000'
+            color: '#ff0000'
         };
     } else if (coordination.totalUnderMin >= coordination.totalMin && coordination.starts_date && coordination.starts_date < currentTime) {
         return {
             title: 'Happening today',
-            color: 'rgba(47, 97, 224, 0.75)'//'#cd1dff'
+            color: '#cd1dff'
         };
     } else if (coordination.totalMin > 0 && coordination.totalUnderMin < coordination.totalMin && coordination.signup_deadline && coordination.signup_deadline < currentTime) {
         return {
@@ -86,12 +86,12 @@ export const getCoordinationLabel = (coordination: any) : any => {
     } else if (coordination.totalMin > 0 && coordination.totalUnderMin < coordination.totalMin) {
         return {
             title: 'Gathering participation',
-            color: 'rgba(255, 243, 17, 0.5)'
+            color: 'rgb(230, 195, 0)'
         };
     } else if (coordination.totalUnderMin >= coordination.totalMin) {
         return {
             title: 'Active',
-            color: 'rgba(37, 255, 17, 0.5)'//'#57ca01'
+            color: '#57ca01'
         };
     }
 

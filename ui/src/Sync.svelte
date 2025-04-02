@@ -4,16 +4,19 @@
     import Matrix from './Matrix.svelte';
     import SvgIcon from './SvgIcon.svelte';
     import { averageColor } from "./crud/localStorage";
+    import { refetchCoordinationsWithDetails } from './crud/refetch';
 
     export let client;
 
-    const timeoutInterval = 60000;
+    const timeoutInterval = 60 * 1000;
 
     let lastMoved = new Date().getTime();
     let collapsed = false;
     let syncInterval;
+    let pullInterval;
     let networkInfo;
     let diff = 0;
+    let lastTimeQueried = 0;
 
     function detectCursorMovement() {
         lastMoved = new Date().getTime();
@@ -26,10 +29,27 @@
 
         if (!collapsed && diff < timeoutInterval) {
             let networkInfoRequest: NetworkInfoRequest = {
+                last_time_queried: lastTimeQueried,
                 agent_pub_key: client.myPubKey,
                 dnas: client.cachedAppInfo.cell_info.whosin.map((cell) => cell.provisioned.cell_id[0])
             }
+            // * Timestamp in ms
+            lastTimeQueried = now * 1000
+            // console.log("networkInfoRequest", networkInfoRequest);
             networkInfo = await client.networkInfoRequester(networkInfoRequest);
+            // const newData: boolean = networkInfo?.[0]?.bytes_since_last_time_queried > 0;
+            // console.log(JSON.stringify(networkInfo, null, 4));
+        }
+    }
+
+    async function checkPull() {
+        const now = new Date().getTime();
+        diff = now - lastMoved;
+
+        if (diff < timeoutInterval) {
+            lastTimeQueried = now * 1000
+            console.log("checkPull", lastTimeQueried);
+            await refetchCoordinationsWithDetails(client);
         }
     }
 
@@ -37,12 +57,14 @@
         detectCursorMovement();
         checkSync();
         window.addEventListener('mousemove', detectCursorMovement);
-        syncInterval = setInterval(checkSync, 10000);
+        syncInterval = setInterval(checkSync, 15 * 1000);
+        pullInterval = setInterval(checkPull, 1 * 60 * 1000);
     });
 
     onDestroy(() => {
         window.removeEventListener('mousemove', detectCursorMovement);
         clearInterval(syncInterval);
+        clearInterval(pullInterval);
     });
 </script>
 

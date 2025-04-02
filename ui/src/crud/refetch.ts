@@ -1,6 +1,6 @@
 import { decode } from "@msgpack/msgpack";
-import { encodeHashToBase64 } from "@holochain/client";
-import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations, addSomeMyCoordinations } from "./dataStore";
+import { decodeHashFromBase64, encodeHashToBase64 } from "@holochain/client";
+import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations, addSomeMyCoordinations, removeCoordination } from "./dataStore";
 import type { Coordination } from '../whosin/coordinator/types';
 import { notifications, weClientStored } from "../store";
 import type { WAL } from "@lightningrodlabs/we-applet";
@@ -32,9 +32,60 @@ export async function refetchCoordinations(client) {
     );
     hashes = hashes.reverse();
     addSomeCoordinations(hashes);
+    return hashes;
   } catch (e) {
     console.error(e);
   }
+}
+
+async function getSponsors(client, coordinationHash) {
+  let record = undefined;
+  let sponsors = [];
+
+  try {
+    record = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'coordinator',
+      fn_name: 'get_sponsors_for_coordination',
+      payload: coordinationHash,
+    });
+  } catch (e) {
+    console.error(e, "Error fetching sponsors", coordinationHash);
+  }
+  if (record) {
+    record.forEach(element => {
+      sponsors.push(element.join())
+    });
+  }
+
+  return sponsors;
+
+}
+
+async function getSpamReporters(client, coordinationHash) {
+  let record = undefined;
+  let reporters = [];
+
+  try {
+    record = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'coordinator',
+      fn_name: 'get_spam_reporters_for_coordination',
+      payload: coordinationHash,
+    });
+  } catch (e) {
+    console.error(e);
+  }
+  // console.log(record)
+  if (record) {
+    record.forEach(element => {
+      reporters.push(element.join())
+    });
+  }
+
+  return reporters;
 }
 
 export async function refetchMyCoordinations(client, reset = true) {
@@ -62,6 +113,7 @@ export async function refetchMyCoordinations(client, reset = true) {
       } else {
         addSomeMyCoordinations(hashes);
       }
+      return hashes;
     }
     catch (e) {
       console.error(e);
@@ -99,6 +151,18 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
     const coordinationWal: WAL = { hrl: [dnaHash, coordinationHash], context: "" }
     let newNotifications = [];
 
+    // const spamReporters = await getSpamReporters(client, coordinationHash);
+    // console.log("Spam reporters: ", spamReporters);
+    // if (spamReporters.length > 0) {
+    //   return false;
+    // }
+
+    const sponsors = await getSponsors(client, coordinationHash);
+    if (sponsors.length < 1) {
+      removeCoordination(coordinationHash);
+      return false;
+    }
+
     let record = await client.callZome({
       cap_secret: null,
       role_name: 'whosin',
@@ -112,6 +176,8 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
       let totalParticipants = 0;
       let totalMin = 0;
       let totalUnderMin = 0;
+
+      console.log("Coordination: ", coordination, coordinationHash);
       
       try {
         let record2 = await client.callZome({
@@ -165,15 +231,30 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
 }
 
 export async function refetchCoordinationsWithDetails(client) {
-  await refetchCoordinations(client);
-  let currentCoordinations = await client.callZome({
-    cap_secret: null,
-    role_name: 'whosin',
-    zome_name: 'coordinator',
-    fn_name: 'get_all_coordinations',
-    payload: null,
-  });
-  currentCoordinations.forEach(async (coordination) => {
-    await refetchCoordinationDetails(client, coordination.signed_action.hashed.hash);
-  });
+  const currentCoordinations = await refetchCoordinations(client);
+  // let currentCoordinations = await client.callZome({
+  //   cap_secret: null,
+  //   role_name: 'whosin',
+  //   zome_name: 'coordinator',
+  //   fn_name: 'get_all_coordinations',
+  //   payload: null,
+  // });
+  for (const coordination of currentCoordinations) {
+    console.log("Coordination: ", coordination);
+      await refetchCoordinationDetails(client, decodeHashFromBase64(coordination.coordinationHash));
+  }
+}
+
+export async function refetchMyCoordinationsWithDetails(client, reset = true) {
+  const currentCoordinations = await refetchMyCoordinations(client, reset);
+  // let currentCoordinations = await client.callZome({
+  //   cap_secret: null,
+  //   role_name: 'whosin',
+  //   zome_name: 'coordinator',
+  //   fn_name: 'get_my_coordination_hashes',
+  //   payload: null,
+  // });
+  for (const coordination of currentCoordinations) {
+    await refetchCoordinationDetails(client, decodeHashFromBase64(coordination.coordinationHash));
+  }
 }

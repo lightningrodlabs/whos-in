@@ -206,7 +206,7 @@
     </div>
     {:else if error}
     <span>Error fetching the coordination: {error}</span>
-    {:else if coordination_type == filterType || filterType == "All"}
+    {:else if coordination?.title && coordination_type && coordination_type == filterType || filterType == "All"}
     <div on:mousedown={goToFullview} class="dashboard-item" style="margin-bottom: 8px;">
       <div style="display: flex; flex-direction: row; margin-bottom: 2px">
         <div class="action-title" style="display: flex; justify-content: space-between; width: 100%;"> 
@@ -217,7 +217,7 @@
               {#if weClient?.renderInfo.applets && firstGroupInfo}
               <img src={ firstGroupInfo ? firstGroupInfo.icon_src : "" } title={firstGroupInfo.name} style="width: 20px; height: 20px; border-radius: 50%; margin-bottom: -4px;"/>
               {/if}
-              { coordination.title }
+              { coordination?.title }
             </div>
           </div>
 
@@ -239,7 +239,7 @@
         </div>
       </div>
 
-      {#if coordination.signup_deadline}
+      {#if coordination?.signup_deadline}
       <div class="action-details">
         <!-- deadline to signup -->
         <div class="action-date">
@@ -249,7 +249,7 @@
       </div>
     {/if}
 
-    {#if coordination.starts_date}
+    {#if coordination?.starts_date}
       <div class="action-details">
         <!-- if start date and end date are on the same day -->
         {#if stringStartDate.split(',')[0] == stringEndDate.split(',')[0]}
@@ -265,7 +265,7 @@
           </div>
         {/if}
       </div>
-    {:else if coordination.ends_date}
+    {:else if coordination?.ends_date}
       <div class="action-date">
         <SvgIcon color="#484848" size=16 icon="faClock" />
         Deadline to complete: <span style="white-space: pre-line">{ stringEndDate }</span>
@@ -273,7 +273,7 @@
     {/if}
 
       <div style="display: flex; flex-direction: row; margin-bottom: 2px">
-        <div class="action-description"> { coordination.description }</div>
+        <div class="action-description"> { coordination?.description }</div>
       </div>
 
       <div class="progress-extraouter" style="display: flex;">

@@ -32,8 +32,8 @@
   import { fade } from 'svelte/transition'
   import { refetchCoordinations } from './crud/refetch.js';
   import app from './main.js';
-  import Calendar from './whosin/coordinator/Calendar.svelte';
-  import { averageColor, backgroundImage, loadState, setAverageColor, setColorPalette } from './crud/localStorage.js';
+  import Calendar from './whosin/coordinator/Calendaring/Calendar.svelte';
+  import { averageColor, backgroundImage, loadState, setAverageColor, setColorPalette, colorPalette, setBackgroundImage } from './crud/localStorage.js';
   import { FastAverageColor } from 'fast-average-color';
   import Sync from './Sync.svelte';
   import { Vibrant } from "node-vibrant/browser";
@@ -50,7 +50,7 @@
   let applets;
   let loading = true;
   let store = undefined;
-  let currentView: string = "calendar";
+  let currentView: string = "all-coordinations";
   let currentHash: Uint8Array;
   let notifier: AgentPubKey | undefined;
   let allNotifiers: Array<AgentPubKey> | undefined;
@@ -60,36 +60,63 @@
   let weClient: WeaveClient
   $: client, loading, store, notifier, dna;
 
-  let colors = undefined;
+  let defaultPalette = {
+    Vibrant: { rgb: [25, 82 ,187] },
+    Muted: { rgb: [50, 73, 115] },
+    DarkMuted: { rgb: [27, 62, 127] },
+    LightVibrant: { rgb: [195, 195, 195] },
+    DarkVibrant: { rgb: [101, 120, 159] },
+    LightMuted: { rgb: [177, 177, 177] },
+    LightMutedTransparent: { rgb: [163, 163, 163] },
+  }
+
+  function setDefaultPalette() {
+    document.body.style.background = "#e6ecf8";
+    setBackgroundImage(null);
+    setAverageColor({
+      rgba: "rgb(255,255,255,1)",
+      rgb: "rgb(255,255,255)",
+      isDark: false,
+    })
+    setColorPalette(defaultPalette);
+        // load default colors
+    document.documentElement.style.setProperty("--vibrant", 'rgb(25,82,187)');
+    document.documentElement.style.setProperty("--muted", 'rgb(50, 73, 115)');
+    document.documentElement.style.setProperty("--dark-muted", 'rgb(27, 62, 127)');
+    document.documentElement.style.setProperty("--light-vibrant", 'rgb(195, 195, 195)');
+    document.documentElement.style.setProperty("--dark-vibrant", 'rgb(101,120,159)');
+    document.documentElement.style.setProperty("--light-muted", 'rgb(177,177,177)');
+    document.documentElement.style.setProperty("--light-muted-transparent", 'rgba(198,198,198,0.5)');
+
+  }
 
   // $: document.body.style.background = "black";
   backgroundImage.subscribe(value => {
     if (!value || value == "none") {
-      document.body.style.background = "#e6ecf8";
-      setAverageColor({
-        isDark: false,
-      });
+      setDefaultPalette();
       return;
-    };
-    document.body.style.background = `url(${value}) no-repeat center center fixed`;
-    document.body.style.backgroundSize = 'cover';
-    // document.body.style.backdropFilter = 'brightness(30%)';
-    const fac = new FastAverageColor();
-    fac.getColorAsync(value)
+    } else {
+      document.body.style.background = `url(${value}) no-repeat center center fixed`;
+      document.body.style.backgroundSize = 'cover';
+      // document.body.style.backdropFilter = 'brightness(30%)';
+      const fac = new FastAverageColor();
+      fac.getColorAsync(value)
       .then(color => {
-          // container.style.backgroundColor = color.rgba;
-          // container.style.color = color.isDark ? '#fff' : '#000';
-          setAverageColor(color);
-          console.log('Average color', color);
+        // container.style.backgroundColor = color.rgba;
+        // container.style.color = color.isDark ? '#fff' : '#000';
+        setAverageColor(color);
+        console.log('Average color', color);
       })
       .catch(e => {
-          console.log(e);
+        console.log(e);
       });
-
-    Vibrant.from(value)
+      
+      console.log("value palette", value);
+      
+      Vibrant.from(value)
       .getPalette()
       .then((palette) => {
-        colors = palette;
+        console.log("palette", palette);
         setColorPalette(palette);
         document.documentElement.style.setProperty("--vibrant", 'rgb(' + palette.Vibrant.rgb.join(",") + ')');
         document.documentElement.style.setProperty("--muted", 'rgb(' + palette.Muted.rgb.join(",") + ')');
@@ -99,9 +126,12 @@
         document.documentElement.style.setProperty("--light-muted", 'rgb(' + palette.LightMuted.rgb.join(",") + ')');
         document.documentElement.style.setProperty("--light-muted-transparent", 'rgba(' + palette.LightMuted.rgb.join(",") + ',0.5)');
         console.log("palette", palette, 'rgb(' + palette.Vibrant.rgb.join(",") + ')');
+      }).catch(() => {
+        setDefaultPalette();
       })
+    }
   });
-
+    
   averageColor.subscribe(value => {
     if (!value) return;
     document.body.classList.toggle("dark-mode", value?.isDark);
@@ -298,6 +328,7 @@
   }
 
   onMount(async () => {
+    await setDefaultPalette();
     await initialize()
     await checkForNotifier()
     if (typeof document !== 'undefined') {
@@ -382,9 +413,9 @@
 </script>
 
 <!-- <div id="colorPalette" style="margin-top: 100px; position: fixed; top: 2000; left: 0; z-index: 1000; display: flex; flex-direction: column; padding: 10px; height: 100px; width: 100px;">
-  {#if colors}
-    {#each Object.keys(colors) as key}
-      <div style='background-color: rgb({colors[key].rgb.join(',')})'>{key}: ({colors[key].rgb.join(',')})</div>
+  {#if $colorPalette}
+    {#each Object.keys($colorPalette) as key}
+      <div style='background-color: rgb({$colorPalette[key].rgb.join(',')})'>{key}: ({$colorPalette[key].rgb.join(',')})</div>
     {/each}
   {/if}
 </div> -->

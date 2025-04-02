@@ -8,7 +8,7 @@
 }
 
 body {
-  background-color: #e6ecf8;
+  background-color: #e6ecf8 !important;
   color: #525252;
   margin: 0;
 }
@@ -103,7 +103,7 @@ main {
 
 body.dark-mode .dashboard-item {
   /* background-color: rgba(196, 196, 196, 0.8); */
-  color: black;
+  color: rgb(255, 255, 255);
 }
 
 /* body.dark-mode .dashboard-item:hover {
@@ -296,10 +296,15 @@ nav logo {
   margin: 0 12px;
 }
 
+.dark-mode .notifications, .dark-mode .dashboard, .dark-mode .calendar, .dark-mode .bulletin, .dark-mode .notifications {
+  color: #e4e9f3 !important;
+}
+
 .notifications, .dashboard, .calendar, .bulletin, .notifications {
   /* width: 24px; */
   height: 26px;
-  color: #e4e9f3;
+  color: rgb(64, 64, 64) !important;
+  /* color: #e4e9f3; */
   /* margin: 0 10px; */
   /* margin-right: 10px; */
   cursor: pointer;
@@ -397,7 +402,7 @@ h1 {
 
 .new-action-button:hover {
   /* background-color: #3875e8; */
-  background-color: var(--light-vibrant);
+  /* background-color: var(--light-vibrant); */
 }
 
 .new-action-button > * {

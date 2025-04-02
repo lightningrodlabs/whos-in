@@ -19,9 +19,10 @@
   import type { WAL } from '@lightningrodlabs/we-applet';
   import { onMount } from 'svelte';
   import { weClientStored } from '../../../store.js';
-  import { secondsToDateInput } from './helper';
+  import { getTime, secondsToDateInput } from './helper';
   export let agreementType: string = "event";
   import CreateRole from './CreateRole.svelte';
+  import { cloneDeep } from 'lodash';
 
   export let fromCalendar = false;
 
@@ -42,9 +43,33 @@
   let attachments: Array<WALUrl> = [];
   let title: string | undefined;
   let description: string | undefined = '';
-  export let startsDate: number | undefined = agreementType == "event" ? new Date().valueOf() * 1000 : undefined;
-  export let endsDate: number | undefined = agreementType == "event" ? new Date().valueOf() * 1000 + 3600 : undefined;
+  // export let startsDate: number | undefined = agreementType == "event" ? new Date().getTime() * 1000 : undefined;
+  export let startsDate: number | undefined = agreementType == "event" ? new Date().getTime() : undefined;
+  // $: startsDateString = startsDate ? secondsToDateInput(startsDate) : "";
+  let startsDateString: string;
+  $: if (startsDate) {
+    console.log("startsDate", startsDate)
+    startsDateString = secondsToDateInput(startsDate);
+  } else {
+    startsDateString = "";
+  }
+
+  export let endsDate: number | undefined = agreementType == "event" ? new Date().getTime() + 3600 : undefined;
+  let endsDateString: string;
+  $: if (endsDate) {
+    endsDateString = secondsToDateInput(endsDate);
+  } else {
+    endsDateString = "";
+  }
+
   let signupDeadline: number | undefined;
+  let deadlineDateString: string;
+  $: if (signupDeadline) {
+    deadlineDateString = secondsToDateInput(signupDeadline);
+  } else {
+    deadlineDateString = "";
+  }
+
   let reminderDate: number | undefined;
   let coordRoles: Coordrole[] = [];
   let roleTitle: string | undefined;
@@ -63,18 +88,21 @@
   let dnaHash;
   
   $: title, description, startsDate, endsDate, signupDeadline, reminderDate, coordRoles, roleTitle, roleDescription, minimum, maximum, attachments;
-  $: isCoordinationValid = title !== undefined && description !== undefined && coordRoles.length > 0 && (agreementType != "event" || (startsDate != undefined)) //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
-  $: isCoordRoleValid = roleTitle != undefined && roleDescription != undefined && minimum != undefined && maximum != undefined && minimum <= maximum && minimum >= 0;
-  
+  $: isCoordinationValid = title !== undefined && description !== undefined && coordRoles.length > 0 && (agreementType != "event" || (startsDateString != undefined)) && (!endsDateString || startsDateString <= endsDateString) //&& happeningDate !== undefined && signupDeadline !== undefined && reminderDate !== undefined;//
+  // $: isCoordRoleValid = roleTitle != undefined && roleDescription != undefined && minimum != undefined && maximum != undefined && minimum <= maximum && minimum >= 0;
+  $: areCoordRolesValid = coordRoles.every(role => {
+    return role.title != undefined && role.title.length > 0 && role.description != undefined && role.minimum != undefined && (!role.maximum || role.minimum <= role.maximum) && role.minimum >= 0;
+  });
+
   async function createCoordination() {
     const coordinationEntry: Coordination = {
       title: title!,
       description: description!,
       // capitalized agreementType
       coordination_type: agreementType!,
-      starts_date: startsDate,
-      ends_date: endsDate,
-      signup_deadline: signupDeadline,
+      starts_date: startsDateString ? new Date(startsDateString).valueOf() * 1000 : undefined,
+      ends_date: endsDateString ? new Date(endsDateString).valueOf() * 1000 : undefined,
+      signup_deadline: deadlineDateString ? new Date(deadlineDateString).valueOf() * 1000 : undefined,
       // reminder_date: reminderDate!,
       coordroles: coordRoles!,
       attachments: attachments
@@ -140,11 +168,11 @@
   }
   
   async function addCoordrole() {
-    coordRoles.push({title: roleTitle, description: roleDescription, minimum: minimum, maximum: maximum});
-    roleTitle = undefined;
-    roleDescription = undefined;
-    minimum = undefined;
-    maximum = undefined;
+    // roleTitle = undefined;
+    // roleDescription = undefined;
+    // minimum = 1;
+    // maximum = undefined;
+    coordRoles.push({title: "", description: "", minimum: 1, maximum: undefined});
     coordRoles = coordRoles;
   }
 
@@ -164,18 +192,22 @@
   }
 
   onMount(async () => {
+    // startsDate = new Date().getTime() * 1000;
+    // startsDateString = secondsToDateInput(startsDate);
+
+    console.log("test date", new Date().getTime() * 1000, startsDate, startsDateString, secondsToDateInput(new Date().getTime() * 1000))
     dnaHash = await getMyDna("whosin", client);
     titleField.focus();
     if (agreementType == "event") {
       // startsDate = new Date().valueOf() * 1000;
-      endsDate = new Date().valueOf() * 1000 + 3600;
-      coordRoles.push({title: "Participant", description: "", minimum: 1, maximum: 100});
+      // endsDate = new Date().valueOf() * 1000 + 3600;
+      coordRoles.push({title: "Participant", description: "", minimum: 1, maximum: undefined});
       coordRoles = coordRoles;
     } else if (agreementType == "project") {
-      coordRoles.push({title: "Participant", description: "", minimum: 1, maximum: 100});
+      coordRoles.push({title: "Participant", description: "", minimum: 1, maximum: undefined});
       coordRoles = coordRoles;
     } else if (agreementType == "agreement") {
-      coordRoles.push({title: "Signatory", description: "", minimum: 1, maximum: 100});
+      coordRoles.push({title: "Signatory", description: "", minimum: 1, maximum: undefined});
       coordRoles = coordRoles;
     }
   });
@@ -208,7 +240,10 @@
 
       <!-- <h1 style="font-size: 24px; font-weight: 400; text-align: left;">Create {agreementTypeGrammar[agreementType]}</h1> -->
     
-      <h3 style="text-transform: capitalize;">New {agreementType}</h3>
+      <h3 style="text-transform: capitalize; margin-bottom: 0;">New {agreementType}</h3>
+
+      <p class="notice">Warning: After proposing an {agreementType}, it "belongs" to everyone and cannot be edited or deleted.</p>
+
       <div style="margin-bottom: 16px; text-align: left;">
         <input class="title-input" placeholder="Title" bind:this={titleField} on:input={e => { title = e.target.value; } } />
       </div>
@@ -223,13 +258,8 @@
                   {agreementType}
                 </span> starts
                 <input type="datetime-local" id="start-date" name="start-date" 
-                value={secondsToDateInput(startsDate) || ""}
-                on:input={e => { 
-                  startsDate = new Date(e.target.value).valueOf() * 1000;
-                  // console.log("endsDate", endsDate)
-                  // endsDate ? null : endsDate = new Date(startsDate + 3600).valueOf() * 1000;
-                  // console.log("endsDate", endsDate)
-                } } required>
+                bind:value={startsDateString}
+                required>
 
                 <span style="font-weight: 300; font-size: 14px;">
                   {!endsDate ? "(all-day event)" : ""}
@@ -257,11 +287,13 @@
                     {agreementType}
                     </span> ends
                     <input type="datetime-local" id="end-date" name="end-date"
-                    value={endsDate ? secondsToDateInput(endsDate) : ""}
+                    bind:value={endsDateString}
                     on:input={e => { 
-                      let newEndsDate = new Date(e.target.value).valueOf() * 1000;
-                      // if (newEndsDate >= startsDate) {
-                      endsDate = newEndsDate;
+                      // const enteredDateTime = cloneDeep(e.target.value);
+                      // let newEndsDate = new Date(enteredDateTime).valueOf() * 1000;
+                      // console.log("endsDate", enteredDateTime, newEndsDate)
+                      // // if (newEndsDate >= startsDate) {
+                      // endsDate = newEndsDate;
                       // } else {
                       // e.target.value = null
                       // }
@@ -274,16 +306,17 @@
           {:else if agreementType == "project"}
           <div style="margin-bottom: 16px; text-align: left;">
             Deadline to complete (optional)
-            <input type="datetime-local" id="end-date" name="end-date"
-              value={endsDate ? new Date(endsDate).toISOString().slice(0, 16) : ""}
+            <input type="datetime-local" id="deadline-date" name="deadline-date"
+              bind:value={endsDateString}
               on:input={e => { 
-                let newEndsDate = new Date(e.target.value).valueOf() * 1000;
-                if (!startsDate || newEndsDate <= startsDate) {
-                  endsDate = newEndsDate;
-                } else {
-                  e.target.value = null
-                }
-              } } required>
+                // let newEndsDate = new Date(e.target.value).valueOf() * 1000;
+                // if (!startsDate || newEndsDate <= startsDate) {
+                //   endsDate = newEndsDate;
+                // } else {
+                //   e.target.value = null
+                // }
+              } } 
+              required>
           </div>
           {/if}     
 
@@ -308,9 +341,9 @@
               <div class="optional-field">
                 Deadline to signup
                 <input type="datetime-local" id="signup-deadline" name="signup-deadline" 
-                value={signupDeadline ? new Date(signupDeadline).toISOString().slice(0, 16) : ""}
+                bind:value={deadlineDateString}
                 on:input={e => {
-                  signupDeadline = new Date(e.target.value).valueOf() * 1000;
+                  // signupDeadline = new Date(e.target.value).valueOf() * 1000;
                 }} required>
                   <!-- remove? -->
               </div>
@@ -318,7 +351,7 @@
           {/if}
         </div>
 
-        <div class="dates">
+        <!-- <div class="dates">
           {#if !repeat}
             <div style="margin-bottom: 16px; text-align: left;">
               <button class="optional-button" on:click={() => repeat = true}>
@@ -341,7 +374,7 @@
               </div>
             </div>
           {/if}
-        </div>
+        </div> -->
 
         {#if !showDescription}
           <div style="margin-bottom: 16px; text-align: left;">
@@ -372,9 +405,16 @@
           <h2
             style="margin-top: 0.2em;"
           >Roles for this {agreementType}</h2>
-          {#each coordRoles as role}
+          {#each coordRoles as role, index}
           <div class="role-outer">
-            <CreateRole {role} />
+            <CreateRole {role} on:update={e => {
+                console.log("update role", e.detail)
+                let updatedRole = e.detail;
+                coordRoles[index] = updatedRole;
+                coordRoles = coordRoles;
+              }
+            }
+            />
             <!-- <div>
               <input type="text" value={role.title} on:input={e => role.title = e.target.value} />
               <br>
@@ -387,7 +427,14 @@
               <br>
             </div> -->
             <!-- {#if coordRoles.length > 1} -->
-              <button class="delete" on:click={() => removeRole(role)}>× remove</button>
+             <div style="
+              display: flex;
+              flex-direction: row;
+              width: 100%;
+              justify-content: flex-end;
+             ">
+               <button class="delete" on:click={() => removeRole(role)}>× remove</button>
+             </div>
             <!-- {/if} -->
           </div>
           {/each}
@@ -432,20 +479,20 @@
       </div> -->
 
       <!-- Editing type select dropdown with options only me, anyone, and no one -->
-      <div style="margin-bottom: 16px; margin-top: 16px; text-align: left;">
+      <!-- <div style="margin-bottom: 16px; margin-top: 16px; text-align: left;">
         Who can edit this {agreementType}:
         <select id="editing-type" name="editing-type" on:input={e => { editingType = e.target.value;} } required>
           <option value="only me">Only me</option>
           <option value="anyone">Anyone</option>
           <option value="no one">No one</option>
         </select>
-      </div>
+      </div> -->
 
       <!-- post to bulletin? -->
-      <div style="margin-bottom: 16px; text-align: left;">
+      <!-- <div style="margin-bottom: 16px; text-align: left;">
         <input type="checkbox" id="post-to-bulletin" name="post-to-bulletin" checked={true} on:input={e => { postToBulletin = e.target.checked;} } required>
         <label for="post-to-bulletin">Post to bulletin</label>
-      </div>
+      </div> -->
 
       <!-- invite specific people -->
       <!-- <div style="margin-bottom: 16px; text-align: left;">
@@ -453,12 +500,10 @@
         <input />
       </div> 
       <br> -->
-
-      <p class="notice">Warning: After proposing an {agreementType}, it belongs to everyone and cannot be edited or deleted.</p>
       <mwc-button 
         raised
         label="Propose {agreementType}"
-        disabled={!isCoordinationValid}
+        disabled={!isCoordinationValid || !areCoordRolesValid}
         on:click={() => createCoordination()}
       ></mwc-button>
     
@@ -506,6 +551,8 @@
       height: fit-content;
       margin-left: 6px;
       cursor: pointer;
+      display: flex;
+      flex-direction: row;
     }
 
     .choose-type {

@@ -479,7 +479,6 @@
         {#each coordRoles as role}
           <div class="role-outer">
             <div class="coordrole-details-section">
-                
               <div class="role-item" style="margin-bottom: 6px;">
                 <strong>{decode(role.coordrole.entry.Present.entry)["title"]}</strong>
               </div>
@@ -572,9 +571,10 @@
 
               <!-- not past the signup deadeline and not past the end date -->
               {:else if (!coordination.signup_deadline || coordination.signup_deadline > (new Date().getTime() * 1000)) && (!coordination.ends_date || coordination.ends_date > (new Date().getTime() * 1000))}
+                {@const max = decode(role.coordrole.entry.Present.entry)["maximum"] || Infinity}
                 {#if role.committed}
                   <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>
-                {:else if role.participants < decode(role.coordrole.entry.Present.entry)["maximum"]}
+                {:else if role.participants < max}
                   <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash, role.coordrole.signed_action.hashed.content.timestamp)} >Add me</button>
                 {/if}
               {/if}

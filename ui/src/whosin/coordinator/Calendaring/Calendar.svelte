@@ -6,18 +6,40 @@
     import ResourceTimeGrid from '@event-calendar/resource-time-grid';
     import Interaction from '@event-calendar/interaction';
     import List from '@event-calendar/list';
-    import CreateCoordination from './Creation/CreateCoordination.svelte';
-    import CoordinationDetail from './CoordinationDetail.svelte';
-    import { allCoordinations, allCoordinationsDetails, myCoordinations } from '../../crud/dataStore';
-    import { refetchCoordinationsWithDetails, refetchMyCoordinations } from '../../crud/refetch';
-    import { weClientStored, navigate } from '../../store';
+    import CreateCoordination from '../Creation/CreateCoordination.svelte';
+    import CoordinationDetail from '../CoordinationDetail.svelte';
+    import { allCoordinations, allCoordinationsDetails, myCoordinations } from '../../../crud/dataStore';
+    import { refetchCoordinationsWithDetails, refetchMyCoordinations } from '../../../crud/refetch';
+    import { weClientStored, navigate } from '../../../store';
     import { onMount, getContext } from 'svelte';
-    import { clientContext } from '../../contexts';
+    import { clientContext } from '../../../contexts';
     import type { AppClient } from '@holochain/client';
-    import { getCoordinationLabel } from '../../util';
+    import { getCoordinationLabel } from '../../../util';
     import { get } from 'svelte/store';
     import isEqual from 'fast-deep-equal';
     import { decodeHashFromBase64 } from '@holochain/client';
+    import FindATimeSettings from './FindATimeSettings.svelte';
+    import { getLocalISOString, reAddOffset } from './helper';
+    import { fade } from 'svelte/transition';
+    import { cloneDeep } from 'lodash';
+    import { secondsToDateInput } from '../Creation/helper';
+    import { debounce } from 'lodash';
+
+    let applets: Array<any> = (getContext(clientContext) as any).getApplets();
+    let client: AppClient = (getContext(clientContext) as any).getClient();
+
+    const refresh = () => {
+        console.log("refreshing");
+        refreshBoolean = false;
+        setTimeout(() => {
+            refreshBoolean = true;
+        }, 0);
+    }
+
+    const debouncedRefresh = debounce(() => {
+        refresh();
+    }, 300);
+
 
     let myCoordinationsHashes;
     myCoordinations.subscribe(value => {
@@ -244,11 +266,11 @@
         let date = calendarObject.getOption('date');
         let month = date.getMonth();
         let year = date.getFullYear();
-        let firstMonthDay = new Date(year, month, 1).getTime();
-        let lastMonthDay = new Date(year, month + 1, 0).getTime();
+        let firstMonthHour = new Date(year, month, 1).getTime();
+        let nextMonthHour = new Date(year, month + 1, 1).getTime();
         // availabilityChangeTimes is 15 minute increments for the entire month viewed
-        let checkSlots = [];
-        for (let i = firstMonthDay; i < lastMonthDay; i += 15 * 60 * 1000) {
+        let checkSlots = [firstMonthHour];
+        for (let i = firstMonthHour; i < nextMonthHour; i += 15 * 60 * 1000) {
             checkSlots.push(i);
         }
         let lastAvailabilities = null;
@@ -256,53 +278,80 @@
         checkSlots.forEach(slot => {
             let availabilities = getUserAvailabilities(userIds, slot, availabilitySettings.duration);
             if (latestAvailability) {
-                latestAvailability.end = new Date(slot + availabilitySettings.duration);
+                let endTime = new Date(slot + availabilitySettings.duration).getTime();
+                /* if next day, cut off at midnight, otherwise add use duration */
+                let latestDate = new Date(latestAvailability.end).getDate();
+                let potentialDate = new Date(endTime).getDate();
+                if (latestDate == potentialDate) {
+                    let oneMinuteBeforeMidnight = new Date(new Date(slot).setHours(23, 59, 59, 0)).getTime();
+                    latestAvailability.end = getLocalISOString(new Date(oneMinuteBeforeMidnight));
+                }
             }
-            // console.log("availabilities", availabilities);
-            if (isEqual(availabilities, lastAvailabilities)) {
+            if (isEqual(availabilities, lastAvailabilities) && 
+            new Date(slot).toLocaleDateString() == new Date(latestAvailability?.start).toLocaleDateString()) {
                 return;
             }
             lastAvailabilities = availabilities;
-            // let title = `👍${availabilities.availableUsers.length}  🤷‍♀️${availabilities.maybeAvailableUsers.length} 🆇${availabilities.unavailableUsers.length}`;
-            let title = `Y:${availabilities.availableUsers.length}  M:${availabilities.maybeAvailableUsers.length} N:${availabilities.unavailableUsers.length}`;
+            let title = `☑️${availabilities.availableUsers.length} ❔${availabilities.maybeAvailableUsers.length} 🇽${availabilities.unavailableUsers.length}`;
+            // let title = `Y:${availabilities.availableUsers.length}  M:${availabilities.maybeAvailableUsers.length} N:${availabilities.unavailableUsers.length}`;
             if (latestAvailability) {
+                let endHour = new Date(slot).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                latestAvailability.title = " to " + endHour + `
+` + latestAvailability.title //title + " - " + Math.round(availabilities.average * 1000) / 10000;
                 availabilityList.push(latestAvailability);
             }
+            const average = cloneDeep(availabilities.average) == 0.5 ? 0.5 : Math.round(availabilities.average * 1000) / 1000;
+            const color = `rgba(${255 * (1 - average)}, ${255 * (average)}, ${255 * (100)}, 0.5)`;
+            const startingEnd = new Date(slot + availabilitySettings.duration).getTime();
+            const nextDayHour = new Date(new Date(slot).setHours(23, 59, 59, 0)).getTime();
             latestAvailability = {
-                id: slot.toString(),
+                id: slot,
                 title: title,
                 description: '',
-                start: new Date(slot).toISOString(),
-                end: new Date(slot + availabilitySettings.duration).toISOString(),
+                start: getLocalISOString(new Date(slot)),
+                end: getLocalISOString( startingEnd < nextDayHour ? new Date(startingEnd) : new Date(nextDayHour)),
                 display: 'auto',
                 editable: false,
                 allDay: false,
                 // red/yellow/green
-                backgroundColor: `rgba(${255 * (1 - availabilities.average)}, ${255 * availabilities.average}, ${255 * availabilities.average + 100}, 0.5)`,
+                backgroundColor: color//`rgba(${255 * (1 - average)}, ${255 * (average)}, ${255 * (average + 100)}, 0.5)`,
             }
         });
         if (latestAvailability) {
+            let endHour = new Date(nextMonthHour).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            latestAvailability.title = "to " + endHour + `
+` + latestAvailability.title;
             availabilityList.push(latestAvailability);
         }
+    }
+
+    const openEventSlot = function(info) {
+        console.log(info.event)
+        selectedDateStart = new Date(info.event.start).getTime()
+        selectedDateEnd = new Date(info.event.start).getTime() + availabilitySettings.duration
+        createModalOpen = true;
+    }
+
+    const openEvent = function(info) {
+        displayedEventHash = decodeHashFromBase64(info.event.id);
+        showEventModal = true;
     }
 
     let plugins = [TimeGrid, ResourceTimeline, ResourceTimeGrid, Interaction, List, DayGrid];
     let options = {
         view: "dayGridMonth",
         events: [],
-        eventClick: function(info) {
-        //    navigate("coordination", decodeHashFromBase64(info.event.id));
-            displayedEventHash = decodeHashFromBase64(info.event.id);
-            showEventModal = true;
-        },
+        eventClick: openEvent,
         dateClick: function(info) {
-            console.log(info)
-            selectedDateStart = new Date(info.date).valueOf() * 1000
+            // console.log(info)
+            // console.log("add offset", reAddOffset(info.date))
+            selectedDateStart = new Date(info.date).getTime() //reAddOffset(info.date) //new Date(info.date).valueOf() * 1000
             if (info.allDay) {
-                selectedDateEnd = new Date(info.date).valueOf() * 1000 + 24 * 60 * 60 * 1000;
-                console.log("Selected date end:", new Date(selectedDateEnd / 1000).toLocaleString());
+                selectedDateEnd = new Date(info.date).getTime() + (24 * 60 * 60 * 1000 - 1);
+                console.log("Selected date end:", new Date(selectedDateEnd).toLocaleString());
             } else {
-                selectedDateEnd = new Date(info.date).valueOf() * 1000 + 60 * 60 * 60 * 1000;
+                selectedDateEnd = new Date(info.date).getTime() + (60 * 60 * 1000);
+                console.log("Selected date ends at:", new Date(selectedDateEnd).toLocaleString());
             }
             createModalOpen = true;
         },
@@ -323,6 +372,8 @@
                     options.customButtons.findaTimeButton.active = false
                     options.customButtons.eventsButton.active = false
                     options.headerToolbar.center = 'eventsButton,myAvailabilityButton,findaTimeButton'
+                    options.events = []
+                    document.body.classList.toggle("fat", false);
                     refresh()
                 }
             },
@@ -334,6 +385,8 @@
                     options.customButtons.eventsButton.active = false
                     options.customButtons.myAvailabilityButton.active = false
                     options.headerToolbar.center = 'eventsButton,myAvailabilityButton,findaTimeButton availabilityDetailsButton'
+                    document.body.classList.toggle("fat", true);
+                    options.eventClick = openEventSlot
                     applyAvailaibility();
                     options.events = availabilityList;
                     refresh();
@@ -347,6 +400,8 @@
                     options.customButtons.findaTimeButton.active = false
                     options.customButtons.myAvailabilityButton.active = false
                     options.headerToolbar.center = 'eventsButton,myAvailabilityButton,findaTimeButton'
+                    document.body.classList.toggle("fat", false);
+                    options.eventClick = openEvent
                     options.events = eventsList;
                     refresh();
                 }
@@ -412,31 +467,28 @@
                 id: key,
                 title: event.title,
                 description: event.description || '',
-                start: new Date(event.starts_date / 1000).toISOString(),
-                end: event.ends_date ? new Date(event.ends_date / 1000).toISOString() : new Date(event.starts_date / 1000).toISOString(),
+                // start: new Date(event.starts_date / 1000).toISOString(),
+                start: getLocalISOString(new Date(event.starts_date / 1000)),
+                end: event.ends_date ? getLocalISOString(new Date(event.ends_date / 1000)) : getLocalISOString(new Date(event.starts_date / 1000)),
                 editable: false,
                 allDay: false,
                 display: 'auto', // myCoordinationsHashes.some(item => item.coordinationHash === key) ? 'auto' : 'ghost',  
                 backgroundColor: getCoordinationLabel(event).color,
             };
         });
-        options.events = eventsList;
+        if (options.customButtons.eventsButton.active) {
+            options.events = eventsList;
+        }
+        debouncedRefresh();
     });
 
-    function refresh() {
-        console.log("refreshing")
-        refreshBoolean = false;
-        setTimeout(() => {
-            refreshBoolean = true;
-        }, 0);
-    }
-
     onMount(async () => {
-        if (weClient?.renderInfo.applets) {
-            weClient?.renderInfo.applets.forEach(applet => {
-                refetchCoordinationsWithDetails(applet.appletClient);
-                refetchMyCoordinations(applet.appletClient);
-            });
+        console.log("=======================applets", applets)
+        if (applets) {
+                for (let i = 0; i < applets.length; i++) {
+                    console.log("refetching applet", applets[i][1].appletClient)
+                    await refetchCoordinationsWithDetails(applets[i][1].appletClient);
+                }
         } else {
             await refetchCoordinationsWithDetails(backupClient);
             await refetchMyCoordinations(backupClient);
@@ -454,14 +506,24 @@
 </script>
 
 {#if createModalOpen}
-    <div class="modal-overlay" on:click={() => createModalOpen = false}>
-        <div class="modal-content" on:click|stopPropagation>
-            <button on:click={() => createModalOpen = false}>Close</button>
-            <CreateCoordination agreementType="event" endsDate={null} startsDate={selectedDateStart} fromCalendar={true}
+    <div class="modal-overlay" in:fade={{duration: 40}} out:fade={{duration: 40}} on:mousedown={() => createModalOpen = false}>
+        <div class="modal-content" on:mousedown|stopPropagation>
+            <button on:click={() => createModalOpen = false}>×</button>
+            <CreateCoordination agreementType="event" endsDate={selectedDateEnd} startsDate={selectedDateStart} fromCalendar={true}
                 on:coordination-created={async () => {
                     createModalOpen = false
-                    await refetchCoordinationsWithDetails(weClient);
-                    await refetchMyCoordinations(weClient);
+                    console.log("coordination created", applets)
+                    if (applets) {
+                        console.log("applets", applets)
+                        for (let i = 0; i < applets.length; i++) {
+                            console.log("refetching applet", applets[i][1].appletClient)
+                            await refetchCoordinationsWithDetails(applets[i][1].appletClient);
+                        }
+                    } else {
+                        console.log("refetching backup client")
+                        await refetchCoordinationsWithDetails(client || backupClient);
+                    }
+                    refresh();
                 }}
                 on:coordination-canceled={() => createModalOpen = false}
             />
@@ -469,20 +531,21 @@
     </div>
 {/if}
 {#if showModalOpen}
-    <div class="modal-overlay" on:click={() => showModalOpen = false}>
-        <div class="modal-content" on:click|stopPropagation>
-            <button on:click={() => showModalOpen = false}>Close</button>
+    <div class="modal-overlay" in:fade={{duration: 40}} out:fade={{duration: 40}} on:mousedown={() => showModalOpen = false}>
+        <div class="modal-content" on:mousedown|stopPropagation>
+            <button on:click={() => showModalOpen = false}>×</button>
             <div style="padding: 16px;">
-                <Calendar {plugins} {options} />
+                <FindATimeSettings />
+                <!-- <Calendar {plugins} {options} /> -->
             </div>
         </div>
     </div>
 {/if}
 
 {#if showEventModal}
-    <div class="modal-overlay" on:click={() => showEventModal = false}>
-        <div class="modal-content" on:click|stopPropagation>
-            <button on:click={() => showEventModal = false}>Close</button>
+    <div class="modal-overlay" out:fade={{duration: 80}} on:mousedown={() => showEventModal = false}>
+        <div class="modal-content" on:mousedown|stopPropagation>
+            <button on:click={() => showEventModal = false}>×</button>
             <CoordinationDetail coordinationHash={displayedEventHash} />
         </div>
     </div>
@@ -513,14 +576,27 @@
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        height: 80%;
+        /* height: 80%; */
         overflow-y: auto;
         justify-content: left;
+        display: flex;
+        flex-direction: column;
+        text-align: left;
     }
     .modal-content > button {
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 0px;
+        right: 0px;
+        border: 0;
+        padding: 3px 7px;
+        border-radius: 6px;
+        color: white;
+        background: transparent;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    .modal-content > button:hover {
+        background: rgba(0, 0, 0, 0.1);
     }
     /* global class ec-bg-events*/
     :global(.ec-bg-events:hover) {
@@ -529,7 +605,7 @@
     :global(.ec-bg-events:hover::after) {
         content: '+ new event';
         position: absolute;
-        background-color: #cccccc;
+        background-color: rgba(157, 157, 157, 0.686);
         top: 88%;
         width: 97%;
         height: 20px;
@@ -540,6 +616,12 @@
         color: #ffffff;
         font-size: 14px;
     }
+    :global(.dark-mode .ec-bg-events:hover::after) {
+        background-color: rgba(204, 204, 204, 0.12);
+    }
+    :global(.fat .ec-bg-events:hover::after) {
+        display: none;
+    }
     :global(body.dark-mode .ec-header, body.dark-mode .ec-all-day, 
         body.dark-mode .ec-body, body.dark-mode .ec-days, 
         body.dark-mode .ec-day, body.dark-mode .ec-day-head,
@@ -548,11 +630,19 @@
         color: white;
     }
     :global(body.dark-mode .ec-button:hover) {
-        background-color: #7c7c7c;
         color:white
     }
-    :global(body.dark-mode .ec-button.ec-active) {
-        background-color: #686868;
+    :global(.ec-button:hover) {
+        background-color: calc(var(--light-vibrant)) !important;
+    }
+    :global(.dark-mode .ec-button:hover) {
+        background-color: calc(var(--dark-vibrant)) !important;
+    }
+    :global(.ec-button.ec-active) {
+        background-color: var(--light-vibrant) !important;
+    }
+    :global(.dark-mode .ec-button.ec-active) {
+        background-color: var(--dark-vibrant) !important;
     }
     /* if no dark mode, make black */
     :global(.ec-header, .ec-all-day, .ec-body, .ec-days, .ec-day, .ec-day-head) {
@@ -566,8 +656,26 @@
     :global(.dark-mode .ec-button, .dark-mode .ec-body, .dark-mode .ec-days) {
         background-color: rgba(0, 0, 0, 0.113);
     }
-    :global(.ec-button, .ec-body, .ec-days) {
+    :global(.ec-button-group, .ec-body, .ec-days) {
         background-color: rgba(255, 255, 255, 0.113);
         backdrop-filter: blur(10px);
+    }
+
+    /* only for find a time */
+    :global(.fat .ec-event-body, .fat .ec-event-time, .fat .ec-event-title) {
+        display: inline;
+    }
+    :global(.fat .ec-event-title) {
+        white-space: pre-wrap !important;
+    }
+    :global(.ec-event:hover) {
+        cursor: pointer;
+        opacity: 0.6;
+    }
+    :global(article.ec-event) {
+        min-height: fit-content !important;
+        height: fit-content !important;
+        /* width: 100% !important; */
+        left: 3px !important;
     }
 </style>
