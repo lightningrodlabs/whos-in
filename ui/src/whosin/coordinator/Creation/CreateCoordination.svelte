@@ -400,7 +400,7 @@
       </div>
 
 
-      <div style="display: flex; flex-direction: column">
+      <div style="display: flex; flex-direction: column; margin-bottom: 1em;">
         <div id="created-roles">
           <h2
             style="margin-top: 0.2em;"

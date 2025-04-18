@@ -472,9 +472,13 @@ h2 {
   /* margin: 8px 0px 0px 7px; */
   display: inline-block !important;
   position: relative;
-  color: #B8BFD0 !important;
+  color: #3d3d3d !important;
   font: normal normal normal 12px Helvetica Neue !important;
   font-size: 16px !important;
+}
+
+.dark-mode .progress-extraouter > .participation-label {
+  color: #f0f0f0 !important;
 }
 
 .role {

@@ -118,24 +118,6 @@ onMount(() => {
       {/if}
     </li>
 
-    <li class="dashboard" on:click={goToDashboard}>
-      {#if currentView == "dashboard"}
-      <div class="dashboard-icon selected-tab">
-        <SvgIcon icon="faList" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} />
-        <span>
-          Joined
-        </span>
-      </div>
-      {:else}
-      <div class="dashboard-icon">
-        <SvgIcon icon="faList" color={darkMode ? "#d6ddeb" : "#404040"} />
-        <span>
-          Joined
-        </span>
-      </div>
-      {/if}
-    </li>
-
     <li class="calendar" on:click={goToCalendar}>
       {#if currentView == "calendar"}
       <div class="dashboard-icon selected-tab">
@@ -149,6 +131,25 @@ onMount(() => {
         <SvgIcon icon="faCalendar" size=18 color={darkMode ? "#d6ddeb" : "#404040"} />
         <span>
           Calendar
+        </span>
+      </div>
+      {/if}
+    </li>
+
+
+    <li class="dashboard" on:click={goToDashboard}>
+      {#if currentView == "dashboard"}
+      <div class="dashboard-icon selected-tab">
+        <SvgIcon icon="faCheck" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} />
+        <span>
+          Commitments
+        </span>
+      </div>
+      {:else}
+      <div class="dashboard-icon">
+        <SvgIcon icon="faCheck" color={darkMode ? "#d6ddeb" : "#404040"} />
+        <span>
+          Commitments
         </span>
       </div>
       {/if}

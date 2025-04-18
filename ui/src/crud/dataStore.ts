@@ -7,6 +7,8 @@ export const myCoordinations = writable([])
 export const allSponsors = writable([])
 export const allSpamReporters = writable([])
 export const allCoordinationsDetails = writable({})
+export const allAvailability = writable({})
+export const availabilityDetails = writable({})
 
 export function setAllCoordinations(coordinations) {
   allCoordinations.set(coordinations)
@@ -14,6 +16,14 @@ export function setAllCoordinations(coordinations) {
 
 export function setAllMyCoordinations(coordinations) {
   myCoordinations.set(coordinations)
+}
+
+export function setAvailabilityDetails(newAvailabilityDetails) {
+  availabilityDetails.set(newAvailabilityDetails)
+}
+
+export function setAllAvailability(newAvailability) {
+  allAvailability.set(newAvailability)
 }
 
 export function addSomeMyCoordinations(coordinations) {
@@ -32,7 +42,7 @@ export function addSomeCoordinations(coordHashAndClients) {
     // !currentCoordinations.includes(hash)
     return !currentCoordinations.some(coord => coord.coordinationHash === coordHashAndClient.coordinationHash)
   });
-  setAllCoordinations([...currentCoordinations, ...newCoordinations]);
+  setAllCoordinations([...newCoordinations, ...currentCoordinations]);
 }
 
 export function addSomeSponsors(coordinationHash, sponsors) {

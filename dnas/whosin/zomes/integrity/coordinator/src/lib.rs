@@ -14,6 +14,8 @@ pub mod coordrole;
 pub use coordrole::*;
 pub mod coordination;
 pub use coordination::*;
+pub mod availability;
+pub use availability::*;
 use hdi::prelude::*;
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -22,6 +24,7 @@ use hdi::prelude::*;
 pub enum EntryTypes {
     Coordination(Coordination),
     Coordrole(Coordrole),
+    Availability(Availability),
     #[entry_type(name = "Viewed", visibility = "private")]
     Viewed(Viewed),
 }
@@ -38,6 +41,7 @@ pub enum LinkTypes {
     SponsorToCoordinations,
     CoordinationToSpamReporters,
     SpamReporterToCoordinations,
+    AllAvailability,
     // AnchorToNotifiers,
 }
 #[hdk_extern]
@@ -79,6 +83,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 viewed,
                             )
                         }
+                        EntryTypes::Availability(availability) => {
+                            validate_create_availability(
+                                EntryCreationAction::Create(action),
+                                availability,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -101,6 +111,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 viewed,
                             )
                         }
+                        EntryTypes::Availability(availability) => {
+                            validate_create_availability(
+                                EntryCreationAction::Update(action),
+                                availability,
+                            )
+                        }
                     }
                 }
                 _ => Ok(ValidateCallbackResult::Valid),
@@ -108,12 +124,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
         }
         FlatOp::RegisterUpdate(update_entry) => {
             match update_entry {
-                _ => Ok(ValidateCallbackResult::Invalid(String::from("Entry cannot be updated"))),
+                // _ => Ok(ValidateCallbackResult::Invalid(String::from("Entry cannot be updated"))),
+                _=> Ok(ValidateCallbackResult::Valid),
             }
         }
         FlatOp::RegisterDelete(delete_entry) => {
             match delete_entry {
-                _ => Ok(ValidateCallbackResult::Invalid(String::from("Entry cannot be deleted"))),
+                // _ => Ok(ValidateCallbackResult::Invalid(String::from("Entry cannot be deleted"))),
+                _=> Ok(ValidateCallbackResult::Valid),
             }
         }
         FlatOp::RegisterCreateLink {
@@ -198,6 +216,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::SpamReporterToCoordinations => {
                     validate_create_link_spam_reporter_to_coordinations(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::AllAvailability => {
+                    validate_create_link_all_availability(
                         action,
                         base_address,
                         target_address,
@@ -305,6 +331,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::AllAvailability => {
+                    validate_delete_link_all_availability(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::StoreRecord(store_record) => {
@@ -327,6 +362,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_viewed(
                                 EntryCreationAction::Create(action),
                                 viewed,
+                            )
+                        }
+                        EntryTypes::Availability(availability) => {
+                            validate_create_availability(
+                                EntryCreationAction::Create(action),
+                                availability,
                             )
                         }
                     }
@@ -445,6 +486,38 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
+                        EntryTypes::Availability(availability) => {
+                            let result = validate_create_availability(
+                                EntryCreationAction::Update(action.clone()),
+                                availability.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_availability: Option<Availability> =
+                                    original_record
+                                        .entry()
+                                        .to_app_option()
+                                        .map_err(|e| wasm_error!(e))?;
+                                let original_availability = match original_availability {
+                                    Some(availability) => availability,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_availability(
+                                    action,
+                                    availability,
+                                    original_action,
+                                    original_availability,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -518,6 +591,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 original_action,
                                 original_viewed,
+                            )
+                        }
+                        EntryTypes::Availability(original_availability) => {
+                            validate_delete_availability(
+                                action,
+                                original_action,
+                                original_availability,
                             )
                         }
                     }
@@ -604,6 +684,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::SpamReporterToCoordinations => {
                             validate_create_link_spam_reporter_to_coordinations(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::AllAvailability => {
+                            validate_create_link_all_availability(
                                 action,
                                 base_address,
                                 target_address,
@@ -718,6 +806,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::SpamReporterToCoordinations => {
                             validate_delete_link_spam_reporter_to_coordinations(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::AllAvailability => {
+                            validate_delete_link_all_availability(
                                 action,
                                 create_link.clone(),
                                 base_address,

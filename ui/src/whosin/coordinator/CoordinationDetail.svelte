@@ -17,9 +17,11 @@
   import { getMyDna } from '../../util';
   import { countViewed, addToViewed, add_notification, weClientStored } from '../../store.js';
   import Loading from '../Loading.svelte';
-  import { allCoordinations, myCoordinations } from '../../crud/dataStore';
-  import { refetchCoordinations } from '../../crud/refetch';
+  import { allCoordinations, myCoordinations, allAvailability } from '../../crud/dataStore';
+  import { refetchCoordinations, refetchAvailability } from '../../crud/refetch';
   import { encodeHashToBase64 } from '@holochain/client';
+    import { addNewAvailabilities, deleteAvailabilities, getUserAvailability } from './Calendaring/availability';
+    import { get } from 'svelte/store';
 
   let cHashAndClients;
   myCoordinations.subscribe(value => {
@@ -94,6 +96,7 @@
       await fetchRoles()
       addToViewed(coordinationHash, client)
       getSponsors()
+      refetchAvailability(client)
     }
   });
 
@@ -271,6 +274,21 @@
   }
   
   async function commitMe(coordRoleHash, coordroleTimestamp) {
+    if (coordination.starts_date && coordination.ends_date) {
+      const duration = (coordination.ends_date - coordination.starts_date) / 1000;
+      const availability = getUserAvailability(client, encodeHashToBase64(client.myPubKey), coordination.starts_date / 1000, duration);
+      console.log("AVAILABILITY", availability,  coordination.starts_date / 1000, duration)
+      if (availability == 0) {
+        const confirmation = window.confirm("You are not available for this time on your calendar. Are you sure you want to add yourself?");
+        if (!confirmation) {
+          return;
+        }
+      }
+    }
+
+    // if event with beginning and end, add unavailable for that time
+
+
     // console.log(coordRoleHash)
     // let coordRoleHash = coordRole;
     committingInProcess[JSON.stringify(coordRoleHash)] = true;
@@ -299,6 +317,23 @@
           "seen": false,
         })
       }
+
+      // add availability for the time of the coordination
+      if (coordination.starts_date && coordination.ends_date) {
+        let availability1 = {
+          "time": coordination.starts_date / 1000,
+          "status": 0,
+        }
+        console.log("endDate", coordination.ends_date)
+        let currentEndAvailability = getUserAvailability(client, encodeHashToBase64(client.myPubKey), coordination.ends_date / 1000, 0);
+        console.log("CURRENT END AVAILABILITY", currentEndAvailability)
+        let availability2 = {
+          "time": coordination.ends_date / 1000,
+          "status": currentEndAvailability,
+        }
+        addNewAvailabilities(client, [availability1, availability2]); 
+      }
+
       committingInProcess[JSON.stringify(coordRoleHash)] = false;
     } catch (e: any) {
       await fetchRoles();
@@ -325,6 +360,11 @@
       fetchRoles();
       // navigate("coordination", coordinationHash);
       coordRole.committed = false;
+
+      // remove availability for the time of the coordination, as well as the end date
+      if (coordination.starts_date && coordination.ends_date) {
+        deleteAvailabilities(client, [coordination.starts_date / 1000, coordination.ends_date / 1000]);
+      }
     } catch (e: any) {
       errorSnackbar.labelText = `Error uncommitting: ${e.data.data}`;
       errorSnackbar.show();

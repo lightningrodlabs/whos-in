@@ -30,7 +30,6 @@
 
         if (typeof client != "undefined") {
             setInterval( () => {
-                console.log("fetching notifications");
                 fetchNotifications();
             }, 30000);
         }
@@ -140,7 +139,6 @@
     }
 
     async function fetchNotifications() {
-        console.log("fetching notifications")
         try {
             const records = await client
             .callZome({

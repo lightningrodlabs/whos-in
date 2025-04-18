@@ -107,3 +107,9 @@ export interface TwilioCredentials {
   auth_token: string;
 }
 
+
+export type AvailabilitySlot = {
+  status: number,
+  time: number,
+  // duration: number,
+}

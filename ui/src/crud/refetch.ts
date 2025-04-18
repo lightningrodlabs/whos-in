@@ -1,6 +1,6 @@
 import { decode } from "@msgpack/msgpack";
 import { decodeHashFromBase64, encodeHashToBase64 } from "@holochain/client";
-import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations, addSomeMyCoordinations, removeCoordination } from "./dataStore";
+import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations, addSomeMyCoordinations, removeCoordination, setAllAvailability, setAvailabilityDetails } from "./dataStore";
 import type { Coordination } from '../whosin/coordinator/types';
 import { notifications, weClientStored } from "../store";
 import type { WAL } from "@lightningrodlabs/we-applet";
@@ -10,6 +10,54 @@ let weClient;
 weClientStored.subscribe(value => {
   weClient = value;
 });
+
+export async function refetchAvailability(client) {
+  try {
+    const records = await client.callZome({
+      cap_secret: null,
+      role_name: 'whosin',
+      zome_name: 'coordinator',
+      fn_name: 'get_all_availability',
+      payload: null,
+    });
+    console.log("Availability records: ", records);
+    const structured = records.map(
+      r => {
+        const availabilityHash = encodeHashToBase64(r.signed_action.hashed.hash)
+        const data = decode((r.entry as any).Present.entry)
+        return {
+          ...data,
+          "availabilityHash": availabilityHash,
+          "client": client,
+          "person": encodeHashToBase64(data.person),
+        };
+      }
+    );
+    console.log("Availability hashes: ", structured);
+    let userAvailability = {};
+    structured.forEach(element => {
+      const existingAvailabilityForPerson = userAvailability[element.person] || [];
+      const newAvailabilities = element.availabilities.map((availability) => {
+        try {
+          return JSON.parse(availability);
+        } catch (e) {
+          return availability;
+        }
+      });
+      const sortedAvailability = existingAvailabilityForPerson.concat(newAvailabilities)
+      .sort((a, b) => {
+        return a.time - b.time;
+      })
+      userAvailability[element.person] = sortedAvailability;
+    });
+    setAvailabilityDetails(structured);
+    setAllAvailability(userAvailability);
+    console.log("User availability: ", userAvailability);
+    return records;
+  } catch (e) {
+    console.error(e);
+  }
+}
 
 export async function refetchCoordinations(client) {
   try {
@@ -23,13 +71,14 @@ export async function refetchCoordinations(client) {
     let hashes = records.map(
       r => {
         let coordinationHash = encodeHashToBase64(r.signed_action.hashed.hash)
+        // by date
         return {
           "coordinationHash": coordinationHash,
           "client": client
         };
 
       }
-    );
+    )
     hashes = hashes.reverse();
     addSomeCoordinations(hashes);
     return hashes;

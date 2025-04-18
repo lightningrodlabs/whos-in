@@ -81,7 +81,7 @@
 </script>
 
 <div class="white-container" style="display: flex; flex-direction: column; background-color: transparent; backdrop-filter: none;">
-  <label>My Coordinations</label>
+  <label>My commitments</label>
   {#if coordinationsHashData && coordinationsHashData.length}
 
   <!-- toggle filters for All, Events, Projects and Agreements -->
