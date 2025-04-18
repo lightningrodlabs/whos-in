@@ -10,13 +10,13 @@
   import '@material/mwc-textarea';
   import { view, viewHash, navigate } from '../../../store.js';
   import AttachmentsDialog from '../../../AttachmentsDialog.svelte';
-  import { isWeContext } from '@lightningrodlabs/we-applet';
+  import { isWeaveContext } from '@theweave/api';
   import { countViewed, addToViewed } from '../../../store.js';
   import type { WALUrl } from '../../../util';
   import { getMyDna } from '../../../util';
   import '@vaadin/date-time-picker/theme/material/vaadin-date-time-picker.js';
   import SvgIcon from '../../../SvgIcon.svelte';
-  import type { WAL } from '@lightningrodlabs/we-applet';
+  import type { WAL } from '@theweave/api';
   import { onMount } from 'svelte';
   import { weClientStored } from '../../../store.js';
   import { getTime, secondsToDateInput } from './helper';
@@ -387,7 +387,7 @@
           </div>
         {/if}
 
-        {#if isWeContext()}
+        {#if isWeaveContext()}
           <div style="display:flex; flex-wrap:wrap; align-items: center; margin-bottom:10px;">
             <AttachmentsDialog bind:this={attachmentsDialog} bind:attachments on:add-attachments={
               (e) => {

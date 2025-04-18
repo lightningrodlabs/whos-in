@@ -1,7 +1,7 @@
 import { asyncDerived, pipe, sliceAndJoin, toPromise } from '@holochain-open-dev/stores';
 import { LazyHoloHashMap } from '@holochain-open-dev/utils';
-import type { AppletHash, AppletServices, WAL,AssetInfo, WeaveServices, RecordInfo } from '@lightningrodlabs/we-applet';
-import type { AppClient, RoleName, ZomeName, AdminWebsocket } from '@holochain/client';
+import type { AppletHash, AppletServices, AssetInfo, WAL, RecordInfo, WeaveServices } from '@theweave/api';
+import type { RoleName, ZomeName, AppClient } from '@holochain/client';
 import { getMyDna, hrlWithContextToB64 } from './util';
 import type { Coordination } from './whosin/coordinator/types';
 import { decode } from '@msgpack/msgpack';
@@ -21,12 +21,20 @@ const EVENTLOGO = `<svg xmlns="http://www.w3.org/2000/svg" fill="%23357cff" view
 const PROJECTLOGO = `<svg xmlns="http://www.w3.org/2000/svg" fill="%23ff951d" viewBox="0 0 576 512"><path d="M413.5 237.5c-28.2 4.8-58.2-3.6-80-25.4l-38.1-38.1C280.4 159 272 138.8 272 117.6l0-12.1L192.3 62c-5.3-2.9-8.6-8.6-8.3-14.7s3.9-11.5 9.5-14l47.2-21C259.1 4.2 279 0 299.2 0l18.1 0c36.7 0 72 14 98.7 39.1l44.6 42c24.2 22.8 33.2 55.7 26.6 86L503 183l8-8c9.4-9.4 24.6-9.4 33.9 0l24 24c9.4 9.4 9.4 24.6 0 33.9l-88 88c-9.4 9.4-24.6 9.4-33.9 0l-24-24c-9.4-9.4-9.4-24.6 0-33.9l8-8-17.5-17.5zM27.4 377.1L260.9 182.6c3.5 4.9 7.5 9.6 11.8 14l38.1 38.1c6 6 12.4 11.2 19.2 15.7L134.9 484.6c-14.5 17.4-36 27.4-58.6 27.4C34.1 512 0 477.8 0 435.7c0-22.6 10.1-44.1 27.4-58.6z"/></svg>`
 const AGREEMENTLOGO = `<svg xmlns="http://www.w3.org/2000/svg" fill="%235301ae" viewBox="0 0 640 512"><path d="M323.4 85.2l-96.8 78.4c-16.1 13-19.2 36.4-7 53.1c12.9 17.8 38 21.3 55.3 7.8l99.3-77.2c7-5.4 17-4.2 22.5 2.8s4.2 17-2.8 22.5l-20.9 16.2L512 316.8 512 128l-.7 0-3.9-2.5L434.8 79c-15.3-9.8-33.2-15-51.4-15c-21.8 0-43 7.5-60 21.2zm22.8 124.4l-51.7 40.2C263 274.4 217.3 268 193.7 235.6c-22.2-30.5-16.6-73.1 12.7-96.8l83.2-67.3c-11.6-4.9-24.1-7.4-36.8-7.4C234 64 215.7 69.6 200 80l-72 48 0 224 28.2 0 91.4 83.4c19.6 17.9 49.9 16.5 67.8-3.1c5.5-6.1 9.2-13.2 11.1-20.6l17 15.6c19.5 17.9 49.9 16.6 67.8-2.9c4.5-4.9 7.8-10.6 9.9-16.5c19.4 13 45.8 10.3 62.1-7.5c17.9-19.5 16.6-49.9-2.9-67.8l-134.2-123zM16 128c-8.8 0-16 7.2-16 16L0 352c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-224-80 0zM48 320a16 16 0 1 1 0 32 16 16 0 1 1 0-32zM544 128l0 224c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-208c0-8.8-7.2-16-16-16l-80 0zm32 208a16 16 0 1 1 32 0 16 16 0 1 1 -32 0z"/></svg>`
 
+const MINILOGO2 = '<svg width="200" height="100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="180" height="80" fill="darkgreen" stroke="lightgreen" stroke-width="5"/></svg>'
+
 export const appletServices: AppletServices = {
     // Types of attachment that this Applet offers for other Applets to attach
     creatables: {
-      'Coordination': {
-        label: "Coordination",
-        icon_src: `data:image/svg+xml;utf8,${AGREEMENTLOGO}`,
+      'Event': {
+        label: "Event",
+        icon_src: 'data:image/svg+xml;utf8,' + EVENTLOGO,
+        width: 'large',
+        height: 'large',
+      },
+      'Agreement': { 
+        label: "Agreement",
+        icon_src: 'data:image/svg+xml;utf8,' + AGREEMENTLOGO,
         width: 'large',
         height: 'large',
       }
@@ -40,10 +48,10 @@ export const appletServices: AppletServices = {
         view: "applet-view",
       },      
     },
-    bindAsset: async (appletClient: AppClient,
-      srcWal: WAL, dstWal: WAL): Promise<void> => {
-      console.log("Bind requested.  Src:", srcWal, "  Dst:", dstWal)
-    },  
+    // bindAsset: async (appletClient: AppClient,
+    //   srcWal: WAL, dstWal: WAL): Promise<void> => {
+    //   console.log("Bind requested.  Src:", srcWal, "  Dst:", dstWal)
+    // },  
     getAssetInfo: async (
       appletClient: AppClient,
       wal: WAL,
@@ -68,15 +76,15 @@ export const appletServices: AppletServices = {
           console.log(e)
         }
 
-        let logo = `data:image/svg+xml;utf8,${EVENTLOGO}`
+        let logo = EVENTLOGO
         if (coordination.coordination_type == "Agreement") {
-          logo = `data:image/svg+xml;utf8,${AGREEMENTLOGO}`
+          logo = AGREEMENTLOGO
         } else if (coordination.coordination_type == "Project") {
-          logo = `data:image/svg+xml;utf8,${PROJECTLOGO}`
+          logo = PROJECTLOGO
         }
 
         return {
-          icon_src: logo,
+          icon_src: `data:image/svg+xml;utf8,${logo}`,
           name: coordination.title + " (" + coordination.coordination_type + ")",
         };
     },

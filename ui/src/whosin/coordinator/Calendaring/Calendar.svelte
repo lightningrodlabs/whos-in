@@ -516,7 +516,6 @@
                 // }),
             ]
         }
-        console.log("========================", !userAvailability[encodeHashToBase64(client.myPubKey)], encodeHashToBase64(client.myPubKey), userAvailability, userAvailability[encodeHashToBase64(client.myPubKey)]);
         const res2 = await refetchAvailability(client);
         if (!userAvailability[encodeHashToBase64(client.myPubKey)] || Object.keys(userAvailability).length === 0) {
             const res = await createAvailability(client, {

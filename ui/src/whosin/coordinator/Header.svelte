@@ -13,7 +13,7 @@ import { onMount, setContext, getContext } from 'svelte';
 import { decode } from '@msgpack/msgpack';
 import Avatar from "./Avatar.svelte";
 import SvgIcon from '../../SvgIcon.svelte';
-import { isWeContext } from "@lightningrodlabs/we-applet";
+import { isWeaveContext } from '@theweave/api';
 import AllNotifications from "./AllNotifications.svelte";
 import SettingsModal from "./SettingsModal.svelte";
 import { averageColor, loadState, colorPalette } from "../../crud/localStorage";
@@ -75,14 +75,14 @@ onMount(() => {
   >
     <div class="container-fluid converge-header">
       <div>
-        <!-- {#if !isWeContext()}
+        <!-- {#if !isWeaveContext()}
         <a id="logo" class="navbar-brand" on:click={() => navigate("instructions")}>
           <img class="logo-image" src={Logo} alt="whos-in logo"/>
         </a>
         {:else} -->
           <a id="logo" class="navbar-brand" on:click={() => navigate("all-coordinations")}>  
             <h1 id="whosin-title" style="display: flex; align-items: center;">
-              {#if !isWeContext()}
+              {#if !isWeaveContext()}
                 <img id="minilogo" src={Logo} alt="whos-in logo"/>
               {/if}
               <span>

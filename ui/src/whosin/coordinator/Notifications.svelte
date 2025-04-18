@@ -4,7 +4,7 @@
     import { clientContext } from '../../contexts';
     import type { Coordination, CoordinatorSignal } from './types';
     import { decode } from '@msgpack/msgpack';
-    import { WeaveClient, isWeContext, initializeHotReload, type WAL, type Hrl } from '@lightningrodlabs/we-applet';  
+    import { WeaveClient, isWeaveContext, initializeHotReload, type WAL, type Hrl } from '@theweave/api';  
     import { notifications, add_notification } from '../../store.js';
     import { appletServices } from '../../we';
     import { getMyDna } from '../../util';

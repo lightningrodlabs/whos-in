@@ -12,7 +12,7 @@
     import SvgIcon from '../../SvgIcon.svelte';
     import { view, viewHash, navigate, weClientStored } from '../../store.js';
     import { decodeHashFromBase64 } from '@holochain/client';
-    import { WeaveClient } from '@lightningrodlabs/we-applet';
+    import { WeaveClient } from '@theweave/api';
     import { appletHashFromAppId, getCoordinationLabel } from '../../util';
     import { getAppletInfoAndGroupsProfiles } from '@lightningrodlabs/we-elements';
     import { refetchCoordinationDetails } from '../../crud/refetch';

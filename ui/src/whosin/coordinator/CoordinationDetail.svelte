@@ -11,7 +11,7 @@
   import '@material/mwc-icon-button';
   import { navigate } from '../../store.js';
   import AttachmentsList from '../../AttachmentsList.svelte';
-  import { isWeContext, type WAL } from '@lightningrodlabs/we-applet';
+  import { isWeaveContext, type WAL } from '@theweave/api';
   import SvgIcon from '../../SvgIcon.svelte';
   import Avatar from './Avatar.svelte';
   import { getMyDna } from '../../util';
@@ -103,7 +103,7 @@
 
   const copyWalToPocket = () => {
     const attachment: WAL = { hrl: [dnaHash, coordinationHash], context: "" }
-    weClient?.walToPocket(attachment)
+    weClient?.assets.assetToPocket(attachment)
   }
   
   async function fetchCoordination() {
@@ -433,7 +433,7 @@
               </div>
             {/if}
           </div>
-          {#if isWeContext()}
+          {#if isWeaveContext()}
             <button title="Add Board to Pocket" class="attachment-button" style="margin-right:10px; cursor: pointer; margin-right: 10px;
             cursor: pointer;
             height: 24px;
@@ -445,7 +445,7 @@
         </div>
     </div>
   
-    {#if isWeContext}
+    {#if isWeaveContext}
       <div style="display: flex; flex-direction: row; margin-bottom: 5px">
         <AttachmentsList {attachments} allowDelete={false}/>
       </div>

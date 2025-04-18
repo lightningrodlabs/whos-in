@@ -3,7 +3,7 @@ import { decodeHashFromBase64, encodeHashToBase64 } from "@holochain/client";
 import { addSomeCoordinations, addSomeSponsors, addCoordinationDetails, setAllMyCoordinations, addSomeMyCoordinations, removeCoordination, setAllAvailability, setAvailabilityDetails } from "./dataStore";
 import type { Coordination } from '../whosin/coordinator/types';
 import { notifications, weClientStored } from "../store";
-import type { WAL } from "@lightningrodlabs/we-applet";
+import type { WAL } from '@theweave/api';
 import { getMyDna } from "../util";
 
 let weClient;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isWeContext, type WAL, weaveUrlFromWal } from "@lightningrodlabs/we-applet";
+  import { isWeaveContext, type WAL, weaveUrlFromWal } from "@theweave/api";
   import { cloneDeep } from "lodash";
   // import type { Board, Piece } from "./board";
   import { getContext, onMount } from "svelte";
@@ -8,7 +8,7 @@
   import '@shoelace-style/shoelace/dist/components/button/button.js';
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
   import AttachmentsList from "./AttachmentsList.svelte";
-  // import AttachmentsBind from "./AttachmentsBind.svelte";
+  import AttachmentsBind from "./AttachmentsBind.svelte";
   import { weClientStored } from './store.js';
   import { createEventDispatcher } from 'svelte';
   import type { WALUrl } from "./util";
@@ -16,6 +16,7 @@
   // const { getStore } :any = getContext("gzStore");
   // let store: GamezStore = getStore();
   // let piece: Piece | undefined
+  export let fromWAL: WAL;
   export let attachmentsLimit: number = Infinity;
   export let attachments: Array<WALUrl>
   const dispatch = createEventDispatcher();
@@ -54,8 +55,9 @@
   }
 
   const addAttachment = async () => {
-    const wal = await weClient?.userSelectWal()
+    const wal = await weClient.assets.userSelectAsset()
     if (wal) {
+      // await weClient.assets.addAssetRelation(fromWal, wal)
       _addAttachment(wal)
     }
   }
@@ -92,14 +94,13 @@
 </script>
 
 <!-- <sl-dialog label="Add links" bind:this={dialog}> -->
-  {#if isWeContext()}
+  {#if isWeaveContext()}
   
   <!-- <div>
     <h3>Search Linkables:</h3> 
   </div>  -->
-  <button class="optional-button" style="margin-right: 5px; width: fit-content;" on:click={()=>addAttachment()} >
-    <!-- <SvgIcon icon=link size=16/> -->
-     + attachments
+  <button style="margin-top:5px;margin-right: 5px; width: fit-content;" on:click={()=>addAttachment()} >
+    <SvgIcon icon=link size=16/>
   </button>
   
   <!-- <button on:click={() => {dialog.show(); bind.refresh()}}>

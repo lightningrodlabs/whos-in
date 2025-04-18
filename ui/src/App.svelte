@@ -25,7 +25,7 @@
   import CreateContact from './whosin/notifications/CreateContact.svelte';
   import NotificationsHandler from './whosin/notifications/NotificationsHandler.svelte';
   import Holochain from "./assets/holochain.png";
-  import { WeaveClient, isWeContext, initializeHotReload } from '@lightningrodlabs/we-applet';  
+  import { WeaveClient, isWeaveContext, initializeHotReload } from '@theweave/api';  
   import { appletServices } from './we';
   import SvgIcon from './SvgIcon.svelte';
   import AllViewed from './whosin/coordinator/AllViewed.svelte';
@@ -203,7 +203,7 @@
       }
     }
     let tokenResp;
-    if (!isWeContext()) {
+    if (!isWeaveContext()) {
       console.log("adminPort is", adminPort);
       if (adminPort) {
         const url = `ws://localhost:${adminPort}`;
@@ -256,8 +256,11 @@
               break;
             case "creatable":
               switch (weClient?.renderInfo.view.name) {
-                case "Coordination":
-                currentView = "create-coordination-mini"
+                case "Event":
+                  currentView = "create-coordination-mini"
+                case "Agreement":
+                  currentView = "create-agreement-mini"
+                  break;
               }
               break;
             case "asset":
@@ -424,10 +427,10 @@
 {#if profilesStore || applets != undefined}
   <profiles-context store="{profilesStore}">
     <profile-prompt>
-      {#if !isWeContext() || (isWeContext() && weClient?.renderInfo.view.type != "asset")}
+      {#if !isWeaveContext() || (isWeaveContext() && weClient?.renderInfo.view.type != "asset")}
       <NotificationsHandler></NotificationsHandler>
       <main style="width: 100vw;">
-          {#if currentView != "create-coordination-mini"}
+          {#if currentView != "create-coordination-mini" && currentView != "create-agreement-mini" && currentView != "create-project-mini"}
             <Header></Header>
           {/if}
 
@@ -451,6 +454,14 @@
           {:else if ["create-coordination-mini"].includes(currentView)}
             <div style="padding: 10px;">
               <CreateCoordination></CreateCoordination>
+            </div>
+          {:else if currentView == "create-agreement-mini"}
+            <div style="padding: 10px;">
+              <CreateCoordination agreementType="agreement"></CreateCoordination>
+            </div>
+          {:else if currentView == "create-project-mini"}
+            <div style="padding: 10px;">
+              <CreateCoordination agreementType="project"></CreateCoordination>
             </div>
           {:else if ["create-event", "create-agreement", "create-project"].includes(currentView)}
             <span in:fade={{duration: 200}} out:fade={{duration: 100}}>
@@ -502,7 +513,7 @@
             <span>Submit feedback</span>
           </a>
           :)
-        {#if !isWeContext() && dna && !loading && currentView != "instructions" && currentView != ""}
+        {#if !isWeaveContext() && dna && !loading && currentView != "instructions" && currentView != ""}
         <br>
         <small>
           <img class="holochain-logo" src={Holochain} alt="holochain logo"/>
