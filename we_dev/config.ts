@@ -39,12 +39,12 @@ export default defineConfig({
           registeringAgent: 1,
           joiningAgents: [2],
         },
-        {
-          name: 'Converge',
-          instanceName: 'Converge',
-          registeringAgent: 1,
-          joiningAgents: [2],
-        },
+        // {
+        //   name: 'Converge',
+        //   instanceName: 'Converge',
+        //   registeringAgent: 1,
+        //   joiningAgents: [2],
+        // },
         // {
         //   name: 'talking-stickies',
         //   instanceName: 'talking-stickies',

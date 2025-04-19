@@ -19,7 +19,15 @@
     let editingTitle = false;
 
     let title = '';
-    $: if (title) { updateRole('title', title); };
+    let pluralizedTitle: 'joiners';
+    $: if (title) { 
+        updateRole('title', title); 
+        try {
+            pluralizedTitle = pluralize(title.toLowerCase())
+        } catch (e) {
+            console.log("Failed to pluralize title", e)
+        }
+    };
     let description = '';
     $: if (description) { updateRole('description', description); showDescription = true; };
     let requiredNumber = null;
@@ -87,11 +95,11 @@
                         showRequiredNumber = false
                         requiredNumber = 0
                         updateRole('minimum', requiredNumber)
-                    }}>× required {title ? pluralize(title.toLowerCase()) : "joiners"}: </button>
-                    <input min="0" type="number" id="requiredNumber" bind:value={requiredNumber} style="width: auto;" placeholder={`Minimum ${title ? pluralize(title.toLowerCase()) : "joiners"}`} />
+                    }}>× required {pluralizedTitle}: </button>
+                    <input min="0" type="number" id="requiredNumber" bind:value={requiredNumber} style="width: auto;" placeholder={`Minimum ${pluralizedTitle}`} />
                 </div>
             {:else}
-                <button type="button" on:click={() => showRequiredNumber = true}>+ required {title ? pluralize(title.toLowerCase()) : "joiners"}</button>
+                <button type="button" on:click={() => showRequiredNumber = true}>+ required {pluralizedTitle}</button>
             {/if}
         </div>
 
@@ -102,12 +110,12 @@
                     showLimitNumber = false
                     limitNumber = null
                     updateRole('maximum', limitNumber)
-                }}>× maximum {title ? pluralize(title.toLowerCase()) : "joiners"}: </button>
-                    <!-- <label for="limitNumber">Maximum number of {title ? pluralize(title.toLowerCase()) : "joiners"}:</label> -->
+                }}>× maximum {pluralizedTitle}: </button>
+                    <!-- <label for="limitNumber">Maximum number of {pluralizedTitle}:</label> -->
                     <input type="number" id="limitNumber" bind:value={limitNumber} min="1" />
                 </div>
             {:else}
-                <button type="button" on:click={() => { showLimitNumber = true; limitNumber = 1; }}>+ maximum {title ? pluralize(title.toLowerCase()) : "joiners"}</button>
+                <button type="button" on:click={() => { showLimitNumber = true; limitNumber = 1; }}>+ maximum {pluralizedTitle}</button>
             {/if}
         </div>
 
