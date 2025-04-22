@@ -43,7 +43,7 @@ pub struct NotificationTip {
 
 #[hdk_extern]
 pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
-    let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let participant: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     let coordination_hash = get_links(
         link_input(
             coordrole_hash.clone(),
@@ -223,7 +223,7 @@ pub fn commit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
 }
 #[hdk_extern]
 pub fn uncommit_to_coordrole(coordrole_hash: ActionHash) -> ExternResult<()> {
-    let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let participant: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     let links = get_links(
         link_input(
             coordrole_hash.clone(),

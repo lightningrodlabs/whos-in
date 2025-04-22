@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount, createEventDispatcher } from 'svelte';
     import { writable } from 'svelte/store';
-    import * as pluralize from 'pluralize';
+    import { pluralize } from '../../../util';
     
     export let role;
     

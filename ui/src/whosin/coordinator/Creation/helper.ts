@@ -8,9 +8,7 @@ export function getTime(date: Date): string {
   return `${date.getHours()}:${date.getMinutes()}`;
 }
 export function secondsToDateInput(seconds: number): string {
-  console.log(seconds);
   const date = new Date(seconds);
-  console.log(date);
   const offset = date.getTimezoneOffset();
   const localDate = new Date(date.getTime() - offset * 60 * 1000);
   return localDate.toISOString().slice(0, 16);

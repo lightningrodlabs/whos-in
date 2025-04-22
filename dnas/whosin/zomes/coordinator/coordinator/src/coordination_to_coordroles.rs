@@ -93,7 +93,7 @@ pub fn get_coordroles_for_coordination(
             .collect();
 
         // let participants_details = vec![];
-        let my_agent_pub_key = agent_info()?.agent_latest_pubkey;
+        let my_agent_pub_key = agent_info()?.agent_initial_pubkey;
         let committed: bool = agents.iter().any(|agent| agent.agent_pub_key == my_agent_pub_key);
         let r_with_users = CoordrolesOutput {
             coordrole: r,
@@ -132,7 +132,7 @@ pub fn get_coordinations_for_coordrole(
 }
 #[hdk_extern]
 pub fn get_my_coordinations(_: ()) -> ExternResult<Vec<Record>> {
-    let my_agent_pub_key = agent_info()?.agent_latest_pubkey;
+    let my_agent_pub_key = agent_info()?.agent_initial_pubkey;
     let links = get_links(
         link_input(
             my_agent_pub_key, LinkTypes::ParticipantToCoordroles, None
@@ -170,7 +170,7 @@ pub fn get_my_coordinations(_: ()) -> ExternResult<Vec<Record>> {
 }
 #[hdk_extern]
 pub fn get_my_coordination_hashes(_: ()) -> ExternResult<Vec<ActionHash>> {
-    let my_agent_pub_key = agent_info()?.agent_latest_pubkey;
+    let my_agent_pub_key = agent_info()?.agent_initial_pubkey;
     let links = get_links(
         link_input(
             my_agent_pub_key, LinkTypes::ParticipantToCoordroles, None

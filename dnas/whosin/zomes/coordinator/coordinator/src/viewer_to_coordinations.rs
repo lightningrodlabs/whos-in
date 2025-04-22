@@ -5,7 +5,7 @@ use crate::utils::link_input;
 pub fn add_coordination_for_viewer(
     target_coordination_hash: ActionHash,
 ) -> ExternResult<()> {
-    let my_agent_pub_key: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let my_agent_pub_key: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     create_link(
         my_agent_pub_key,
         target_coordination_hash.clone(),
@@ -40,7 +40,7 @@ pub fn get_coordinations_for_viewer(viewer: AgentPubKey) -> ExternResult<Vec<Rec
 pub fn find_coordination_links_for_viewer(
     coordination_hash: ActionHash,
 ) -> ExternResult<i32> {
-    let my_agent_pub_key: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let my_agent_pub_key: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     let links = get_links(
         link_input(
             my_agent_pub_key, LinkTypes::ViewerToCoordinations, None

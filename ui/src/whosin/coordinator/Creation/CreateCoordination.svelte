@@ -408,7 +408,6 @@
           {#each coordRoles as role, index}
           <div class="role-outer">
             <CreateRole {role} on:update={e => {
-                console.log("update role", e.detail)
                 let updatedRole = e.detail;
                 coordRoles[index] = updatedRole;
                 coordRoles = coordRoles;

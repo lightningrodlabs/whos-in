@@ -97,3 +97,26 @@ export const getCoordinationLabel = (coordination: any) : any => {
 
     return null;
 }
+
+export function pluralize(word: string): string {
+  const lower = word.toLowerCase();
+
+  if (lower.endsWith('s') || lower.endsWith('x') || lower.endsWith('z') ||
+      lower.endsWith('ch') || lower.endsWith('sh')) {
+    return word + 'es';
+  }
+
+  if (lower.endsWith('y') && !'aeiou'.includes(lower.charAt(lower.length - 2))) {
+    return word.slice(0, -1) + 'ies';
+  }
+
+  if (lower.endsWith('f')) {
+    return word.slice(0, -1) + 'ves';
+  }
+
+  if (lower.endsWith('fe')) {
+    return word.slice(0, -2) + 'ves';
+  }
+
+  return word + 's';
+}

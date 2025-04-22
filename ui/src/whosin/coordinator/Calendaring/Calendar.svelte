@@ -357,7 +357,7 @@
                     options.dateClick = function(info) {
                         selectedAvailability = {
                             status: 1,
-                            time: new Date(info.date).getTime(),
+                            time: new Date(info.date).getTime(), // + (9 * 60 * 60 * 1000),
                             // duration: 1 * 25 * 60 * 60 * 1000//60 * 60 * 1000,
                         }
                         showAvailabilityModal = true;
@@ -616,7 +616,7 @@
     <div class="modal-overlay" out:fade={{duration: 80}} on:mousedown={() => showAvailabilityModal = false}>
         <div class="modal-content" on:mousedown|stopPropagation>
             <button on:click={() => showAvailabilityModal = false}>×</button>
-            <AvailabilityModal {selectedAvailability} {addAvailabilities} bind:showAvailabilityModal />
+            <AvailabilityModal {client} {selectedAvailability} {addAvailabilities} bind:showAvailabilityModal />
         </div>
     </div>
 {/if}

@@ -26,7 +26,7 @@ pub fn get_dna_hash(_:()) -> ExternResult<String> {
 
 #[hdk_extern]
 pub fn create_coordination(input: CreateCoordinationInput) -> ExternResult<Record> {
-    let participant: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let participant: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     let coordroles = input.coordroles;
     let mut coordrole_hashes = vec![];
     for role in coordroles.iter() {

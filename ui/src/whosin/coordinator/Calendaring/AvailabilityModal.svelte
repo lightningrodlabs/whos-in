@@ -1,7 +1,10 @@
 <script lang="ts">
     import SvgIcon from "../../../SvgIcon.svelte";
     import { secondsToDateInput } from "../Creation/helper";
+    import { getUserAvailability } from "./availability";
+    import { encodeHashToBase64 } from "@holochain/client";
     export let selectedAvailability: any;
+    export let client: any;
     // export let editing: boolean;
     // export let deleteAvailability: Function;
     export let addAvailabilities: Function;
@@ -11,19 +14,27 @@
     let repeat: any = null;
     let repeatUntil: string = secondsToDateInput(selectedAvailability.time);
     let selectedTime: string = secondsToDateInput(selectedAvailability.time);
+    let selectedEndTime: string = secondsToDateInput(selectedAvailability.time + 3600000);
 </script>
 
-    <strong class="modal-title">Change in availability</strong>
+    <strong class="modal-title">Add availability</strong>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 
 <!-- {JSON.stringify(selectedAvailability)} -->
 
 <!-- time, status fields -->
 <div style="margin-bottom: 0.5rem;">
-    <label for="time" class="form-label">Time</label>
+    <label for="time" class="form-label">Starting</label>
 
     <input type="datetime-local" id="start-date" name="start-date" 
         bind:value={selectedTime}
+        required
+    />
+</div>
+<div style="margin-bottom: 0.5rem;">
+    <label for="end-time" class="form-label">Ending</label>
+    <input type="datetime-local" id="end-date" name="end-date" 
+        bind:value={selectedEndTime}
         required
     />
 </div>
@@ -92,9 +103,17 @@
     <button
         class="btn btn-primary"
         on:click={() => {
+            // export function getUserAvailability(client, userId, timeSlotStart, slotDuration): number {
+            let previousEndAvailability = getUserAvailability(
+                client,
+                encodeHashToBase64(client.myPubKey),
+                new Date(selectedEndTime).getTime(),
+                0
+            );
             if (repeat) {
                 let newAvailabilities = []
                 let latestTime = new Date(selectedTime).getTime();
+                let latestEndTime = new Date(selectedEndTime).getTime();
                 console.log('repeateUntil', new Date(selectedTime), new Date(repeatUntil));
                 console.log('repeateUntil', new Date(selectedTime).getTime(), new Date(repeatUntil).getTime());
                 console.log((new Date(selectedTime).getTime() < new Date(repeatUntil).getTime()) )
@@ -107,14 +126,21 @@
                         ...selectedAvailability,
                         time: latestTime,
                     });
+                    newAvailabilities.push({
+                        status: previousEndAvailability,
+                        time: latestEndTime,
+                    });
                     if (repeat === 'day') {
                         latestTime = latestTime + 24 * 60 * 60 * 1000;
+                        latestEndTime = latestEndTime + 24 * 60 * 60 * 1000;
                     }
                     else if (repeat === 'week') {
                         latestTime = latestTime + 7 * 24 * 60 * 60 * 1000;
+                        latestEndTime = latestEndTime + 7 * 24 * 60 * 60 * 1000;
                     }
                     else if (repeat === 'month') {
                         latestTime = latestTime + 30 * 24 * 60 * 60 * 1000;
+                        latestEndTime = latestEndTime + 30 * 24 * 60 * 60 * 1000;
                     }
                     else {
                         break;
@@ -124,10 +150,16 @@
                 addAvailabilities(newAvailabilities);
             }
             else {
-                addAvailabilities([{
-                    ...selectedAvailability,
-                    time: new Date(selectedTime).getTime(),
-                }]);
+                addAvailabilities([
+                    {
+                        ...selectedAvailability,
+                        time: new Date(selectedTime).getTime(),
+                    },
+                    {
+                        status: previousEndAvailability,
+                        time: new Date(selectedEndTime).getTime(),
+                    }
+                ]);
             }
         }}
     >

@@ -81,7 +81,7 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
   
   // START GET COMMITTERS FOR COORDINATION AND FIND ACTIVATION
   let zome_call_response = call_remote(
-    agent_info().unwrap().agent_latest_pubkey.into(),
+    agent_info().unwrap().agent_initial_pubkey.into(),
     "coordinator",
     FunctionName(String::from("get_coordroles_for_coordination")),
     None,
@@ -139,7 +139,7 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
 
   // START CHECK SENT NOTIFICATIONS
   let zome_call_response = call_remote(
-    agent_info().unwrap().agent_latest_pubkey.into(),
+    agent_info().unwrap().agent_initial_pubkey.into(),
     "notifications",
     FunctionName(String::from("retrieve_sent_notifications")),
     None,
@@ -164,7 +164,7 @@ pub fn custom_handle_notification_tip(data: NotificationTip) -> ExternResult<Not
 
   // START GET COORDINATION DETAILS
   let zome_call_response = call_remote(
-    agent_info().unwrap().agent_latest_pubkey.into(),
+    agent_info().unwrap().agent_initial_pubkey.into(),
     "coordinator",
     FunctionName(String::from("get_coordination")),
     None,

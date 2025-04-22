@@ -4,7 +4,7 @@ use crate::utils::link_input;
 
 #[hdk_extern]
 pub fn add_sponsor_for_coordination(coordination_hash: ActionHash) -> ExternResult<()> {
-    let sponsor: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let sponsor: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     create_link(
         coordination_hash.clone(),
         sponsor.clone(),
@@ -66,7 +66,7 @@ pub fn get_coordinations_for_sponsor(sponsor: AgentPubKey) -> ExternResult<Vec<R
 pub fn remove_sponsor_for_coordination(
     coordination_hash: ActionHash,
 ) -> ExternResult<()> {
-    let sponsor: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let sponsor: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     let links = get_links(
         link_input(
             coordination_hash.clone(),

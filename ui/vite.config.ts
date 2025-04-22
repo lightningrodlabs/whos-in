@@ -15,6 +15,10 @@ export default defineConfig({
         {
           src: 'public/**/*', // Copy all files from the public directory
           dest: '.' // Copy to the root of the output directory
+        },
+        {
+          src: 'src/assets/backgrounds/*', // Copy all files from the src/assets directory
+          dest: 'src/assets/backgrounds' // Copy to the same location in the output directory
         }
       ]
     })

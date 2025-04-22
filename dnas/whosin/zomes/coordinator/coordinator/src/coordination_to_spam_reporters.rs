@@ -5,7 +5,7 @@ use crate::utils::link_input;
 pub fn add_spam_reporter_for_coordination(
     coordination_hash: ActionHash,
 ) -> ExternResult<()> {
-    let spam_reporter: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let spam_reporter: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     create_link(
         coordination_hash.clone(),
         spam_reporter.clone(),
@@ -70,7 +70,7 @@ pub fn get_coordinations_for_spam_reporter(
 pub fn remove_spam_reporter_for_coordination(
     coordination_hash: ActionHash,
 ) -> ExternResult<()> {
-    let spam_reporter: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+    let spam_reporter: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     let links = get_links(
         link_input(
             coordination_hash.clone(),

@@ -11,7 +11,7 @@
 //     let path = Path::from(format!("all_notifiers"));
 //     let typed_path = path.typed(LinkTypes::AnchorToNotifiers)?;
 //     typed_path.ensure()?;
-//     let my_agent_pub_key: AgentPubKey = agent_info()?.agent_latest_pubkey.into();
+//     let my_agent_pub_key: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
 //     create_link(
 //         typed_path.path_entry_hash()?,
 //         my_agent_pub_key,
