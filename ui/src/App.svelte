@@ -541,7 +541,7 @@
       {/if}
     </profile-prompt>
   </profiles-context>
-  <Sync {client}/>
+  <!-- <Sync {client}/> -->
 {/if}
 
 <style>

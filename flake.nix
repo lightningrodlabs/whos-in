@@ -18,6 +18,7 @@
 
         packages = (with inputs'.holonix.packages; [
           holochain
+          hc
           lair-keystore
           hc-launch
           hc-scaffold

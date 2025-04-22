@@ -14,7 +14,7 @@
     import { decodeHashFromBase64 } from '@holochain/client';
     import { WeaveClient } from '@theweave/api';
     import { appletHashFromAppId, getCoordinationLabel } from '../../util';
-    import { getAppletInfoAndGroupsProfiles } from '@lightningrodlabs/we-elements';
+    import { getAppletInfoAndGroupsProfiles } from '@theweave/elements';
     import { refetchCoordinationDetails } from '../../crud/refetch';
     import { allCoordinationsDetails } from '../../crud/dataStore';
     import { allCoordinations, myCoordinations } from '../../crud/dataStore';

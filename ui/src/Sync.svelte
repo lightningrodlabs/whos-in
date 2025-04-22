@@ -18,6 +18,9 @@
     let diff = 0;
     let lastTimeQueried = 0;
 
+    let opsToFetch = 0;
+    let peerCount = 0;
+
     function detectCursorMovement() {
         lastMoved = new Date().getTime();
         diff = 0;
@@ -28,17 +31,21 @@
         diff = now - lastMoved;
 
         if (!collapsed && diff < timeoutInterval) {
+            console.log("checkSync", client.cachedAppInfo.cell_info.whosin.map((cell) => cell.value.cell_id[0]));
             let networkInfoRequest: NetworkInfoRequest = {
                 last_time_queried: lastTimeQueried,
                 agent_pub_key: client.myPubKey,
-                dnas: client.cachedAppInfo.cell_info.whosin.map((cell) => cell.provisioned.cell_id[0])
+                dnas: client.cachedAppInfo.cell_info.whosin.map((cell) => cell.value.cell_id[0])
             }
             // * Timestamp in ms
             lastTimeQueried = now * 1000
-            // console.log("networkInfoRequest", networkInfoRequest);
-            networkInfo = await client.networkInfoRequester(networkInfoRequest);
+            console.log("networkInfoRequest", client);
+            networkInfo = await client.dumpNetworkMetricsRequester(networkInfoRequest);
+            const networkInfo2 = await client.dumpNetworkStatsRequester();
             // const newData: boolean = networkInfo?.[0]?.bytes_since_last_time_queried > 0;
-            // console.log(JSON.stringify(networkInfo, null, 4));
+            opsToFetch = Object.keys(Object.values(networkInfo)?.[0]?.["fetch_state_summary"]?.["pending_requests"])?.length || 0;
+            peerCount = Object.values(networkInfo)?.[0]?.["local_agents"]?.length || 0;
+            console.log("-----------------------------", JSON.stringify(networkInfo2, null, 4));
         }
     }
 
@@ -74,14 +81,16 @@
         {#if collapsed}▲ Network{:else}▼ Network{/if}
     </button>
     <div>
-        {#if networkInfo?.[0]?.fetch_pool_info?.op_bytes_to_fetch > 0}
+        <!-- {#if networkInfo?.[0]?.fetch_pool_info?.op_bytes_to_fetch > 0} -->
+        {#if opsToFetch > 0}
             Incoming data...
             <Matrix />
         {:else if diff > timeoutInterval}
             <span>
                 Move cursor to check network
             </span>
-        {:else if networkInfo?.[0]?.current_number_of_peers == 1}
+        <!-- {:else if networkInfo?.[0]?.current_number_of_peers == 1} -->
+        {:else if peerCount == 1}
             Alone in network
         {:else}
             <SvgIcon size=12 color="white" icon="faCheck" />
@@ -89,7 +98,8 @@
                 style="margin-left: -8px;"
             >
                 In sync with 
-                <br>{networkInfo?.[0]?.current_number_of_peers} peers
+                <!-- <br>{networkInfo?.[0]?.current_number_of_peers} peers -->
+                <br>{peerCount} peers
             </span>
         {/if}
     </div>
