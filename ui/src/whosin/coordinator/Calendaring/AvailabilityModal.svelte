@@ -1,7 +1,7 @@
 <script lang="ts">
     import SvgIcon from "../../../SvgIcon.svelte";
     import { secondsToDateInput } from "../Creation/helper";
-    import { getUserAvailability } from "./availability";
+    import { getUserAvailability, deleteAvailabilitiesForPeriodOfTime } from "./availability";
     import { encodeHashToBase64 } from "@holochain/client";
     export let selectedAvailability: any;
     export let client: any;
@@ -12,7 +12,7 @@
     export let showAvailabilityModal: boolean;
 
     let repeat: any = null;
-    let repeatUntil: string = secondsToDateInput(selectedAvailability.time);
+    let repeatUntil: string = secondsToDateInput(selectedAvailability.time + 3600000 * 24 * 30); // add a month
     let selectedTime: string = secondsToDateInput(selectedAvailability.time);
     let selectedEndTime: string = secondsToDateInput(selectedAvailability.time + 3600000);
 </script>
@@ -102,7 +102,7 @@
     <!-- add button -->
     <button
         class="btn btn-primary"
-        on:click={() => {
+        on:click={async () => {
             // export function getUserAvailability(client, userId, timeSlotStart, slotDuration): number {
             let previousEndAvailability = getUserAvailability(
                 client,
@@ -120,6 +120,12 @@
                 const repeatUntilTime = new Date(repeatUntil).getTime();
                 let cycle = 0;
                 while (cycle < 999 && latestTime < repeatUntilTime) {
+                    // await deleteAvailabilitiesForPeriodOfTime(
+                    //     client,
+                    //     new Date(latestTime).getTime(),
+                    //     new Date(latestEndTime).getTime()
+                    // );
+
                     cycle++;
                     console.log('latestTime', latestTime);
                     newAvailabilities.push({
@@ -150,6 +156,11 @@
                 addAvailabilities(newAvailabilities);
             }
             else {
+                // await deleteAvailabilitiesForPeriodOfTime(
+                //     client,
+                //     new Date(selectedTime).getTime(),
+                //     new Date(repeatUntil).getTime()
+                // );
                 addAvailabilities([
                     {
                         ...selectedAvailability,

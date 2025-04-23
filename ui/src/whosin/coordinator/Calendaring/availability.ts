@@ -66,6 +66,37 @@ export async function addNewAvailabilities(client, availabilities) {
     console.log("updated availability", res);
 }
 
+export async function deleteAvailabilitiesForPeriodOfTime(client, startTime, endTime) {
+//     console.log("delete availabilities for period of time", startTime, endTime);
+//     const userAvailability = get(allAvailability)
+//     let myCurrentAvailabilities = userAvailability[encodeHashToBase64(client.myPubKey)] || [];
+//     console.log("my current availabilities", myCurrentAvailabilities);
+//     const filteredAvailabilities = myCurrentAvailabilities.filter(avail => {
+//         return avail.time < startTime || avail.time > endTime;
+//     });
+//     console.log("filtered availabilities", filteredAvailabilities);
+//     const ad = get(availabilityDetails);
+//     const myAvailabilityHash = ad.find(avail => avail.person === encodeHashToBase64(client.myPubKey)).availabilityHash;
+//     console.log("my availability hash", myAvailabilityHash);
+//     console.log("availability details", ad);
+//     console.log("my availability hash", myAvailabilityHash);
+//     const updateAvailabilityData = {
+//         availability_hash: myAvailabilityHash,
+//         availability: {
+//             title: '',
+//             person: client.myPubKey,
+//             availabilities: filteredAvailabilities.map(avail => JSON.stringify(avail)),
+//         }
+//     }
+//     console.log("update availability", updateAvailabilityData);
+//     if (filteredAvailabilities.length === 0) {
+//         console.log("no availabilities to update");
+//         return;
+//     }
+//     const res = await updateAvailability(client, updateAvailabilityData);
+//     console.log("updated availability", res);
+}
+
 export async function deleteAvailabilities(client, times) {
     const userAvailability = get(allAvailability)
     let myCurrentAvailabilities = userAvailability[encodeHashToBase64(client.myPubKey)] || [];

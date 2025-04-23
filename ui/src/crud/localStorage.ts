@@ -14,6 +14,7 @@ export function loadState() {
     }
     // get background image and average color from state
     const state = JSON.parse(serializedState);
+    console.log("found stored state", state);
     backgroundImage.set(state?.backgroundImage || null);
     averageColor.set(state?.averageColor || null);
     colorPalette.set(state?.colorPalette || null);

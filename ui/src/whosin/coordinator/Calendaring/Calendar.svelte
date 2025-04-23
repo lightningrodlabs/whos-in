@@ -571,7 +571,7 @@
         <div class="modal-content" on:mousedown|stopPropagation>
             <button on:click={() => createModalOpen = false}>×</button>
             <CreateCoordination agreementType="event" endsDate={selectedDateEnd} startsDate={selectedDateStart} fromCalendar={true}
-                on:coordination-created={async () => {
+                on:coordination-created={async (event) => {
                     createModalOpen = false
                     console.log("coordination created", applets)
                     if (applets) {
@@ -585,6 +585,10 @@
                         await refetchCoordinationsWithDetails(client || backupClient);
                     }
                     refresh();
+                    // open event
+                    console.log("event", event.detail.coordinationHash);
+                    displayedEventHash = event.detail.coordinationHash;
+                    showEventModal = true;
                 }}
                 on:coordination-canceled={() => createModalOpen = false}
             />

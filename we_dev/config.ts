@@ -69,31 +69,31 @@ export default defineConfig({
         uiPort: 8888,
       },
     },
-    {
-        name: 'Converge',
-        subtitle: 'Decide stuff with others!',
-        description: 'Real-time games based on syn',
-        icon: {
-          type: "https",
-          url: "https://raw.githubusercontent.com/lightningrodlabs/converge/273cba658883f5d9cc866d88980d45e8453d3fda/we_dev/converge.svg"
-        },
-        source: {
-          type: "https",
-          url: "https://github.com/lightningrodlabs/converge/releases/download/weave-rc/converge-0.1.2.webhapp"
-        },
-      },
-      {
-      name: 'talking-stickies',
-      subtitle: 'talking stickies',
-      description: 'Real-time stickies based on syn',
-      icon: {
-        type: 'https',
-        url: 'https://raw.githubusercontent.com/holochain-apps/talking-stickies/main/we_dev/talking-stickies_icon.png',
-      },
-      source: {
-        type: 'https',
-        url: 'https://github.com/holochain-apps/talking-stickies/releases/download/v0.9.1/talking-stickies.webhapp',
-      },
-    },
+    // {
+    //     name: 'Converge',
+    //     subtitle: 'Decide stuff with others!',
+    //     description: 'Real-time games based on syn',
+    //     icon: {
+    //       type: "https",
+    //       url: "https://raw.githubusercontent.com/lightningrodlabs/converge/273cba658883f5d9cc866d88980d45e8453d3fda/we_dev/converge.svg"
+    //     },
+    //     source: {
+    //       type: "https",
+    //       url: "https://github.com/lightningrodlabs/converge/releases/download/weave-rc/converge-0.1.2.webhapp"
+    //     },
+    //   },
+    //   {
+    //   name: 'talking-stickies',
+    //   subtitle: 'talking stickies',
+    //   description: 'Real-time stickies based on syn',
+    //   icon: {
+    //     type: 'https',
+    //     url: 'https://raw.githubusercontent.com/holochain-apps/talking-stickies/main/we_dev/talking-stickies_icon.png',
+    //   },
+    //   source: {
+    //     type: 'https',
+    //     url: 'https://github.com/holochain-apps/talking-stickies/releases/download/v0.9.1/talking-stickies.webhapp',
+    //   },
+    // },
   ],
 });

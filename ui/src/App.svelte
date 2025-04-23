@@ -72,7 +72,7 @@
 
   function setDefaultPalette() {
     document.body.style.background = "#e6ecf8";
-    setBackgroundImage(null);
+    // setBackgroundImage(null);
     setAverageColor({
       rgba: "rgb(255,255,255,1)",
       rgb: "rgb(255,255,255)",
