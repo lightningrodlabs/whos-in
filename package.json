@@ -23,12 +23,12 @@
     "start:happ": "echo \"starting with admin $VITE_ADMIN_PORT\" echo \"pass\" |  WASM_LOG=debug RUST_LOG='debug,wasmer_compiler_cranelift=error,holochain::core::workflow=debug,cranelift_codegen=error,holochain::conductor::entry_def_store=debug' RUST_BACKTRACE=1 hc s -f=$VITE_ADMIN_PORT --piped generate workdir/whosin.happ --run=$VITE_APP_PORT -a whosin network -b \"http://127.0.0.1:$BOOTSTRAP_PORT\"  webrtc \"ws://127.0.0.1:$SIGNAL_PORT\"",
     "start:happ:online": "echo \"starting with admin $VITE_ADMIN_PORT\" && RUST_LOG=warn echo \"pass\" | hc s -f=$VITE_ADMIN_PORT --piped generate workdir/whosin.happ  -s 1234 --run=$VITE_APP_PORT -a whosin network -b \"https://bootstrap.holo.host/\" webrtc \"wss://signal-2.infra.holochain.org\"",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
-    "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
+    "build:zomes": "CARGO_TARGET_DIR=target RUSTFLAGS='--cfg getrandom_backend=\"custom\"' cargo build --release --target wasm32-unknown-unknown",
     "calculate-hashes": "weave hash-webhapp workdir/whosin.webhapp"
   },
   "devDependencies": {
-    "@theweave/cli": "0.14.0-rc.0",
-    "@holochain/hc-spin": "^0.500.0-rc.1",
+    "@theweave/cli": "^0.15.5",
+    "@holochain/hc-spin": "^0.600.0",
     "@holochain-playground/cli": "^0.1.1",
     "concurrently": "^6.2.1",
     "rimraf": "^3.0.2",

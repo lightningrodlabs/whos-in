@@ -1,16 +1,14 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
-use crate::utils::link_input;
 
 #[hdk_extern]
 pub fn create_availability(availability: Availability) -> ExternResult<ActionHash> {
     let path = Path::from("all_availability");
     let links = get_links(
-        link_input(
+        LinkQuery::try_new(
             path.path_entry_hash()?.clone(),
             LinkTypes::AllAvailability,
-            None,
-        )
+        )?, GetStrategy::Local
     )?;
     for link in links {
         if link.author == availability.person.clone().into() {
@@ -45,15 +43,14 @@ pub fn update_availability(
     let path = Path::from("all_availability");
     // delete the old link
     let links = get_links(
-        link_input(
+        LinkQuery::try_new(
             path.path_entry_hash()?,
             LinkTypes::AllAvailability,
-            None,
-        ),
+        )?, GetStrategy::Local
     )?;
     for link in links {
         if link.target == availability_hash.clone().into() {
-            delete_link(link.create_link_hash)?;
+            delete_link(link.create_link_hash, GetOptions::local())?;
         }
     }
     // create a new link
@@ -70,11 +67,10 @@ pub fn update_availability(
 pub fn get_availability_links(_: ()) -> ExternResult<Vec<Link>> {
     let path = Path::from("all_availability");
     let links = get_links(
-        link_input(
+        LinkQuery::try_new(
             path.path_entry_hash()?,
             LinkTypes::AllAvailability,
-            None,
-        ),
+        )?, GetStrategy::Local
     )?;
     Ok(links)
 }
@@ -99,11 +95,10 @@ pub fn get_availability_entry(
 pub fn get_all_availability(_: ()) -> ExternResult<Vec<Record>> {
     let path = Path::from("all_availability");
     let links = get_links(
-        link_input(
+        LinkQuery::try_new(
             path.path_entry_hash()?,
             LinkTypes::AllAvailability,
-            None,
-        ),
+        )?, GetStrategy::Local
     )?;
     let get_input: Vec<GetInput> = links
         .into_iter()

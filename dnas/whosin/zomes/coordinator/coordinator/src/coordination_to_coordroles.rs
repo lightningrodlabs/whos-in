@@ -1,6 +1,5 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
-use crate::utils::link_input;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddCoordroleForCoordinationInput {
@@ -45,9 +44,10 @@ pub fn get_coordroles_for_coordination(
 // ) -> ExternResult<()> {
 ) -> ExternResult<Vec<CoordrolesOutput>> {
     let links = get_links(
-        link_input(
-            coordination_hash, LinkTypes::CoordinationToCoordroles, None
-        )
+        LinkQuery::try_new(
+            coordination_hash,
+            LinkTypes::CoordinationToCoordroles,
+        )?, GetStrategy::Local
     )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
@@ -69,11 +69,10 @@ pub fn get_coordroles_for_coordination(
             )
             .into();
         let user_links = get_links(
-            link_input(
+            LinkQuery::try_new(
                 coordrole_hash,
                 LinkTypes::CoordroleToParticipants,
-                None,
-            )
+            )?, GetStrategy::Local
         )?;
         // let agents: Vec<AgentPubKey> = user_links
         //     .into_iter()
@@ -111,9 +110,10 @@ pub fn get_coordinations_for_coordrole(
     coordrole_hash: ActionHash,
 ) -> ExternResult<Vec<Record>> {
     let links = get_links(
-        link_input(
-            coordrole_hash, LinkTypes::CoordroleToCoordinations, None
-        )
+        LinkQuery::try_new(
+            coordrole_hash,
+            LinkTypes::CoordroleToCoordinations,
+        )?, GetStrategy::Local
     )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
@@ -134,9 +134,10 @@ pub fn get_coordinations_for_coordrole(
 pub fn get_my_coordinations(_: ()) -> ExternResult<Vec<Record>> {
     let my_agent_pub_key = agent_info()?.agent_initial_pubkey;
     let links = get_links(
-        link_input(
-            my_agent_pub_key, LinkTypes::ParticipantToCoordroles, None
-        )
+        LinkQuery::try_new(
+            my_agent_pub_key,
+            LinkTypes::ParticipantToCoordroles,
+        )?, GetStrategy::Local
     )?;
     let coordinations: Vec<GetInput> = links
         .into_iter()
@@ -144,9 +145,10 @@ pub fn get_my_coordinations(_: ()) -> ExternResult<Vec<Record>> {
             // let hash = ActionHash::from(link.target);
             let hash = ActionHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();
             let links2 = get_links(
-                link_input(
-                    hash, LinkTypes::CoordroleToCoordinations, None
-                )
+                LinkQuery::try_new(
+                    hash,
+                    LinkTypes::CoordroleToCoordinations,
+                ).ok()?, GetStrategy::Local
             )
                 .ok()?;
             let link2 = &links2.get(0)?;
@@ -172,9 +174,10 @@ pub fn get_my_coordinations(_: ()) -> ExternResult<Vec<Record>> {
 pub fn get_my_coordination_hashes(_: ()) -> ExternResult<Vec<ActionHash>> {
     let my_agent_pub_key = agent_info()?.agent_initial_pubkey;
     let links = get_links(
-        link_input(
-            my_agent_pub_key, LinkTypes::ParticipantToCoordroles, None
-        )
+        LinkQuery::try_new(
+            my_agent_pub_key,
+            LinkTypes::ParticipantToCoordroles,
+        )?, GetStrategy::Local
     )?;
     let coordinations: Vec<ActionHash> = links
         .into_iter()
@@ -182,9 +185,10 @@ pub fn get_my_coordination_hashes(_: ()) -> ExternResult<Vec<ActionHash>> {
             // let hash = ActionHash::from(link.target);
             let hash = ActionHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();
             let links2 = get_links(
-                link_input(
-                    hash, LinkTypes::CoordroleToCoordinations, None
-                )
+                LinkQuery::try_new(
+                    hash,
+                    LinkTypes::CoordroleToCoordinations,
+                ).ok()?, GetStrategy::Local
             ).ok()?;
             let link2 = &links2.get(0)?;
             Some(

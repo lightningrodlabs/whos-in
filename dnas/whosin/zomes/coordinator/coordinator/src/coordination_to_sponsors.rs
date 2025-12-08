@@ -1,6 +1,5 @@
 use hdk::{hdi::link, prelude::*};
 use coordinator_integrity::*;
-use crate::utils::link_input;
 
 #[hdk_extern]
 pub fn add_sponsor_for_coordination(coordination_hash: ActionHash) -> ExternResult<()> {
@@ -24,9 +23,10 @@ pub fn get_sponsors_for_coordination(
     coordination_hash: ActionHash,
 ) -> ExternResult<Vec<AgentPubKey>> {
     let links = get_links(
-        link_input(
-            coordination_hash, LinkTypes::CoordinationToSponsors, None
-        )
+        LinkQuery::try_new(
+            coordination_hash,
+            LinkTypes::CoordinationToSponsors,
+        )?, GetStrategy::Local
     )?;
     let agents: Vec<AgentPubKey> = links
         .into_iter()
@@ -43,9 +43,10 @@ pub fn get_sponsors_for_coordination(
 #[hdk_extern]
 pub fn get_coordinations_for_sponsor(sponsor: AgentPubKey) -> ExternResult<Vec<Record>> {
     let links = get_links(
-        link_input(
-            sponsor, LinkTypes::SponsorToCoordinations, None
-        )
+        LinkQuery::try_new(
+            sponsor,
+            LinkTypes::SponsorToCoordinations,
+        )?, GetStrategy::Local
     )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
@@ -68,27 +69,27 @@ pub fn remove_sponsor_for_coordination(
 ) -> ExternResult<()> {
     let sponsor: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     let links = get_links(
-        link_input(
+        LinkQuery::try_new(
             coordination_hash.clone(),
             LinkTypes::CoordinationToSponsors,
-            None,
-        )
+        )?, GetStrategy::Local
     )?;
     for link in links {
         if AgentPubKey::from(EntryHash::try_from(link.target).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected entryhash".into()))).unwrap())
             .eq(&sponsor)
         {
-            delete_link(link.create_link_hash)?;
+            delete_link(link.create_link_hash, GetOptions::local())?;
         }
     }
     let links = get_links(
-        link_input(
-            sponsor.clone(), LinkTypes::SponsorToCoordinations, None
-        )
+        LinkQuery::try_new(
+            sponsor.clone(),
+            LinkTypes::SponsorToCoordinations,
+        )?, GetStrategy::Local
     )?;
     for link in links {
         if             ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().eq(&coordination_hash) {
-            delete_link(link.create_link_hash)?;
+            delete_link(link.create_link_hash, GetOptions::local())?;
         }
     }
     Ok(())

@@ -5,7 +5,7 @@ pub fn validate_create_link_coordination_to_coordroles(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    let action_hash = ActionHash::try_from(base_address).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();;
+    let action_hash = ActionHash::try_from(base_address).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();
     let record = must_get_valid_record(action_hash)?;
     let _coordination: crate::Coordination = record
         .entry()
@@ -48,7 +48,7 @@ pub fn validate_create_link_coordrole_to_coordinations(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    let action_hash = ActionHash::try_from(base_address).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();;
+    let action_hash = ActionHash::try_from(base_address).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap();
     let record = must_get_valid_record(action_hash)?;
     let _coordrole: crate::Coordrole = record
         .entry()

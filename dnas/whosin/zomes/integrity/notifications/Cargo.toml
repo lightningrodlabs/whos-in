@@ -9,7 +9,7 @@ name = "notifications_integrity"
 
 [dependencies]
 hdi = { workspace = true }
-
+holochain_serialized_bytes = { workspace = true }
 serde = { workspace = true }
 
-hc_zome_notifications_integrity = { git = "https://github.com/holochain-open-dev/notifications", branch = "main-0.5" }
+hc_zome_notifications_integrity = { git = "https://github.com/holochain-open-dev/notifications", branch = "main-0.6" }

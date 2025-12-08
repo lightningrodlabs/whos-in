@@ -1,6 +1,5 @@
 use hdk::prelude::*;
 use coordinator_integrity::*;
-use crate::utils::link_input;
 #[hdk_extern]
 pub fn add_coordination_for_viewer(
     target_coordination_hash: ActionHash,
@@ -17,9 +16,10 @@ pub fn add_coordination_for_viewer(
 #[hdk_extern]
 pub fn get_coordinations_for_viewer(viewer: AgentPubKey) -> ExternResult<Vec<Record>> {
     let links = get_links(
-        link_input(
-            viewer, LinkTypes::ViewerToCoordinations, None
-        )
+        LinkQuery::try_new(
+            viewer,
+            LinkTypes::ViewerToCoordinations,
+        )?, GetStrategy::Local
     )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
@@ -42,9 +42,10 @@ pub fn find_coordination_links_for_viewer(
 ) -> ExternResult<i32> {
     let my_agent_pub_key: AgentPubKey = agent_info()?.agent_initial_pubkey.into();
     let links = get_links(
-        link_input(
-            my_agent_pub_key, LinkTypes::ViewerToCoordinations, None
-        )
+        LinkQuery::try_new(
+            my_agent_pub_key,
+            LinkTypes::ViewerToCoordinations,
+        )?, GetStrategy::Local
     )?;
     let relevant_links = links
         .into_iter()
@@ -61,15 +62,14 @@ pub fn remove_coordination_for_viewer(
     input: RemoveCoordinationForViewerInput,
 ) -> ExternResult<()> {
     let links = get_links(
-        link_input(
+        LinkQuery::try_new(
             input.base_viewer.clone(),
             LinkTypes::ViewerToCoordinations,
-            None,
-        )
+        )?, GetStrategy::Local
     )?;
     for link in links {
         if ActionHash::try_from(link.target.clone()).map_err(|_| wasm_error!(WasmErrorInner::Guest("Expected actionhash".into()))).unwrap().eq(&input.target_coordination_hash) {
-            delete_link(link.create_link_hash)?;
+            delete_link(link.create_link_hash, GetOptions::local())?;
         }
     }
     Ok(())
