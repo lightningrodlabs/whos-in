@@ -296,11 +296,16 @@ nav logo {
   margin: 0 12px;
 }
 
-.dark-mode .notifications, .dark-mode .dashboard, .dark-mode .calendar, .dark-mode .bulletin, .dark-mode .notifications {
+.dark-mode .info, 
+.dark-mode .notifications, 
+.dark-mode .dashboard, 
+.dark-mode .calendar, 
+.dark-mode .bulletin, 
+.dark-mode .notifications {
   color: #e4e9f3 !important;
 }
 
-.notifications, .dashboard, .calendar, .bulletin, .notifications {
+.notifications, .dashboard, .calendar, .bulletin, .notifications, .info {
   /* width: 24px; */
   height: 26px;
   color: rgb(64, 64, 64) !important;
@@ -316,9 +321,14 @@ nav logo {
   width: 24px;
 } */
 
-.notifications:hover, .dashboard:hover, .calendar:hover, .bulletin:hover {
+.notifications:hover, .dashboard:hover, .calendar:hover, .bulletin:hover, .info:hover {
   background-color: #b5bed4;
   color: #e6ebf3;
+}
+
+a.bulletin-icon {
+  text-decoration: none;
+  color: inherit;
 }
 
 update-profile {

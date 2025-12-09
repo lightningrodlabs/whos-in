@@ -24,7 +24,7 @@
     "start:happ:online": "echo \"starting with admin $VITE_ADMIN_PORT\" && RUST_LOG=warn echo \"pass\" | hc s -f=$VITE_ADMIN_PORT --piped generate workdir/whosin.happ  -s 1234 --run=$VITE_APP_PORT -a whosin network -b \"https://bootstrap.holo.host/\" webrtc \"wss://signal-2.infra.holochain.org\"",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
     "build:zomes": "CARGO_TARGET_DIR=target RUSTFLAGS='--cfg getrandom_backend=\"custom\"' cargo build --release --target wasm32-unknown-unknown",
-    "calculate-hashes": "weave hash-webhapp workdir/whosin.webhapp"
+    "calculate-hashes": "weave hash-webhapp 0.2.2 workdir/whosin.webhapp"
   },
   "devDependencies": {
     "@theweave/cli": "^0.15.5",

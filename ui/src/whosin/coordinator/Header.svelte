@@ -98,6 +98,13 @@ onMount(() => {
 
     <ul class="nav navbar-nav float-right">
 
+    <li class="info">
+      <a class="bulletin-icon" href="https://dcan.app" target="_blank" rel="noopener noreferrer">
+        <SvgIcon icon="faExternal" size=18 color={darkMode ? "#d6ddeb" : "#404040"} />
+        <span>Website</span>
+      </a>
+    </li>
+
     <li class="bulletin" on:click={goToBulletin}>
       {#if currentView == "all-coordinations"}
       <div class="bulletin-icon selected-tab">
@@ -213,6 +220,7 @@ onMount(() => {
       </div>
       {/if}
     </li>
+
     <!-- if no agent linked to my agent as notifier -->
     <!-- {#if !notifier}
       <svg xmlns="http://www.w3.org/2000/svg" style="margin: 0 10" width="1" height="30" viewBox="0 0 1 30"><defs><style>.a{fill:none;stroke:rgba(0,0,0,0.15);}</style></defs><line class="a" y2="30" transform="translate(0.5)"/></svg>
