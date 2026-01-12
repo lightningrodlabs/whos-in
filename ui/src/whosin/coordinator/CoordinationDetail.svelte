@@ -18,7 +18,7 @@
   import { countViewed, addToViewed, add_notification, weClientStored } from '../../store.js';
   import Loading from '../Loading.svelte';
   import { allCoordinations, myCoordinations, allAvailability } from '../../crud/dataStore';
-  import { refetchCoordinations, refetchAvailability } from '../../crud/refetch';
+  import { refetchCoordinations, refetchAvailability, refetchCoordinationsWithDetails } from '../../crud/refetch';
   import { encodeHashToBase64 } from '@holochain/client';
     import { addNewAvailabilities, deleteAvailabilities, getUserAvailability } from './Calendaring/availability';
     import { get } from 'svelte/store';
@@ -64,6 +64,7 @@
   let stringStartDate;
   let stringEndDate;
   let stringExpiresDate;
+  let refreshing: Promise<void> | undefined = undefined;
 
   let coordination_type;
   const coordination_type_icons = {
@@ -85,13 +86,18 @@
   // onMount(() => fetchRoles());
   
   onMount(async () => {
-    console.log("CHASH AND CLIENTS", cHashAndClients)
+    console.log("CHASH AND CLIENTS", cHashAndClients, client)
+
+    // if (!cHashAndClients) {
+    //   await refetchCoordinationsWithDetails(client);
+    // }
 
     if (!client) {
       client = clientBackup;
     }
     if (client) {
       dnaHash = await getMyDna("whosin", client)
+      await new Promise(r => setTimeout(r, 1000)); // wait for weClient to be set
       await fetchCoordination()
       await fetchRoles()
       addToViewed(coordinationHash, client)
@@ -150,6 +156,7 @@
       }
     } catch (e) {
       error = e;
+      navigate("all-coordinations");
     }
   
     loading = false;
@@ -366,7 +373,7 @@
         deleteAvailabilities(client, [coordination.starts_date / 1000, coordination.ends_date / 1000]);
       }
     } catch (e: any) {
-      errorSnackbar.labelText = `Error uncommitting: ${e.data.data}`;
+      errorSnackbar.labelText = `Error uncommitting: ${e.data}`;
       errorSnackbar.show();
     }
   }
@@ -380,15 +387,29 @@
     <mwc-circular-progress indeterminate></mwc-circular-progress>
   </div>
   {:else if error}
-  <span>Error fetching the coordination: {error.data.data}</span>
+  <span>Error fetching the coordination: {error.data}</span>
   {:else}
   
 
   <div style="display: flex; flex-direction: row; margin-bottom: 0px; justify-content: space-between">
         <div style="display: flex; flex-direction: row; margin-bottom: 0px">
-          <h1 style="margin: 0; font-weight: bold;">
-            { coordination.title }
-          </h1>
+          <div style="margin: 0; font-weight: bold; font-size: 30px;">
+            { coordination?.title }
+            <span 
+              title="Refresh Coordination"
+              style="cursor: pointer; margin-left: 10px;"
+              class={(refreshing ? 'spinning' : '')}      on:click={async () => {
+              refreshing = new Promise(r => setTimeout(r, 1000));
+              await refetchCoordinationsWithDetails(client);
+              await refreshing;
+              refreshing = undefined;
+            }}>
+              <SvgIcon
+                icon="faArrosRotate"
+                size="24px"
+              />
+            </span>
+          </div>
           <!-- <div class="type-label" style="background: {coordination_type_colors[coordination_type]}">
             <SvgIcon color="#fff" size=15 icon="{coordination_type_icons[coordination_type]}" /> 
             <div style="margin: 2px;">
@@ -411,15 +432,15 @@
           </div>
           <div class="status-label">
             <!-- active, happening today, expired, gathering participation -->
-            {#if coordination.ends_date && coordination.ends_date < (new Date().getTime() * 1000)}
+            {#if coordination?.ends_date && coordination?.ends_date < (new Date().getTime() * 1000)}
               <div style="background: #ff0000; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
                 Expired
               </div>
-            {:else if totalUnderMin >= totalMin && coordination.starts_date && coordination.starts_date < (new Date().getTime() * 1000)}
+            {:else if totalUnderMin >= totalMin && coordination?.starts_date && coordination?.starts_date < (new Date().getTime() * 1000)}
               <div style="background: #cd1dff; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
                 Happening today
               </div>
-            {:else if totalMin > 0 && totalUnderMin < totalMin && coordination.signup_deadline && coordination.signup_deadline < (new Date().getTime() * 1000)}
+            {:else if totalMin > 0 && totalUnderMin < totalMin && coordination?.signup_deadline && coordination?.signup_deadline < (new Date().getTime() * 1000)}
               <div style="background: gray; color: #fff; padding: 3px 5px; border-radius: 5px; margin-right: 10px;">
                 Did not reach minimum participation
               </div>
@@ -458,7 +479,7 @@
       </div>
     </div> -->
 
-    {#if coordination.signup_deadline}
+    {#if coordination?.signup_deadline}
       <div class="action-details">
         <!-- deadline to signup -->
         <div class="action-date">
@@ -468,7 +489,7 @@
       </div>
     {/if}
 
-    {#if coordination.starts_date}
+    {#if coordination?.starts_date}
       <div class="action-details">
         <!-- if start date and end date are on the same day -->
         {#if stringStartDate.split(',')[0] == stringEndDate.split(',')[0]}
@@ -484,7 +505,7 @@
           </div>
         {/if}
       </div>
-    {:else if coordination.ends_date}
+    {:else if coordination?.ends_date}
       <div class="action-date">
         <SvgIcon color="#484848" size=16 icon="faClock" />
         Deadline to complete: <span style="white-space: pre-line">{ stringEndDate }</span>
@@ -492,7 +513,7 @@
     {/if}
 
     <div style="display: flex; flex-direction: row; margin-bottom: 0; margin-top: 10px;">
-      <span class="action-description" style="white-space: pre-line">{ coordination.description }</span>
+      <span class="action-description" style="white-space: pre-line">{ coordination?.description }</span>
     </div>
 
     <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -610,7 +631,7 @@
                 </div>
 
               <!-- not past the signup deadeline and not past the end date -->
-              {:else if (!coordination.signup_deadline || coordination.signup_deadline > (new Date().getTime() * 1000)) && (!coordination.ends_date || coordination.ends_date > (new Date().getTime() * 1000))}
+              {:else if (!coordination?.signup_deadline || coordination?.signup_deadline > (new Date().getTime() * 1000)) && (!coordination?.ends_date || coordination?.ends_date > (new Date().getTime() * 1000))}
                 {@const max = decode(role.coordrole.entry.Present.entry)["maximum"] || Infinity}
                 {#if role.committed}
                   <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>

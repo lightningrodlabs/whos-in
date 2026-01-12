@@ -105,18 +105,18 @@
         // container.style.backgroundColor = color.rgba;
         // container.style.color = color.isDark ? '#fff' : '#000';
         setAverageColor(color);
-        console.log('Average color', color);
+        // console.log('Average color', color);
       })
       .catch(e => {
         console.log(e);
       });
       
-      console.log("value palette", value);
+      // console.log("value palette", value);
       
       Vibrant.from(value)
       .getPalette()
       .then((palette) => {
-        console.log("palette", palette);
+        // console.log("palette", palette);
         setColorPalette(palette);
         document.documentElement.style.setProperty("--vibrant", 'rgb(' + palette.Vibrant.rgb.join(",") + ')');
         document.documentElement.style.setProperty("--muted", 'rgb(' + palette.Muted.rgb.join(",") + ')');
@@ -125,7 +125,7 @@
         document.documentElement.style.setProperty("--dark-vibrant", 'rgb(' + palette.DarkVibrant.rgb.join(",") + ')');
         document.documentElement.style.setProperty("--light-muted", 'rgb(' + palette.LightMuted.rgb.join(",") + ')');
         document.documentElement.style.setProperty("--light-muted-transparent", 'rgba(' + palette.LightMuted.rgb.join(",") + ',0.5)');
-        console.log("palette", palette, 'rgb(' + palette.Vibrant.rgb.join(",") + ')');
+        // console.log("palette", palette, 'rgb(' + palette.Vibrant.rgb.join(",") + ')');
       }).catch(() => {
         setDefaultPalette();
       })
@@ -507,12 +507,12 @@
             </span>
           {/if}
 
-        <!-- <footer style="margin: 10px;">
+        <footer style="margin: 10px;">
           <SvgIcon icon=faBug size="24" color="#000000" />
           <a href="https://docs.google.com/forms/d/e/1FAIpQLSdzwS5D1HP3Eq6JV2lSD2cTXZoVTJJR2b7vEuAKgk9izVFRIw/viewform" target="_blank" class="feedback-button">
             <span>Submit feedback</span>
           </a>
-          :)
+          <!-- :) -->
         {#if !isWeaveContext() && dna && !loading && currentView != "instructions" && currentView != ""}
         <br>
         <small>
@@ -520,7 +520,7 @@
           Private Holochain network: {dna}
         </small>
         {/if}
-        </footer> -->
+        </footer>
         <!-- </profile-prompt> -->
         <!-- </profiles-context> -->
         {#if false && dna && !loading && currentView != "instructions" && currentView != ""}

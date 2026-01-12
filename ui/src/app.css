@@ -44,6 +44,22 @@ main {
   .role-outer {
     width: calc(100% - 28px);
   }
+  #whosin-title > span {
+    display: none;
+  }
+}
+
+/* table */
+@media only screen and (max-width: 1100px) { 
+  .new-action-button > #new-action {
+      display: none;
+  }
+  .dashboard-icon > span, .bulletin-icon > span, .calendar-icon > span, .notifications > span, .info-icon > span {
+    display: none;
+  }
+  #notifications-count {
+    left: 15px !important;
+  }
 }
 
 .role-item {
@@ -263,6 +279,8 @@ nav logo {
 
 .navbar-nav > li {
   float: left;
+  display: flex;
+  align-items: center;
 }
 
 .nav > li {
@@ -315,6 +333,7 @@ nav logo {
   cursor: pointer;
   padding: 5px 5px 0 5px;
   border-radius: 6px;
+  white-space: nowrap;
 }
 
 /* .notifications {
@@ -626,4 +645,31 @@ vaadin-date-time-picker {
 .filter-button:hover {
   box-shadow: inset 0px 0px 10px #e2e2e2;
   /* box-shadow: 1px 2px 8px #2f2f2f; */
+}
+
+body.dark-mode .refresh-icon {
+  filter: invert(1);
+}
+
+body.dark-mode .action-date {
+  color: #fff;
+}
+
+.refresh-icon {
+  cursor: pointer;
+  margin-left: 8px;
+  display: inline-block;
+}
+
+.spinning img {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -145,4 +145,7 @@
     .mark-all-as-read-button:hover {
         background: #85bfff;
     }
+    :global(body.dark-mode) h1 {
+        color: #e2e2e2;
+    }
 </style>

@@ -7,6 +7,25 @@
     let customImage: boolean = false;
     const dispatch = createEventDispatcher();
 
+    const predefinedOptions = [
+        'none',
+        '/src/assets/backgrounds/woods.jpeg',
+        '/src/assets/backgrounds/mountain.jpeg',
+        '/src/assets/backgrounds/texture.jpg',
+        '/src/assets/backgrounds/birds.jpg',
+        '/src/assets/backgrounds/abstract.jpg',
+        '/src/assets/backgrounds/misty.jpg',
+        '/src/assets/backgrounds/pond.jpg',
+        '/src/assets/backgrounds/sheep.jpg',
+        '/src/assets/backgrounds/black.png'
+    ];
+
+    // Reactive declaration to determine the select value
+    $: selectValue = predefinedOptions.includes($backgroundImage) ? $backgroundImage : 'custom';
+    $: if (!predefinedOptions.includes($backgroundImage) && $backgroundImage) {
+        customImage = true;
+    }
+
     // function handleImageChange(event) {
     //     const file = event.target.files[0];
     //     if (file) {
@@ -32,13 +51,15 @@
     <div class="modal-body">
         <!-- <h3>Background</h3> -->
         <select
-            value={$backgroundImage}
+            value={selectValue}
             on:change={(e) => {
-                customImage = e.target.value === 'custom';
-                if (!customImage) {
+                if (e.target.value === 'custom') {
+                    customImage = true;
+                } else {
+                    customImage = false;
                     setBackgroundImage(e.target.value);
+                    dispatch('changeBackground', { backgroundImage });
                 }
-                dispatch('changeBackground', { backgroundImage });
             }}
         >
             <option value="none">Basic</option>
@@ -55,9 +76,11 @@
         </select>
         <!-- if custom, reveal text input -->
         {#if customImage}
-            <input type="text" id="background-image" accept="image/*" 
+            <input type="text" id="background-image" accept="image/*"
+            value={$backgroundImage}
             on:change={(e) => {
                 setBackgroundImage(e.target.value);
+                dispatch('changeBackground', { backgroundImage });
             }} />
         {/if}
         <!-- <input type="file" id="background-image" accept="image/*" on:change={handleImageChange} /> -->

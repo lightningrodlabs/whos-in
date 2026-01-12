@@ -8,22 +8,28 @@ import CoordinationListItem from './CoordinationListItem.svelte';
 import SvgIcon from '../../SvgIcon.svelte';
 import FaBullhorn from 'svelte-icons/fa/FaBullhorn.svelte';
 import { decodeHashFromBase64 } from '@holochain/client';
-import { allCoordinations } from '../../crud/dataStore';
+import { allCoordinations, allCoordinationsDetails } from '../../crud/dataStore';
 import { refetchCoordinations, refetchCoordinationsWithDetails, refetchSponsors } from '../../crud/refetch';
 
 let client: AppClient = (getContext(clientContext) as any).getClient();
 let applets: Array<any> = (getContext(clientContext) as any).getApplets();
 
 let coordinationsHashData: Array<any> | undefined;
+let coordinationsDetails: Array<any> | undefined;
 let allSponsors = {};
 let allSpamReporters = {};
 let loading = true;
 let filterType = 'All';
 let error: any = undefined;
+let refreshing: Promise<void> | undefined = undefined;
 
 allCoordinations.subscribe(value => {
   coordinationsHashData = value;
   loading = false;
+});
+
+allCoordinationsDetails.subscribe(value => {
+  coordinationsDetails = value;
 });
 
 $: coordinationsHashData, loading, error, allSponsors;
@@ -65,16 +71,51 @@ onMount(async () => {
         <div style="width: 14px; display: inline-block; margin-right: 6px; display: flex;">
           <FaBullhorn />
         </div>
-        All</button>
+        All ({coordinationsHashData.length})
+      </button>
       <button class="filter-button" style="background: #357cff;" class:active={filterType == "Event"} on:click={() => filterType = 'Event'}>
         <SvgIcon color="#fff" size=10 icon="faCalendar" />
-        Events</button>
+        Events ({coordinationsHashData.filter(c => {
+          const decodedHash = c.coordinationHash
+          const details = coordinationsDetails && coordinationsDetails[decodedHash];
+          const entryType = details?.coordination_type;
+          return entryType === 'Event';
+        }).length})
+      </button>
       <!-- <button class="filter-button" style="background: rgb(255, 149, 29);" class:active={filterType == "Project"} on:click={() => filterType = 'Project'}>
         <SvgIcon color="#fff" size=12 icon="faTask" />
         Projects</button> -->
       <button class="filter-button" style="background: rgb(83, 1, 174);" class:active={filterType == "Agreement"} on:click={() => filterType = 'Agreement'}>
         <SvgIcon color="#fff" size=14 icon="faAgreement" />
-        Agreements</button>
+        Agreements ({coordinationsHashData.filter(c => {
+          const decodedHash = c.coordinationHash
+          const details = coordinationsDetails && coordinationsDetails[decodedHash];
+          const entryType = details?.coordination_type;
+          return entryType === 'Agreement';
+        }).length})
+      </button>
+
+      <!-- Refresh -->
+      <span 
+        title="Refresh Coordinations"
+        class={'refresh-icon ' + (refreshing ? 'spinning' : '')}      on:click={async () => {
+        refreshing = new Promise(r => setTimeout(r, 1000));
+        if (applets) {
+          for (const applet of applets) {
+            await refetchCoordinationsWithDetails(applet[1].appletClient);
+          }
+        } else {
+          await refetchCoordinationsWithDetails(client);
+        }
+        await refreshing;
+        refreshing = undefined;
+        loading = false;
+      }}>
+        <SvgIcon
+          icon="faArrosRotate"
+          size="22px"
+        />
+      </span>
     </div>
 
     <!-- sort by recent, oldest -->

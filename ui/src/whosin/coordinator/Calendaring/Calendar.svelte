@@ -37,8 +37,26 @@
         const hours = Math.floor(availabilityDuration / 3600000);
         const minutes = Math.floor((availabilityDuration % 3600000) / 60000).toString().padStart(2, '0');
         options.customButtons.availabilityDetailsButton.text = `${availabilityParticipants.length} people for ${hours}:${minutes} hrs`;
+        
+        // Preserve the current view and date
+        let currentDate = null;
+        let currentView = null;
+        if (calendarObject) {
+            currentDate = calendarObject.getOption('date');
+            currentView = calendarObject.getOption('view');
+        }
+        
         setTimeout(() => {
             refreshBoolean = true;
+            // Restore the view and date after re-render
+            setTimeout(() => {
+                if (calendarObject && currentDate) {
+                    calendarObject.setOption('date', currentDate);
+                }
+                if (calendarObject && currentView) {
+                    calendarObject.setOption('view', currentView);
+                }
+            }, 0);
         }, 0);
     }
 

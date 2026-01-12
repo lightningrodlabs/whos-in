@@ -20,7 +20,7 @@ export async function refetchAvailability(client) {
       fn_name: 'get_all_availability',
       payload: null,
     });
-    console.log("Availability records: ", records);
+    // console.log("Availability records: ", records);
     const structured = records.map(
       r => {
         const availabilityHash = encodeHashToBase64(r.signed_action.hashed.hash)
@@ -33,7 +33,7 @@ export async function refetchAvailability(client) {
         };
       }
     );
-    console.log("Availability hashes: ", structured);
+    // console.log("Availability hashes: ", structured);
     let userAvailability = {};
     structured.forEach(element => {
       const existingAvailabilityForPerson = userAvailability[element.person] || [];
@@ -52,7 +52,7 @@ export async function refetchAvailability(client) {
     });
     setAvailabilityDetails(structured);
     setAllAvailability(userAvailability);
-    console.log("User availability: ", userAvailability);
+    // console.log("User availability: ", userAvailability);
     return records;
   } catch (e) {
     console.error(e);
@@ -226,7 +226,7 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
       let totalMin = 0;
       let totalUnderMin = 0;
 
-      console.log("Coordination: ", coordination, coordinationHash);
+      // console.log("Coordination: ", coordination, coordinationHash);
       
       try {
         let record2 = await client.callZome({
@@ -289,7 +289,7 @@ export async function refetchCoordinationsWithDetails(client) {
   //   payload: null,
   // });
   for (const coordination of currentCoordinations) {
-    console.log("Coordination: ", coordination);
+    // console.log("Coordination: ", coordination);
       await refetchCoordinationDetails(client, decodeHashFromBase64(coordination.coordinationHash));
   }
 }

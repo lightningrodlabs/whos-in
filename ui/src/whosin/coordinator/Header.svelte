@@ -24,7 +24,6 @@ let darkMode = false;
 averageColor.subscribe(value => {
   headerColor = value?.rgba
   darkMode = value?.isDark;
-  console.log("headerColor", headerColor, value);
   if (!headerColor) {
     headerColor = "#fff";
   }
@@ -82,9 +81,7 @@ onMount(() => {
         {:else} -->
           <a id="logo" class="navbar-brand" on:click={() => navigate("all-coordinations")}>  
             <h1 id="whosin-title" style="display: flex; align-items: center;">
-              {#if !isWeaveContext()}
-                <img id="minilogo" src={Logo} alt="whos-in logo"/>
-              {/if}
+              <img id="minilogo" src={Logo} alt="whos-in logo"/>
               <span>
                 Who's In?
               </span>
@@ -98,14 +95,32 @@ onMount(() => {
 
     <ul class="nav navbar-nav float-right">
 
-    <li class="info">
+    <li class="info" title="Go to Who's In? website">
       <a class="bulletin-icon" href="https://dcan.app" target="_blank" rel="noopener noreferrer">
         <SvgIcon icon="faExternal" size=18 color={darkMode ? "#d6ddeb" : "#404040"} />
         <span>Website</span>
       </a>
     </li>
 
-    <li class="bulletin" on:click={goToBulletin}>
+    <li class="calendar" on:click={goToCalendar} title="Calendar of events">
+      {#if currentView == "calendar"}
+      <div class="dashboard-icon selected-tab">
+        <SvgIcon icon="faCalendar" size=18 color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} /> 
+        <span>
+          Calendar
+        </span>
+      </div>
+      {:else}
+      <div class="dashboard-icon">
+        <SvgIcon icon="faCalendar" size=18 color={darkMode ? "#d6ddeb" : "#404040"} />
+        <span>
+          Calendar
+        </span>
+      </div>
+      {/if}
+    </li>
+
+    <li class="bulletin" on:click={goToBulletin} title="All coordinations">
       {#if currentView == "all-coordinations"}
       <div class="bulletin-icon selected-tab">
         <!-- <FaBullhorn />  -->
@@ -125,26 +140,7 @@ onMount(() => {
       {/if}
     </li>
 
-    <li class="calendar" on:click={goToCalendar}>
-      {#if currentView == "calendar"}
-      <div class="dashboard-icon selected-tab">
-        <SvgIcon icon="faCalendar" size=18 color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} /> 
-        <span>
-          Calendar
-        </span>
-      </div>
-      {:else}
-      <div class="dashboard-icon">
-        <SvgIcon icon="faCalendar" size=18 color={darkMode ? "#d6ddeb" : "#404040"} />
-        <span>
-          Calendar
-        </span>
-      </div>
-      {/if}
-    </li>
-
-
-    <li class="dashboard" on:click={goToDashboard}>
+    <li class="dashboard" on:click={goToDashboard} title="My Commitments">
       {#if currentView == "dashboard"}
       <div class="dashboard-icon selected-tab">
         <SvgIcon icon="faCheck" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} />
@@ -162,17 +158,17 @@ onMount(() => {
       {/if}
     </li>
 
-    <li class="notifications-li">
+    <li class="notifications-li" title="Notifications">
       <div class="dropdown">
         <div class="notifications" class:selected-tab={currentView=='notifications'} on:click={goToNotifications} on:mouseover={() => document.getElementById('notifications-dropdown').style.display = 'block'} on:mouseleave={() => document.getElementById('notifications-dropdown').style.display = 'none'}>
           {#if currentView == "notifications"}
-            <SvgIcon icon="faBell" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} /> Notifications
+            <SvgIcon icon="faBell" color={'rgb(' + $colorPalette?.Vibrant.rgb.join(",") + ')'} /> <span>Notifications</span>
           {:else}
-            <SvgIcon icon="faBell" color={darkMode ? "#d6ddeb" : "#404040"} /> Notifications
+            <SvgIcon icon="faBell" color={darkMode ? "#d6ddeb" : "#404040"} /> <span>Notifications</span>
           {/if}
-          <span class="notifications-count">
+          <div class="notifications-count">
             <Notifications client={client}></Notifications>
-          </span>
+          </div>
         </div>
         <div id="notifications-dropdown" class="dropdown-content" on:mouseover={() => document.getElementById('notifications-dropdown').style.display = 'block'} on:mouseleave={() => document.getElementById('notifications-dropdown').style.display = 'none'}>
           <!-- Add your notification items here -->

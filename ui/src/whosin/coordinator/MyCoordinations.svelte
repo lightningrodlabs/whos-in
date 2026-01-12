@@ -81,15 +81,13 @@
 </script>
 
 <div class="white-container" style="display: flex; flex-direction: column; background-color: transparent; backdrop-filter: none;">
-  <label>My commitments</label>
+  <label>Events and agreements I've committed to</label>
   {#if coordinationsHashData && coordinationsHashData.length}
 
   <!-- toggle filters for All, Events, Projects and Agreements -->
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px;">
+  <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px;">
     <div style="display: flex; flex-direction: row; margin-right: 8px;">
-      <!-- <label class="filter-by-label">Filter by&nbsp;</label> -->
       <button class="filter-button" style="background: #7a7a7a;" class:active={filterType == "All"} on:click={() => filterType = 'All'}>
-        <!-- <SvgIcon color="#fff" size=12 icon="faBars" /> -->
         <div style="width: 14px; display: inline-block; margin-right: 6px; display: flex;">
           <FaList />
         </div>
@@ -97,14 +95,11 @@
       <button class="filter-button" style="background: #357cff;" class:active={filterType == "Event"} on:click={() => filterType = 'Event'}>
         <SvgIcon color="#fff" size=10 icon="faCalendar" />
         Events</button>
-      <!-- <button class="filter-button" style="background: rgb(255, 149, 29);" class:active={filterType == "Project"} on:click={() => filterType = 'Project'}>
-        <SvgIcon color="#fff" size=12 icon="faTask" />
-        Projects</button> -->
       <button class="filter-button" style="background: rgb(83, 1, 174);" class:active={filterType == "Agreement"} on:click={() => filterType = 'Agreement'}>
         <SvgIcon color="#fff" size=14 icon="faAgreement" />
         Agreements</button>
     </div>
-  </div>
+  </div> -->
 
   <!-- {#each coordinations.reverse() as hash} -->
   {#each coordinationsHashData as cHashData}
@@ -115,3 +110,9 @@
     No Commitments
   {/if}
 </div>
+
+<style>
+  :global(body.dark-mode) label {
+    color: #e2e2e2;
+  }
+</style>
