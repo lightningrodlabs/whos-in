@@ -43,8 +43,26 @@
   let attachments: Array<WALUrl> = [];
   let title: string | undefined;
   let description: string | undefined = '';
-  // export let startsDate: number | undefined = agreementType == "event" ? new Date().getTime() * 1000 : undefined;
-  export let startsDate: number | undefined = agreementType == "event" ? new Date().getTime() : undefined;
+  const now = new Date();
+  const defaultEventStartsDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0
+  ).getTime();
+  const defaultEventEndsDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    0,
+    0
+  ).getTime();
+  export let startsDate: number | undefined = agreementType == "event" ? defaultEventStartsDate : undefined;
   // $: startsDateString = startsDate ? secondsToDateInput(startsDate) : "";
   let startsDateString: string;
   $: if (startsDate) {
@@ -54,7 +72,7 @@
     startsDateString = "";
   }
 
-  export let endsDate: number | undefined = agreementType == "event" ? new Date().getTime() + 3600 : undefined;
+  export let endsDate: number | undefined = agreementType == "event" ? defaultEventEndsDate : undefined;
   let endsDateString: string;
   $: if (endsDate) {
     endsDateString = secondsToDateInput(endsDate);

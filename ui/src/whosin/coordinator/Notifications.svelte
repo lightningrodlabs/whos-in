@@ -118,7 +118,7 @@
                             weClient?.notifyFrame([{
                                 title: "Coordination Activated",
                                 body: new_notification.description,
-                                notification_type: "change",
+                                notification_type: "Events",
                                 icon_src: undefined,
                                 urgency: "high",
                                 timestamp: coordination.signed_action.hashed.content.timestamp / 1000,

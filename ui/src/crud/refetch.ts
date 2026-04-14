@@ -251,7 +251,7 @@ export async function refetchCoordinationDetails(client, coordinationHash) {
               newNotifications.push({
                 title: "Coordination joined",
                 body: "A participant has joined a coordination",
-                notification_type: "change",
+                notification_type: "Events",
                 icon_src: undefined,
                 urgency: "low",
                 timestamp: participant.link_created / 1000,

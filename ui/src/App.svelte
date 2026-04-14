@@ -258,6 +258,7 @@
               switch (weClient?.renderInfo.view.name) {
                 case "Event":
                   currentView = "create-coordination-mini"
+                  break;
                 case "Agreement":
                   currentView = "create-agreement-mini"
                   break;
