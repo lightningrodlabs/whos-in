@@ -13,4 +13,4 @@ serde = { workspace = true }
 holochain_serialized_bytes = { workspace = true }
 notifications_integrity = { workspace = true } 
 
-hc_zome_notifications_coordinator = { git = "https://github.com/holochain-open-dev/notifications", branch = "main-0.6" }
+hc_zome_notifications_coordinator = { workspace = true }

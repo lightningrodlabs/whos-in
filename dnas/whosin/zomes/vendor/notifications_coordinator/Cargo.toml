@@ -1,13 +1,15 @@
 [package]
-name = "notifications_integrity"
+name = "hc_zome_notifications_coordinator"
 version = "0.0.1"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-name = "notifications_integrity"
+name = "hc_zome_notifications_coordinator"
 
 [dependencies]
-hdi = { workspace = true }
+hdk = { workspace = true }
 holochain_serialized_bytes = { workspace = true }
 serde = { workspace = true }
+
+notifications_integrity = { workspace = true }

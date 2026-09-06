@@ -5,7 +5,7 @@ opt-level = "z"
 opt-level = "z"
 
 [workspace]
-members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
+members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*", "dnas/*/zomes/vendor/*"]
 
 resolver = "2"
 
@@ -23,6 +23,15 @@ path = "dnas/whosin/zomes/integrity/coordinator"
 
 [workspace.dependencies.notifications]
 path = "dnas/whosin/zomes/coordinator/notifications"
+
+# Vendored from https://github.com/holochain-open-dev/notifications @ f3b63da5 (branch
+# main-0.6, "Update to Holochain 0.6", 2025-12-08). That repository has no 0.7 branch and
+# has never carried a tag, so there is nothing to point a git dependency at on the 0.7
+# line. See RELEASE.md / the upgrade report: to go back to an upstream crate, replace this
+# entry and the two `{ workspace = true }` uses of it with a git dependency on a 0.7 tag
+# -- but note that doing so after the canonical happ is frozen would change the DNA hash.
+[workspace.dependencies.hc_zome_notifications_coordinator]
+path = "dnas/whosin/zomes/vendor/notifications_coordinator"
 
 [workspace.dependencies.notifications_integrity]
 path = "dnas/whosin/zomes/integrity/notifications"
