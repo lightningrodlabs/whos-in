@@ -1,5 +1,5 @@
-import { CallableCell } from '@holochain/tryorama';
-import { NewEntryAction, ActionHash, Record, AppBundleSource, fakeActionHash, fakeAgentPubKey, fakeEntryHash, fakeDnaHash } from '@holochain/client';
+import { CallableCell } from '@holochain-open-dev/tryorama';
+import { ActionHash, Record, AppBundleSource, fakeActionHash, fakeAgentPubKey, fakeEntryHash, fakeDnaHash } from '@holochain/client';
 
 
 
@@ -30,7 +30,8 @@ export async function sampleTwilioCredentials(cell: CallableCell, partialTwilioC
         ...{
 	  account_sid: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
 	  auth_token: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-	  from_number: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	  from_number_text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	  from_number_whatsapp: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         },
         ...partialTwilioCredentials
     };

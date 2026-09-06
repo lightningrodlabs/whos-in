@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, setContext, getContext } from 'svelte';
-    import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction } from '@holochain/client';
+    import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient } from '@holochain/client';
     import { clientContext } from '../../contexts';
     import type { Coordination, CoordinatorSignal } from './types';
     import { decode } from '@msgpack/msgpack';
@@ -92,7 +92,7 @@
                     
                     let new_notification = 
                         {
-                            "timestamp": coordination.signed_action.hashed.content.timestamp,
+                            "timestamp": coordination.signed_action.hashed.content.header.timestamp,
                             "type": "coordination-activation",
                             "description": "The "  + formatted_coordination.coordination_type.toLocaleLowerCase() + " " + formatted_coordination.title + " has reached minimum participation",
                             "hash": coordination_hash,
@@ -121,7 +121,7 @@
                                 notification_type: "Events",
                                 icon_src: undefined,
                                 urgency: "high",
-                                timestamp: coordination.signed_action.hashed.content.timestamp / 1000,
+                                timestamp: coordination.signed_action.hashed.content.header.timestamp / 1000,
                                 aboutWal: coordinationWal,
                                 fromAgent: client.myPubKey,
                             }])

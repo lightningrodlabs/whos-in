@@ -8,7 +8,7 @@ pub struct Availability {
 }
 
 pub fn validate_create_availability(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _availability: Availability,
 ) -> ExternResult<ValidateCallbackResult> {
     // I can only create one availability
@@ -17,14 +17,14 @@ pub fn validate_create_availability(
 }
 
 pub fn validate_update_availability(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _availability: Availability,
-    _original_action: EntryCreationAction,
+    _original_action: TypedAction<EntryCreationData>,
     _original_availability: Availability,
 ) -> ExternResult<ValidateCallbackResult> {
     // if i am the creator, i can update
     let original_creator = _original_action.author().clone();
-    let current_agent = _action.author;
+    let current_agent = _action.author().clone();
     if original_creator == current_agent {
         return Ok(ValidateCallbackResult::Valid);
     } else {
@@ -35,13 +35,13 @@ pub fn validate_update_availability(
 }
 
 pub fn validate_delete_availability(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_availability: Availability,
 ) -> ExternResult<ValidateCallbackResult> {
     // if i am the creator, i can delete
     let original_creator = _original_action.author().clone();
-    let current_agent = _action.author;
+    let current_agent = _action.author().clone();
     if original_creator == current_agent {
         return Ok(ValidateCallbackResult::Valid);
     } else {
@@ -52,7 +52,7 @@ pub fn validate_delete_availability(
 }
 
 pub fn validate_create_link_all_availability(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     _base_address: AnyLinkableHash,
     _target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -62,15 +62,15 @@ pub fn validate_create_link_all_availability(
 }
 
 pub fn validate_delete_link_all_availability(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base_address: AnyLinkableHash,
     _target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     // if i am the creator, i can delete
-    let original_creator = _original_action.author.clone();
-    let current_agent = _action.author;
+    let original_creator = _original_action.author().clone();
+    let current_agent = _action.author().clone();
     if original_creator == current_agent {
         return Ok(ValidateCallbackResult::Valid);
     } else {

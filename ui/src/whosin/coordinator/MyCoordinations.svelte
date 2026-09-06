@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext, getContext } from 'svelte';
-  import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction } from '@holochain/client';
+  import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient } from '@holochain/client';
   import { clientContext } from '../../contexts';
   import type { Coordination, CoordinatorSignal } from './types';
   import { decode, encode } from '@msgpack/msgpack';

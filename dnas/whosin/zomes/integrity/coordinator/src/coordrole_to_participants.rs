@@ -1,6 +1,6 @@
 use hdi::prelude::*;
 pub fn validate_create_link_coordrole_to_participants(
-    action: CreateLink,
+    action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -16,7 +16,7 @@ pub fn validate_create_link_coordrole_to_participants(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
-    if target_address != action.author.clone().into() {
+    if target_address != action.author().clone().into() {
         return Ok(
             ValidateCallbackResult::Invalid(
                 "Only the author of the Coordrole can link to it".into(),
@@ -26,8 +26,8 @@ pub fn validate_create_link_coordrole_to_participants(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_coordrole_to_participants(
-    action: DeleteLink,
-    _original_action: CreateLink,
+    action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -43,7 +43,7 @@ pub fn validate_delete_link_coordrole_to_participants(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
-    if target_address != action.author.clone().into() {
+    if target_address != action.author().clone().into() {
         return Ok(
             ValidateCallbackResult::Invalid(
                 "Only the author of the Coordrole can link to it".into(),
@@ -53,7 +53,7 @@ pub fn validate_delete_link_coordrole_to_participants(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_participant_to_coordroles(
-    action: CreateLink,
+    action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -69,7 +69,7 @@ pub fn validate_create_link_participant_to_coordroles(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
-    if base_address != action.author.clone().into() {
+    if base_address != action.author().clone().into() {
         return Ok(
             ValidateCallbackResult::Invalid(
                 "Only the author of the Coordrole can link to it".into(),
@@ -79,8 +79,8 @@ pub fn validate_create_link_participant_to_coordroles(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_participant_to_coordroles(
-    action: DeleteLink,
-    _original_action: CreateLink,
+    action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -96,7 +96,7 @@ pub fn validate_delete_link_participant_to_coordroles(
                 WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
             ),
         )?;
-    if base_address != action.author.clone().into() {
+    if base_address != action.author().clone().into() {
         return Ok(
             ValidateCallbackResult::Invalid(
                 "Only the author of the Coordrole can link to it".into(),

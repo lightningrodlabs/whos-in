@@ -245,15 +245,11 @@
             case "main":
               // here comes your rendering logic for the main view
               break;
-            case "block":
-              switch(weClient?.renderInfo.view.block) {
-                case "active_boards":
-                  currentView = "dashboard"
-                  break;
-                default:
-                  throw new Error("Unknown applet-view block type:"+weClient?.renderInfo.view.block);
-              }
-              break;
+            // weave 0.7 removed the `block` AppletView (and AppletServices.blockTypes
+            // with it), so the `case "block":` arm that used to live here is gone. It was
+            // already unreachable: `we.ts` only ever declared the block name
+            // "my_deliberations", and this switch only handled "active_boards", so any
+            // block Moss could actually request fell through to its `default:` throw.
             case "creatable":
               switch (weClient?.renderInfo.view.name) {
                 case "Event":

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import type { Record, EntryHash, ActionHash, AgentPubKey, AppClient, NewEntryAction } from '@holochain/client';
+import type { Record, EntryHash, ActionHash, AgentPubKey, AppClient, CreateLink } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import CoordroleDetail from './CoordroleDetail.svelte';
 import type { CoordinatorSignal } from './types';
@@ -42,7 +42,7 @@ onMount(async () => {
     if (payload.type !== 'LinkCreated') return;
     if (payload.link_type !== 'CoordinationToCoordroles') return;
 
-    hashes = [...hashes, payload.action.hashed.content.target_address];
+    hashes = [...hashes, (payload.action.hashed.content.data as CreateLink).target_address];
   });
 });
 

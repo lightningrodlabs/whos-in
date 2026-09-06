@@ -45,25 +45,26 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
     // Ok(ValidateCallbackResult::Valid)
 
     match op.flattened::<EntryTypes, LinkTypes>()? {
-        FlatOp::StoreEntry(store_entry) => {
+        // The entry authority. 0.6 called this op variant "store entry".
+        FlatOp::CreateEntry(store_entry) => {
             match store_entry {
                 OpEntry::CreateEntry { app_entry, action } => {
                     match app_entry {
                         EntryTypes::Contact(contact) => {
                             validate_create_contact(
-                                EntryCreationAction::Create(action),
+                                action.into(),
                                 contact,
                             )
                         }
                         EntryTypes::TwilioCredentials(twilio_credentials) => {
                             validate_create_twilio_credentials(
-                                EntryCreationAction::Create(action),
+                                action.into(),
                                 twilio_credentials,
                             )
                         }
                         EntryTypes::SentNotification(sent_notification) => {
                             validate_create_sent_notification(
-                                EntryCreationAction::Create(action),
+                                action.into(),
                                 sent_notification,
                             )
                         }
@@ -73,19 +74,19 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     match app_entry {
                         EntryTypes::Contact(contact) => {
                             validate_create_contact(
-                                EntryCreationAction::Update(action),
+                                action.into(),
                                 contact,
                             )
                         }
                         EntryTypes::TwilioCredentials(twilio_credentials) => {
                             validate_create_twilio_credentials(
-                                EntryCreationAction::Update(action),
+                                action.into(),
                                 twilio_credentials,
                             )
                         }
                         EntryTypes::SentNotification(sent_notification) => {
                             validate_create_sent_notification(
-                                EntryCreationAction::Update(action),
+                                action.into(),
                                 sent_notification,
                             )
                         }
@@ -94,7 +95,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 _ => Ok(ValidateCallbackResult::Valid),
             }
         }
-        FlatOp::RegisterUpdate(update_entry) => {
+        FlatOp::Update(update_entry) => {
             match update_entry {
                 OpUpdate::Entry {
                     app_entry,
@@ -126,7 +127,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 _ => Ok(ValidateCallbackResult::Valid),
             }
         }
-        FlatOp::RegisterDelete(delete_entry) => {
+        FlatOp::Delete(delete_entry) => {
             match delete_entry {
                 // OpDelete::Entry { original_action, original_app_entry, action } => {
                 //     match original_app_entry {
@@ -148,13 +149,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 _ => Ok(ValidateCallbackResult::Valid),
             }
         }
-        FlatOp::RegisterCreateLink {
-            link_type,
-            base_address,
-            target_address,
-            tag,
-            action,
-        } => {
+        // The link authority. 0.6 delivered create-link and delete-link as two separate
+        // top-level op variants that destructured base/target/tag at the match site; 0.7
+        // groups them under `Link` and keeps those three on the actions' `.data`. Both arms
+        // read them from the same actions the 0.6 flattener read them from
+        // (hdi 0.7.3 `op.rs:493-531`: all three off the CreateLink action).
+        FlatOp::Link(op_link) => match op_link {
+            OpLink::CreateLink { link_type, action } => {
+            let base_address = action.data.base_address.clone();
+            let target_address = action.data.target_address.clone();
+            let tag = action.data.tag.clone();
             match link_type {
                 LinkTypes::NotificantToNotifiers => {
                     validate_create_link_notificant_to_notifiers(
@@ -197,15 +201,11 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     )
                 }
             }
-        }
-        FlatOp::RegisterDeleteLink {
-            link_type,
-            base_address,
-            target_address,
-            tag,
-            original_action,
-            action,
-        } => {
+            }
+            OpLink::DeleteLink { original_action, link_type, action } => {
+            let base_address = original_action.data.base_address.clone();
+            let target_address = original_action.data.target_address.clone();
+            let tag = original_action.data.tag.clone();
             match link_type {
                 LinkTypes::NotificantToNotifiers => {
                     validate_delete_link_notificant_to_notifiers(
@@ -253,43 +253,44 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     )
                 }
             }
-        }
-        FlatOp::StoreRecord(store_record) => {
+            }
+        },
+        // The record (action) authority. 0.6 called this op variant "store record".
+        FlatOp::CreateRecord(store_record) => {
             match store_record {
                 OpRecord::CreateEntry { app_entry, action } => {
                     match app_entry {
                         EntryTypes::Contact(contact) => {
                             validate_create_contact(
-                                EntryCreationAction::Create(action),
+                                action.into(),
                                 contact,
                             )
                         }
                         EntryTypes::TwilioCredentials(twilio_credentials) => {
                             validate_create_twilio_credentials(
-                                EntryCreationAction::Create(action),
+                                action.into(),
                                 twilio_credentials,
                             )
                         }
                         EntryTypes::SentNotification(sent_notification) => {
                             validate_create_sent_notification(
-                                EntryCreationAction::Create(action),
+                                action.into(),
                                 sent_notification,
                             )
                         }
                     }
                 }
-                OpRecord::UpdateEntry {
-                    original_action_hash,
-                    app_entry,
-                    action,
-                    ..
-                } => {
+                OpRecord::UpdateEntry { app_entry, action } => {
+                    // 0.6 bound `original_action_hash` in the pattern; 0.7 dropped the
+                    // redundant field, so read it off the action the flattener copied it from.
+                    let original_action_hash = action.data.original_action_address.clone();
                     let original_record = must_get_valid_record(original_action_hash)?;
                     let original_action = original_record.action().clone();
-                    let original_action = match original_action {
-                        Action::Create(create) => EntryCreationAction::Create(create),
-                        Action::Update(update) => EntryCreationAction::Update(update),
-                        _ => {
+                    let original_action = match TypedAction::<
+                        EntryCreationData,
+                    >::try_from(original_action) {
+                        Ok(original_action) => original_action,
+                        Err(_) => {
                             return Ok(
                                 ValidateCallbackResult::Invalid(
                                     "Original action for an update must be a Create or Update action"
@@ -301,7 +302,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     match app_entry {
                         EntryTypes::Contact(contact) => {
                             let result = validate_create_contact(
-                                EntryCreationAction::Update(action.clone()),
+                                action.clone().into(),
                                 contact.clone(),
                             )?;
                             if let ValidateCallbackResult::Valid = result {
@@ -330,7 +331,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         EntryTypes::TwilioCredentials(coordrole) => {
                             let result = validate_create_twilio_credentials(
-                                EntryCreationAction::Update(action.clone()),
+                                action.clone().into(),
                                 coordrole.clone(),
                             )?;
                             if let ValidateCallbackResult::Valid = result {
@@ -359,7 +360,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         EntryTypes::SentNotification(sent_notification) => {
                             let result = validate_create_sent_notification(
-                                EntryCreationAction::Update(action.clone()),
+                                action.clone().into(),
                                 sent_notification.clone(),
                             )?;
                             if let ValidateCallbackResult::Valid = result {
@@ -390,13 +391,17 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     }
                 }
-                OpRecord::DeleteEntry { original_action_hash, action, .. } => {
+                OpRecord::DeleteEntry { action } => {
+                    // 0.6 bound `original_action_hash` in the pattern; 0.7 dropped the
+                    // redundant field, so read it off the action the flattener copied it from.
+                    let original_action_hash = action.data.deletes_address.clone();
                     let original_record = must_get_valid_record(original_action_hash)?;
                     let original_action = original_record.action().clone();
-                    let original_action = match original_action {
-                        Action::Create(create) => EntryCreationAction::Create(create),
-                        Action::Update(update) => EntryCreationAction::Update(update),
-                        _ => {
+                    let original_action = match TypedAction::<
+                        EntryCreationData,
+                    >::try_from(original_action) {
+                        Ok(original_action) => original_action,
+                        Err(_) => {
                             return Ok(
                                 ValidateCallbackResult::Invalid(
                                     "Original action for a delete must be a Create or Update action"
@@ -465,13 +470,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     }
                 }
-                OpRecord::CreateLink {
-                    base_address,
-                    target_address,
-                    tag,
-                    link_type,
-                    action,
-                } => {
+                OpRecord::CreateLink { link_type, action } => {
+                    // 0.6 bound these three in the pattern; the 0.6 flattener copied them off
+                    // this same CreateLink action (hdi 0.7.3 `op.rs:69-85`).
+                    let base_address = action.data.base_address.clone();
+                    let target_address = action.data.target_address.clone();
+                    let tag = action.data.tag.clone();
                     match link_type {
                         LinkTypes::NotificantToNotifiers => {
                             validate_create_link_notificant_to_notifiers(
@@ -515,11 +519,18 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     }
                 }
-                OpRecord::DeleteLink { original_action_hash, base_address, action } => {
+                OpRecord::DeleteLink { action } => {
+                    // 0.6 bound `original_action_hash` and `base_address` in the pattern; the
+                    // 0.6 flattener took both off this same DeleteLink action
+                    // (hdi 0.7.3 `op.rs:87-93`), which is what `action.data` holds.
+                    let original_action_hash = action.data.link_add_address.clone();
+                    let base_address = action.data.base_address.clone();
                     let record = must_get_valid_record(original_action_hash)?;
-                    let create_link = match record.action() {
-                        Action::CreateLink(create_link) => create_link.clone(),
-                        _ => {
+                    let create_link = match TypedAction::<
+                        CreateLinkData,
+                    >::try_from(record.action().clone()) {
+                        Ok(create_link) => create_link,
+                        Err(_) => {
                             return Ok(
                                 ValidateCallbackResult::Invalid(
                                     "The action that a DeleteLink deletes must be a CreateLink"
@@ -528,6 +539,11 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             );
                         }
                     };
+                    // `create_link` is a `TypedAction<CreateLinkData>` now, so its target and
+                    // tag cannot be moved out per arm the way the 0.6 `CreateLink` struct's
+                    // fields were: clone them once, same values.
+                    let create_link_target_address = create_link.data.target_address.clone();
+                    let create_link_tag = create_link.data.tag.clone();
                     let link_type = match LinkTypes::from_type(
                         create_link.zome_index.clone(),
                         create_link.link_type.clone(),
@@ -543,8 +559,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 create_link.clone(),
                                 base_address,
-                                create_link.target_address,
-                                create_link.tag,
+                                create_link_target_address,
+                                create_link_tag,
                             )
                         }
                         LinkTypes::AnchorToNotifiers => {
@@ -552,8 +568,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 create_link.clone(),
                                 base_address,
-                                create_link.target_address,
-                                create_link.tag,
+                                create_link_target_address,
+                                create_link_tag,
                             )
                         }
                         LinkTypes::TwilioCredentialsUpdates => {
@@ -561,8 +577,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 create_link.clone(),
                                 base_address,
-                                create_link.target_address,
-                                create_link.tag,
+                                create_link_target_address,
+                                create_link_tag,
                             )
                         }
                         LinkTypes::ContactUpdates => {
@@ -570,8 +586,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 create_link.clone(),
                                 base_address,
-                                create_link.target_address,
-                                create_link.tag,
+                                create_link_target_address,
+                                create_link_tag,
                             )
                         }
                         LinkTypes::SentNotificationUpdates => {
@@ -579,8 +595,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 create_link.clone(),
                                 base_address,
-                                create_link.target_address,
-                                create_link.tag,
+                                create_link_target_address,
+                                create_link_tag,
                             )
                         }
                     }
@@ -598,13 +614,25 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 _ => Ok(ValidateCallbackResult::Valid),
             }
         }
-        FlatOp::RegisterAgentActivity(agent_activity) => {
+        FlatOp::AgentActivity(agent_activity) => {
             match agent_activity {
                 OpActivity::CreateAgent { agent, action } => {
-                    let previous_action = must_get_action(action.prev_action)?;
-                    match previous_action.action() {
-                        Action::AgentValidationPkg(
-                            AgentValidationPkg { membrane_proof, .. },
+                    // 0.6's `Create.prev_action` was an infallible field; 0.7's
+                    // `TypedAction::prev_action()` returns `Option` (`None` only for the
+                    // genesis Dna action, which a CreateAgent never is).
+                    let prev_action_hash = action
+                        .prev_action()
+                        .cloned()
+                        .ok_or(
+                            wasm_error!(
+                                WasmErrorInner::Guest("CreateAgent action must have a previous action"
+                                .to_string())
+                            ),
+                        )?;
+                    let previous_action = must_get_action(prev_action_hash)?;
+                    match &previous_action.action().data {
+                        ActionData::AgentValidationPkg(
+                            AgentValidationPkgData { membrane_proof, .. },
                         ) => validate_agent_joining(agent, membrane_proof),
                         _ => {
                             Ok(

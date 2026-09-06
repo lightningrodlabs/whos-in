@@ -317,7 +317,7 @@
       // coordRole.committed = true;
       if (totalUnderMin >= totalMin) {
         add_notification({
-          "timestamp": coordinationRecord.signed_action.hashed.content.timestamp,
+          "timestamp": coordinationRecord.signed_action.hashed.content.header.timestamp,
           "type": "coordination-activation",
           "description": "The " + coordination.coordination_type.toLocaleLowerCase() + " " + coordination.title + " has reached minimum participation",
           "hash": coordinationHash,
@@ -636,7 +636,7 @@
                 {#if role.committed}
                   <button class="commit" on:click={() => unCommitMe(role.coordrole.signed_action.hashed.hash)} >Remove me</button>
                 {:else if role.participants < max}
-                  <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash, role.coordrole.signed_action.hashed.content.timestamp)} >Add me</button>
+                  <button class="commit" on:click={() => commitMe(role.coordrole.signed_action.hashed.hash, role.coordrole.signed_action.hashed.content.header.timestamp)} >Add me</button>
                 {/if}
               {/if}
             </div>

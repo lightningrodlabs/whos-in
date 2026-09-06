@@ -5,28 +5,28 @@ pub struct SentNotification {
     pub unique_data: String,
 }
 pub fn validate_create_sent_notification(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _sent_notification: SentNotification,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_sent_notification(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _sent_notification: SentNotification,
-    _original_action: EntryCreationAction,
+    _original_action: TypedAction<EntryCreationData>,
     _original_sent_notification: SentNotification,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_sent_notification(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_sent_notification: SentNotification,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_sent_notification_updates(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -59,8 +59,8 @@ pub fn validate_create_link_sent_notification_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_sent_notification_updates(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,

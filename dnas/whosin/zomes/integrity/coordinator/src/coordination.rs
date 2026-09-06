@@ -29,28 +29,28 @@ pub struct Coordination {
     pub attachments: Option<Vec<String>>,
 }
 pub fn validate_create_coordination(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _coordination: Coordination,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_coordination(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _coordination: Coordination,
-    _original_action: EntryCreationAction,
+    _original_action: TypedAction<EntryCreationData>,
     _original_coordination: Coordination,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Invalid(String::from("Coordinations cannot be updated")))
 }
 pub fn validate_delete_coordination(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_coordination: Coordination,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Invalid(String::from("Coordinations cannot be deleted")))
 }
 pub fn validate_create_link_all_coordinations(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     _base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -69,8 +69,8 @@ pub fn validate_create_link_all_coordinations(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_all_coordinations(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,

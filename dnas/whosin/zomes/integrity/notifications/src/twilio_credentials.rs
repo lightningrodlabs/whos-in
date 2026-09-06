@@ -8,7 +8,7 @@ pub struct TwilioCredentials {
     pub from_number_whatsapp: String,
 }
 pub fn validate_create_twilio_credentials(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _twilio_credentials: TwilioCredentials,
 ) -> ExternResult<ValidateCallbackResult> {
     // debug!("-----------------------> validate create twilio: {:?}", _action);
@@ -16,20 +16,20 @@ pub fn validate_create_twilio_credentials(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_twilio_credentials(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _twilio_credentials: TwilioCredentials,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_twilio_credentials(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_twilio_credentials: TwilioCredentials,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_twilio_credentials_updates(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -59,8 +59,8 @@ pub fn validate_create_link_twilio_credentials_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_twilio_credentials_updates(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,

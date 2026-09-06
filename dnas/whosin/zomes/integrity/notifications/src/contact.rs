@@ -8,7 +8,7 @@ pub struct Contact {
     pub email_address: Option<String>,
 }
 pub fn validate_create_contact(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _contact: Contact,
 ) -> ExternResult<ValidateCallbackResult> {
     // if contact.agent_pub_key != action.author().clone().into() {
@@ -17,7 +17,7 @@ pub fn validate_create_contact(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_contact(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _contact: Contact,
 ) -> ExternResult<ValidateCallbackResult> {
     // if (original_action.author().clone() != action.author.clone()) || (action.author.clone() != contact.agent_pub_key) {
@@ -26,8 +26,8 @@ pub fn validate_update_contact(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_contact(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_contact: Contact,
 ) -> ExternResult<ValidateCallbackResult> {
     // if original_action.author().clone() != action.author.clone() {
@@ -36,7 +36,7 @@ pub fn validate_delete_contact(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_contact_updates(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -66,8 +66,8 @@ pub fn validate_create_link_contact_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_contact_updates(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,

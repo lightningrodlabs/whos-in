@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction } from '@holochain/client';
+import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { CoordinatorSignal, Coordination } from './types';
 import CoordinationListItem from './CoordinationListItem.svelte';

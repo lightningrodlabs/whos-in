@@ -9,22 +9,22 @@ pub struct Coordrole {
     pub approved_participants: Option<Vec<ActionHash>>,
 }
 pub fn validate_create_coordrole(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _coordrole: Coordrole,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_coordrole(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _coordrole: Coordrole,
-    _original_action: EntryCreationAction,
+    _original_action: TypedAction<EntryCreationData>,
     _original_coordrole: Coordrole,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Invalid(String::from("Coordroles cannot be updated")))
 }
 pub fn validate_delete_coordrole(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_coordrole: Coordrole,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Invalid(String::from("Coordroles cannot be deleted")))

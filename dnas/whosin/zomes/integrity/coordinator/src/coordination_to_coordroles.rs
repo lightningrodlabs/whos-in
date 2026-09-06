@@ -1,6 +1,6 @@
 use hdi::prelude::*;
 pub fn validate_create_link_coordination_to_coordroles(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -30,8 +30,8 @@ pub fn validate_create_link_coordination_to_coordroles(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_coordination_to_coordroles(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
@@ -43,7 +43,7 @@ pub fn validate_delete_link_coordination_to_coordroles(
     )
 }
 pub fn validate_create_link_coordrole_to_coordinations(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -73,8 +73,8 @@ pub fn validate_create_link_coordrole_to_coordinations(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_coordrole_to_coordinations(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
