@@ -33,6 +33,7 @@
   import { refetchCoordinations } from './crud/refetch.js';
   import app from './main.js';
   import Calendar from './whosin/coordinator/Calendaring/Calendar.svelte';
+  import CrossGroupCalendar from './CrossGroupCalendar.svelte';
   import { averageColor, backgroundImage, loadState, setAverageColor, setColorPalette, colorPalette, setBackgroundImage } from './crud/localStorage.js';
   import { FastAverageColor } from 'fast-average-color';
   import Sync from './Sync.svelte';
@@ -57,6 +58,8 @@
   let dna;
   let profilesStore = undefined;
   let connected = false
+  // True when Moss is rendering the cross-group view rather than a group's applet.
+  let isCrossGroup = false
   let weClient: WeaveClient
   $: client, loading, store, notifier, dna;
 
@@ -315,11 +318,18 @@
         client = weClient?.renderInfo.appletClient;
         profilesClient = weClient?.renderInfo.profilesClient;
       } else {
+        // Cross-group view. Moss renders this IN ADDITION to the per-group
+        // applet-view, so it must not run the single-group app: doing so drove a
+        // second full startup against one group's cell and raced the applet-view's
+        // own startup write on the source chain head.
+        //
+        // We deliberately do not assign `client` or `profilesClient` here. Picking
+        // applets[0] made this view silently act as that one group, which is both
+        // wrong (it should merge across groups) and the source of the collision.
         applets = Array.from(weClient?.renderInfo.applets.entries());
-        const firstApplet = applets[0];
-        console.log("we client 2", firstApplet)
-        client = firstApplet[1].appletClient;
-        profilesClient = firstApplet[1].profilesClient;
+        isCrossGroup = true;
+        console.log("cross-group view over", applets.length, "applet(s)");
+        return;
       }
       //@ts-ignore
     }
@@ -420,8 +430,14 @@
   {/if}
 </div> -->
 
-{#if client || applets != undefined}
-{#if profilesStore || applets != undefined}
+{#if isCrossGroup}
+  <!-- Cross-group view: read-only merge of this agent's coordinations across every
+       group with whos-in installed. Rendered instead of the single-group app, not
+       alongside it. -->
+  <CrossGroupCalendar {applets} {weClient} />
+{:else}
+{#if client}
+{#if profilesStore}
   <profiles-context store="{profilesStore}">
     <profile-prompt>
       {#if !isWeaveContext() || (isWeaveContext() && weClient?.renderInfo.view.type != "asset")}
@@ -561,4 +577,5 @@
     position: relative;
   }
 </style>
+{/if}
 {/if}
