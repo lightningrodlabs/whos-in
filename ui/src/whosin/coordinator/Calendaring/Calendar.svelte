@@ -536,12 +536,20 @@
         }
         const res2 = await refetchAvailability(client);
         if (!userAvailability[encodeHashToBase64(client.myPubKey)] || Object.keys(userAvailability).length === 0) {
-            const res = await createAvailability(client, {
-                title: '',
-                person: client.myPubKey,
-                availabilities: availability.availabilities
-            });
-            console.log("create availability", res);
+            try {
+                const res = await createAvailability(client, {
+                    title: '',
+                    person: client.myPubKey,
+                    availabilities: availability.availabilities
+                });
+                console.log("create availability", res);
+            } catch (e) {
+                // createAvailability now propagates instead of swallowing. If this
+                // fires, the agent has no starter availability record and the
+                // calendar will show them as unavailable until they set a slot by
+                // hand, so it must be visible rather than logged and forgotten.
+                console.error("Failed to create the starter availability record", e);
+            }
         } else {
             console.log("user availability", userAvailability);
         }

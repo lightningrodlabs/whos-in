@@ -4,7 +4,17 @@
     import { clientContext } from '../../contexts';
     import { notifications, navigate, setSeenNotification } from '../../store.js';
     
-    let client: AppClient = (getContext(clientContext) as any).getClient();
+    // Declared as a prop with the context read as its default, so both call
+    // styles work: Header.svelte passes client={client}, while the other 29
+    // components rely on context alone. Previously the prop declaration was
+    // commented out here, so the passed prop was ignored and Svelte warned
+    // "was created with unknown prop 'client'".
+    //
+    // The context read is a snapshot taken at component-init time, not a live
+    // binding. It only yields a real client because App.svelte gates this whole
+    // subtree behind {#if client || applets != undefined}; a child created
+    // outside that gate would snapshot undefined and stay that way.
+    export let client: AppClient = (getContext(clientContext) as any).getClient();
     
     let coordinations: Array<ActionHash> | undefined;
     let local_notifications;
