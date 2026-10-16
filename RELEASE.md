@@ -19,6 +19,13 @@ across by hand either: everything on the 0.7 line starts empty. Say so plainly i
 the curation changelog, and consider leaving the 0.2.x entry published so a group
 can finish anything already in flight before moving.
 
+Who's In 0.4.0 (DNA version 0.4.0) uses Holochain 0.7.1 and profiles 0.702.0.
+It is a new network again. Holochain 0.7.1 changed the capability-grant format,
+so the notifications zome's grant had to be rebuilt in the new shape. The 0.3.x
+line (`happ-v0.3.0`) cannot see the 0.4.0 network. Who's In 0.4.0 needs Moss
+0.16.0-rc.1 or later. Coordinations from 0.3.x do not carry over, and there is
+no export/import. A group must upgrade together.
+
 ## Why the happ is frozen (never rebuilt)
 
 The zome wasm embeds the builder's absolute paths (`~/.cargo/...` and source
