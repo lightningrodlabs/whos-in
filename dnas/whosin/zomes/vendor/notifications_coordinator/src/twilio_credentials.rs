@@ -11,12 +11,11 @@ fn functions_to_grant_capability_for() -> ExternResult<GrantedFunctions> {
 #[hdk_extern]
 fn grant_unrestricted_capability(_: ()) -> ExternResult<()> {
     let functions = functions_to_grant_capability_for()?;
-    let access = CapAccess::Unrestricted;
-    let capability_grant = CapGrantEntry {
+    let capability_grant = CapGrantEntry::new_zome_call_grant(
+        String::from("unrestricted"),
+        GrantConstraint::Unrestricted,
         functions,
-        access,
-        tag: String::from("unrestricted"),
-    };
+    );
     create_cap_grant(capability_grant)?;
     Ok(())
 }
